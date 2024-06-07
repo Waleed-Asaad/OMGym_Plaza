@@ -1,0 +1,338 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@100;200;300;400;500;600&display=swap');
+
+*{
+   font-family: 'Poppins', sans-serif;
+   margin:0; padding:0;
+   box-sizing: border-box;
+   outline: none; border:none;
+   text-decoration: none;
+}
+
+body{
+   background: #eee;
+}
+
+.container{
+   min-height: 100vh;
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   padding:20px;
+   padding-bottom: 60px;
+}
+
+.product-container{
+   display: inline-block;
+   width: 280px;
+   align-items: center;
+   justify-content: center;
+   padding:20px;
+   
+}
+
+.container .content{
+   text-align: center;
+}
+
+.container .content h3{
+   font-size: 30px;
+   color:#333;
+}
+
+.container .content h3 span{
+   background: #006400;
+   color:#fff;
+   border-radius: 5px;
+   padding:0 15px;
+}
+
+.container .content h1{
+   font-size: 50px;
+   color:#333;
+}
+
+.container .content h1 span{
+   color:#006400;
+}
+
+.container .content p{
+   font-size: 25px;
+   margin-bottom: 20px;
+}
+
+.container .content .btn{
+   display: inline-block;
+   padding:10px 30px;
+   font-size: 20px;
+   background: #333;
+   color:#fff;
+   margin:0 5px;
+   text-transform: capitalize;
+}
+
+.container .content .btn:hover{
+   background: #006400;
+}
+
+.form-container{
+   min-height: 100vh;
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   padding:20px;
+   padding-bottom: 60px;
+   background: #eee;
+}
+
+.form-container form{
+   padding:20px;
+   border-radius: 5px;
+   box-shadow: 0 5px 10px rgba(0,0,0,.1);
+   background: #fff;
+   text-align: center;
+   width: 500px;
+}
+
+.form-container form h3{
+   font-size: 30px;
+   text-transform: uppercase;
+   margin-bottom: 10px;
+   color:#333;
+}
+
+.form-container form input,
+.form-container form select{
+   width: 100%;
+   padding:10px 15px;
+   font-size: 17px;
+   margin:8px 0;
+   background: #eee;
+   border-radius: 5px;
+}
+
+.form-container form select option{
+   background: #fff;
+}
+
+.form-container form .form-btn{
+   background: #556B2F;
+   color:#006400;
+   text-transform: capitalize;
+   font-size: 20px;
+   cursor: pointer;
+}
+
+.form-container form .form-btn:hover{
+   background: #006400;
+   color:#fff;
+}
+
+.form-container form p{
+   margin-top: 10px;
+   font-size: 20px;
+   color:#333;
+}
+
+.form-container form p a{
+   color:#006400;
+}
+
+.form-container form .error-msg{
+   margin:10px 0;
+   display: block;
+   background: #006400;
+   color:#fff;
+   border-radius: 5px;
+   font-size: 20px;
+   padding:10px;
+}
+
+ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: #333;
+}
+
+li {
+    float: left;
+}
+
+    li a {
+        display: block;
+        color: white;
+        text-align: center;
+        padding: 20px 22px;
+        text-decoration: none;
+    }
+
+        li a:hover {
+            background-color: #006400;
+        }
+.leftLi{
+	float:right;
+}
+
+.card {
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+  max-width: 300px;
+  margin: auto;
+  text-align: center;
+  font-family: arial;
+}
+
+.card p{
+	margin:20px;
+}
+.price {
+  color: grey;
+  font-size: 22px;
+}
+
+.h1{
+	text-align: center;
+	font-size: 50px;
+	color:#333;
+}
+
+.form-container1{
+   min-height: 50vh;
+   display: flex;
+   flex:inline;
+   align-items: center;
+   justify-content: center;
+   padding:10px;
+   padding-bottom: 60px;
+}
+.formBtn{
+   background: #008000;
+   color: white;
+   text-transform: capitalize;
+   font-size: 20px;
+   cursor: pointer;
+   border-radius: 5px;
+   padding:2px;
+   margin:2px;
+}
+
+.delete{
+	background: red;
+   color: white;
+   text-transform: capitalize;
+   font-size: 20px;
+   cursor: pointer;
+   border-radius: 5px;
+   padding:2px;
+   margin:2px;
+}
+
+.edit{
+	background: Orange;
+   color: white;
+   text-transform: capitalize;
+   font-size: 20px;
+   cursor: pointer;
+   border-radius: 5px;
+   padding:2px;
+   margin:2px;
+}
+
+.formBtn a:hover{
+   background: #006400;
+   color: white;
+}
+
+table {
+  border-collapse: solid 1px black;
+  width: 50%;
+  text-align: center;
+}
+
+th, td {
+  text-align: center;
+}
+
+th {
+  background-color: Orange;
+}
+
+tr:hover {
+  background-color: #f5f5f5;
+}
+
+td a {
+  text-decoration: none;
+  color: #000;
+}
+
+td a:hover {
+  color: #f00;
+}
+
+.delete1{
+	background: red;
+   color: white;
+   font-size: 15px;
+   cursor: pointer;
+   border-radius: 5px;
+   padding:1px;
+   margin:1px;
+}
+
+.edit1{
+	background: Orange;
+    color: white;
+    text-transform: capitalize;
+    font-size: 10px;
+    cursor: pointer;
+    border-radius: 5px;
+    padding:1px;
+    margin:1px;
+}
+
+.cart-btn{
+	display:inline-block;
+	padding:10px 30px 10px;
+}
+.formBtn1{
+   background: #008000;
+   color: white;
+   font-size: 15px;
+   border-radius: 4px;
+   padding:1px;
+   margin:1px;
+}
+
+.formBtn2{
+   background: Orange;
+   color: white;
+   font-size: 15px;
+   border-radius: 4px;
+   padding:1px;
+   margin:1px;
+}
+
+.heading{
+	text-align:left-side; 
+	margin-left:200px;
+}
+
+.product-actions {
+   display: flex;
+   justify-content: left;
+padding: 5px;
+margin: 5px;
+}
+
+img {
+   width: 400px;
+   height: 400px;
+}
+
+.product {
+   border: 1px solid #ccc;
+   padding: 10px;
+   margin-bottom: 10px;
+   height: 300px;
+}
