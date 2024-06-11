@@ -23,6 +23,35 @@ if(isset($_POST['submit'])){
        $error[] = 'incorrect email or password!';
     }
  };
+ if(isset($_POST['submit1'])){
+    $id = $_POST['id'];
+    $name = mysqli_real_escape_string($conn, $_POST['name']);
+    $address = mysqli_real_escape_string($conn, $_POST['address']);
+    $email = mysqli_real_escape_string($conn, $_POST['email']);
+    $pass = $_POST['password'];
+    $cpass = $_POST['cpassword'];
+ 
+    $select = " SELECT * FROM user WHERE userEmail = '$email' && userPassword = '$pass' ";
+ 
+    $result = mysqli_query($conn, $select);
+ 
+    if(mysqli_num_rows($result) > 0){
+ 
+       $err[] = 'user already exist!';
+ 
+    }
+    else{
+ 
+       if($pass != $cpass){
+          $err[] = 'password not matched!';
+       }else{
+          $insert = "INSERT INTO user(userId,userName,userAddress, userEmail, userPassword,status) VALUES('$id','$name','$address','$email','$pass','user')";
+          mysqli_query($conn, $insert);
+          header('location:user-home.php');
+       }
+    }
+ 
+ };
 ?>
 
 <!DOCTYPE html>
@@ -100,11 +129,20 @@ if(isset($_POST['submit'])){
 <div class="form-container">
     <form action="" method="post">
         <h1>Register now</h1>
+        <?php
+      if(isset($err)){
+         foreach($err as $err){
+            echo '<span class="error-msg">'.$err.'</span>';
+         };
+      };
+      ?>
+        <input type="number" name="id" required placeholder="enter your ID">
         <input type="text" name="name" required placeholder="enter your name">
+        <input type="text" name="address" required placeholder="enter your address">
         <input type="email" name="email" required placeholder="enter your email">
         <input type="password" name="password" required placeholder="enter your password">
         <input type="password" name="cpassword" required placeholder="confirm your password">
-        <input type="submit" name="submit" value="register now" class="form-btn">
+        <input type="submit" name="submit1" value="register now" class="form-btn">
    </form>
 </div>
 </div>

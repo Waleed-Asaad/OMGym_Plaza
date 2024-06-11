@@ -5,7 +5,7 @@ session_start();
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
-$sql = "SELECT productId, productName, description, price FROM products";
+$sql = "SELECT productId, productName, description, image,price FROM products";
 $result = $conn->query($sql);
 
 if (!$result) {
@@ -36,6 +36,13 @@ if (!$result) {
     <link rel="stylesheet" href="css/magnific-popup.css" type="text/css">
     <link rel="stylesheet" href="css/slicknav.min.css" type="text/css">
     <link rel="stylesheet" href="css/style.css" type="text/css">
+    <style>
+        .product-image {
+            width: 150px;
+            height: 150px;
+            object-fit: cover;
+        }
+    </style>
 </head>
 
 <body>
@@ -96,6 +103,7 @@ if (!$result) {
                     <div class="col-lg-4 col-md-8">
                         <div class="ps-item">
                             <h2 style="color:beige"><?php echo $row["productName"]; ?></h2>
+                            <?php echo "<img class='product-image' src ='img/products/".$row['image']."'>";?>
                             <div class="pi-price">
                                 <h2><?php echo "$" . $row["price"]; ?></h2>
                                 <span><?php echo $row["description"]; ?></span>
