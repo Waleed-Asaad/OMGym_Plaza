@@ -8,8 +8,33 @@ if ($conn->connect_error) {
 $sql = "SELECT productId, productName, description, image,price FROM products";
 $result = $conn->query($sql);
 
-if (!$result) {
-    die("Error executing query: " . $conn->error);
+if (isset($_GET['productId'])) {
+    $productId = $_GET['productId'];
+    $userId = $_SESSION['userId'];
+
+    $existingQuery = "SELECT * FROM cart WHERE userId = '$userId' AND productId = '$productId'";
+    $existingResult = mysqli_query($conn, $existingQuery);
+
+    if ($existingResult->num_rows > 0) {
+        echo "This product is already in the cart.";
+    } 
+	else {
+        $productQuery = "SELECT * FROM products WHERE productId = '$productId'";
+        $productResult = mysqli_query($conn, $productQuery);
+
+        if ($productResult->num_rows > 0) {
+            $item = $productResult->fetch_assoc();
+            $productName = $item['productName'];
+            $price = $item['price'];
+            $quantity = 1;
+			$productId=$item['productId'];
+
+            $insertQuery = "INSERT INTO cart (userId, productId, productName, quantity, price) VALUES ('$userId', '$productId', '$productName', '$quantity', '$price')";
+            mysqli_query($conn, $insertQuery);
+
+            header('location: cart.php');
+        }
+    }
 }
 ?>
 <!DOCTYPE html>
@@ -108,11 +133,7 @@ if (!$result) {
                                 <h2><?php echo "$" . $row["price"]; ?></h2>
                                 <span><?php echo $row["description"]; ?></span>
                             </div>
-                            <form action="cart.php" method="POST">
-                                <input type="hidden" name="product_id" value="<?php echo $row["productId"]; ?>">
-                                <input type="number" name="quantity" value="1" min="1" class="form-control">
-                                <button type="submit" name="add_to_cart" class="primary-btn pricing-btn">ADD to Cart</button>
-                            </form>
+                            <button class="primary-btn pricing-btn"><a href="store.php ? productId=<?php echo $row["productId"]; ?>">Order Now</a></button>
                         </div>
                     </div>
                 <?php }
