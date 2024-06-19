@@ -16,7 +16,14 @@ if(isset($_POST['submit'])){
         $_SESSION['userId'] = $row['userId'];
         $_SESSION['userName'] = $row['userName'];
        echo '<script type="text/javascript">
+        if("' . $row['status'] . '"=="trainee"){
+            window.location = "traineeHome.php";
+          }
+        else if("' . $row['status'] . '"=="user")
          window.location = "user-home.php";
+        else{
+        window.location = "trainer_home.php";
+        }
        </script>';
       
     }else{

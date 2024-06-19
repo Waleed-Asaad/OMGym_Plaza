@@ -12,6 +12,7 @@ if (!isset($_SESSION['userId'])) {
 }
 
 $user_id = $_SESSION['userId'];
+$membership_id=$_SESSION['priod'];
 
 // עדכון הסטטוס של המשתמש ל-trainee
 $sql = "UPDATE user SET status = 'trainee' WHERE userId = ?";
@@ -20,7 +21,7 @@ $stmt->bind_param("i", $user_id);
 
 if ($stmt->execute()) {
     // הוספת פרטי המשתמש לטבלת trainee
-    $sql = "INSERT INTO trainee (userId) VALUES (?)";
+    $sql = "INSERT INTO trainee (userId,membershipId) VALUES (?,'$membership_id')";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("i", $user_id);
 

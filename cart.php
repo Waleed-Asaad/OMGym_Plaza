@@ -151,7 +151,22 @@ if(isset($_POST['checkout'])) {
 </head>
 <body>
 
-<?php include 'userMenu.php'; ?>
+<?php
+    
+    $user_id = $_SESSION['userId'];
+   $select = " SELECT * FROM user WHERE userId = '$user_id'  ";
+   $result = mysqli_query($conn, $select); 
+   $row = mysqli_fetch_array($result);
+   if($row['status']=="trainee"){
+    include 'traineeMenu.php';
+   }
+   else if($row['status']=="user"){
+    include 'userMenu.php';
+   }
+   else{
+      include 'trainer_menu.php';
+     }
+?>
 
 <section class="breadcrumb-section set-bg" data-setbg="img/breadcrumb-bg.jpg">
         <div class="container">

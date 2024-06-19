@@ -1,6 +1,30 @@
 <?php 
 include "connection.php";
 session_start();
+if(isset($_POST['submit'])){
+    
+        $weight = $_POST['weight'];
+        $height = $_POST['height'];
+        $age = $_POST['age'];
+        $gender = mysqli_real_escape_string($conn, $_POST['gender']);
+        $activity = mysqli_real_escape_string($conn, $_POST['activity']);
+        $goal = mysqli_real_escape_string($conn, $_POST['goal']);
+        $user_id = $_SESSION['userId'];
+
+        $sql = "UPDATE trainee SET weight = ?, height = ?, age = ?, gender = ?, activity = ?, goal = ? WHERE userId = ?";
+        $stmt = $conn->prepare($sql);
+        if ($stmt) {
+            $stmt->bind_param("iiisssi", $weight, $height, $age, $gender, $activity, $goal, $user_id);
+            if($stmt->execute()){
+                echo "Record updated successfully";
+            } else {
+                echo "Error updating record: " . $stmt->error;
+            }
+            $stmt->close();
+        } else {
+            echo "Error preparing statement: " . $conn->error;
+        }
+}
 ?>
 <!DOCTYPE html>
 <html lang="zxx">
@@ -30,33 +54,69 @@ session_start();
 
 <body>
 <?php
-    include 'userMenu.php';
+    include 'TraineeMenu.php';
 ?>
 
     <!-- Hero Section Begin -->
     <section class="hero-section">
         <div class="hs-slider owl-carousel">
             <div class="hs-item set-bg" data-setbg="img/hero/hero-1.jpg">
-                <div class="container">
-                    <div class="row">
-                        <div class="col-lg-6 offset-lg-6">
-                            <div class="hi-text">
-                                <span>Shape your body</span>
-                                <h1>Be <strong>strong</strong> traning hard</h1>
-                                <a href="subscription.php" class="primary-btn">HURRY AND SUBSCRIBE</a>
-                            </div>
-                        </div>
-                    </div>
+            <div class="container">
+            
+           
+            <div class="col-lg-12 col-md-8">
+                <div class="ps-item">
+                    <h3 style="font-size:40px">Personal Details</h3>
+                    <?php
+                        $user_id = $_SESSION['userId'];
+                       $select = " SELECT * FROM trainee WHERE userId = '$user_id'  ";
+                       $result = mysqli_query($conn, $select); 
+                       $row = mysqli_fetch_array($result);
+                    ?>
+                    <ul>
+                        <li style="font-size:25px;margin-bottom: 5px">Weight: <?php echo $row['weight'] ?></li>
+                        <li style="font-size:25px;margin-bottom: 5px">Height: <?php echo $row['height'] ?></li>
+                        <li style="font-size:25px;margin-bottom: 5px">Age: <?php echo $row['age'] ?></li>
+                        <li style="font-size:25px;margin-bottom: 5px">Gender: <?php echo $row['gender'] ?></li>
+                        <li style="font-size:25px;margin-bottom: 5px">Activity: <?php echo $row['activity'] ?></li>
+                        <li style="font-size:25px;margin-bottom: 5px">Goal: <?php echo $row['goal'] ?></li>
+                        <li style="font-size:25px;margin-bottom: 20px">Starting Membership: <?php echo $row['startingMembership'] ?></li>
+                        <li style="font-size:35px;margin-bottom: 5px;color:orange"><b>Slide To The Side To Update</b>  </li>
+
+                    </ul>
+                    
                 </div>
+            </div>
+            
+        </div> 
+            
             </div>
             <div class="hs-item set-bg" data-setbg="img/hero/hero-2.jpg">
                 <div class="container">
                     <div class="row">
                         <div class="col-lg-6 offset-lg-6">
                             <div class="hi-text">
-                                <span>Shape your body</span>
-                                <h1>Be <strong>strong</strong> traning hard</h1>
-                                <a href="#" class="primary-btn">Get info</a>
+                            <div class="container" style="width:800px; ">
+                <div class="form-container" style="padding:5px 5px 5px 5px" >
+                    <form action="" style="width:800px; " method="post">
+                         <h1 style="font-size:35px;margin-bottom: 0;">Update Personal details</h1>
+                        <?php
+                          if(isset($err)){
+                             foreach($err as $err){
+                               echo '<span class="error-msg">'.$err.'</span>';
+                             };
+                           };
+                         ?>
+                            <input type="number" name="weight" required placeholder="enter your weight">
+                            <input type="number" name="height" required placeholder="enter your height">
+                            <input type="number" name="age" required placeholder="enter your age">
+                             <input type="text" name="gender" required placeholder="enter your gender">
+                             <input type="text" name="activity" required placeholder="enter your activity">
+                             <input type="text" name="goal" required placeholder="enter your goal">
+                             <input type="submit" name="submit" value="Submit" class="form-btn">
+                         </form>
+                    </div>
+                </div>
                             </div>
                         </div>
                     </div>

@@ -1258,14 +1258,17 @@ ol {
      login
 --------------*/
 .form-container{
-	min-height: 100vh;
+	min-height: 75vh;
 	display: flex;
+	border-radius: 5px;
 	align-items: center;
 	justify-content: center;
 	padding:35px;
 	padding-bottom: 60px;
 	background: #f3610f;
  }
+
+
  
  .form-container form{
 	padding:20px;
@@ -1278,6 +1281,13 @@ ol {
  
  .form-container form h1{
 	font-size: 45px;
+	text-transform: uppercase;
+	margin-bottom: 10px;
+	color:#f36100;
+ }
+
+ .form-container form h2{
+	font-size: 35px;
 	text-transform: uppercase;
 	margin-bottom: 10px;
 	color:#f36100;

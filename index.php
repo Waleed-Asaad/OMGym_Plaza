@@ -130,7 +130,7 @@ session_start()
 
     <!-- Pricing Section Begin -->
     <?php
-        include 'pricing.php';
+        include 'pricing_login.php';
     ?>
     <!-- Pricing Section End -->
 

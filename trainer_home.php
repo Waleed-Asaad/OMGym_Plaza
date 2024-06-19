@@ -30,7 +30,7 @@ session_start();
 
 <body>
 <?php
-    include 'userMenu.php';
+    include 'trainer_Menu.php';
 ?>
 
     <!-- Hero Section Begin -->

@@ -1,10 +1,5 @@
-    <!-- Page Preloder -->
-    <!-- <div id="preloder">
-        <div class="loader"></div>
-    </div> -->
-
-    <!-- Offcanvas Menu Section Begin -->
-    <div class="offcanvas-menu-overlay"></div>
+<!-- Offcanvas Menu Section Begin -->
+<div class="offcanvas-menu-overlay"></div>
     <div class="offcanvas-menu-wrapper">
         <div class="canvas-close">
             <i class="fa fa-close"></i>
@@ -14,7 +9,7 @@
         </div>
         <nav class="canvas-menu mobile-menu">
             <ul>
-                <li><a href="./user-home.php">User Home</a></li>
+                <li><a href="./traineeHome.php">Trainee Home</a></li>
                 <li><a href="./store.php">Store</a></li>
                 <li><a href="./cart.php">Cart</a></li>
                 <li><a href="./subscription.php">Subscription</a></li>
@@ -37,10 +32,11 @@
                 <div class="col-lg-6">
                     <nav class="nav-menu">
                         <ul>
-                            <li><a href="./user-home.php">User Home</a></li>
+                            <li><a href="./traineeHome.php">Trainee Home</a></li>
                             <li><a href="./store.php">Store</a></li>
                             <li><a href="./cart.php">Cart</a></li>
-                            <li><a href="./subscription.php">Subscription</a></li>
+                            <li><a href="./myPlans.php">My Plans</a></li>
+                            <li><a href="./myClasses.php">My Classes</a></li>
                             <li><a href="./logout.php">Logout</a></li>
                             
                         </ul>

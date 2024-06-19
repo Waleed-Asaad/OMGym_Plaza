@@ -37,7 +37,7 @@ if(isset($_POST['submit'])){
 <body>
 <div class="loginORregister"> 
 <div class="form-container">
-   <form action="" method="post">
+   <form action="" method="POST">
       <h1>Login now</h1>
       <?php
       if(isset($error)){
@@ -54,7 +54,7 @@ if(isset($_POST['submit'])){
    </form>
 </div>
 <div class="form-container">
-    <form action="" method="post">
+    <form action="" method="POST">
         <h1>Register now</h1>
         <input type="text" name="name" required placeholder="enter your name">
         <input type="email" name="email" required placeholder="enter your email">

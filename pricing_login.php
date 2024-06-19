@@ -1,40 +1,5 @@
-<?php
 
-include 'connection.php';
 
-// בדיקת חיבור
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
-
-// בדיקת אם המשתמש מחובר
-if (!isset($_SESSION['userId'])) {
-    die("User not logged in.");
-}
-
-$user_id = $_SESSION['userId'];
-?>
-<script>
-        function enrollNow() {
-            if (confirm("Are you sure you want to enroll?")) {
-                var xhr = new XMLHttpRequest();
-                xhr.open("POST", "update_status.php", true);
-                xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-                xhr.onreadystatechange = function () {
-                    if (xhr.readyState === XMLHttpRequest.DONE) {
-                        alert(xhr.responseText);
-                        if (xhr.status === 200) {
-                            window.location.href = "traineeHome.php";
-                        }
-                    }
-                };
-                xhr.send();
-                return false;
-            } else {
-                return false;
-            }
-        }
-    </script>
 <section class="pricing-section spad">
         <div class="container">
             <div class="row">
@@ -60,7 +25,7 @@ $user_id = $_SESSION['userId'];
                             <li>Weight losing classes</li>
                             <li>No time restriction</li>
                         </ul>
-                        <a href="#" class="primary-btn pricing-btn" onclick="return enrollNow()" <?php $_SESSION['priod']=1 ?>>Enroll now</a>
+                        <a href="user-login.php" class="primary-btn pricing-btn"  <?php $_SESSION['priod']=1 ?>>Enroll now</a>
                         
                     </div>
                 </div>
@@ -79,7 +44,7 @@ $user_id = $_SESSION['userId'];
                             <li>Month to mouth</li>
                             <li>No time restriction</li>
                         </ul>
-                        <a href="#" class="primary-btn pricing-btn" onclick="return enrollNow()" <?php $_SESSION['priod']=3 ?> >Enroll now</a>
+                        <a href="user-login.php" class="primary-btn pricing-btn"  <?php $_SESSION['priod']=3 ?> >Enroll now</a>
                         
                     </div>
                 </div>
@@ -98,7 +63,7 @@ $user_id = $_SESSION['userId'];
                             <li>Month to mouth</li>
                             <li>No time restriction</li>
                         </ul>
-                        <a href="#" class="primary-btn pricing-btn" onclick="return enrollNow()" <?php $_SESSION['priod']=2 ?> >Enroll now</a>
+                        <a href="user-login.php" class="primary-btn pricing-btn"  <?php $_SESSION['priod']=2 ?> >Enroll now</a>
                         
                     </div>
                 </div>
