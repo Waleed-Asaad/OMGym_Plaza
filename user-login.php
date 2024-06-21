@@ -13,7 +13,7 @@ if(isset($_POST['submit'])){
     if(mysqli_num_rows($result) > 0){
  
        $row = mysqli_fetch_array($result);
-        $_SESSION['userId'] = $row['userId'];
+        $_SESSION['userEmail'] = $row['userEmail'];
         $_SESSION['userName'] = $row['userName'];
        echo '<script type="text/javascript">
         if("' . $row['status'] . '"=="trainee"){
@@ -31,7 +31,7 @@ if(isset($_POST['submit'])){
     }
  };
  if(isset($_POST['submit1'])){
-    $id = $_POST['id'];
+    // $id = $_POST['id'];
     $name = mysqli_real_escape_string($conn, $_POST['name']);
     $address = mysqli_real_escape_string($conn, $_POST['address']);
     $email = mysqli_real_escape_string($conn, $_POST['email']);
@@ -52,7 +52,7 @@ if(isset($_POST['submit'])){
        if($pass != $cpass){
           $err[] = 'password not matched!';
        }else{
-          $insert = "INSERT INTO user(userId,userName,userAddress, userEmail, userPassword,status) VALUES('$id','$name','$address','$email','$pass','user')";
+          $insert = "INSERT INTO user(userName,userAddress, userEmail, userPassword,status) VALUES('$name','$address','$email','$pass','user')";
           mysqli_query($conn, $insert);
           header('location:user-home.php');
        }
@@ -143,7 +143,7 @@ if(isset($_POST['submit'])){
          };
       };
       ?>
-        <input type="number" name="id" required placeholder="enter your ID">
+        <!-- <input type="number" name="id" required placeholder="enter your ID"> -->
         <input type="text" name="name" required placeholder="enter your name">
         <input type="text" name="address" required placeholder="enter your address">
         <input type="email" name="email" required placeholder="enter your email">

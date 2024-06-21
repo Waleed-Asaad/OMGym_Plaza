@@ -7,13 +7,17 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-if (!isset($_SESSION['userId'])) {
+if (!isset($_SESSION['userEmail'])) {
     die("User not logged in.");
 }
 
-$user_id = $_SESSION['userId'];
+$user_email = $_SESSION['userEmail'];
 $membership_id=$_SESSION['priod'];
 
+$select = " SELECT * FROM user WHERE userEmail = '$user_email'  ";
+$result = mysqli_query($conn, $select); 
+$row = mysqli_fetch_array($result);
+$user_id = $row['userId'];
 // עדכון הסטטוס של המשתמש ל-trainee
 $sql = "UPDATE user SET status = 'trainee' WHERE userId = ?";
 $stmt = $conn->prepare($sql);

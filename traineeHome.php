@@ -9,7 +9,11 @@ if(isset($_POST['submit'])){
         $gender = mysqli_real_escape_string($conn, $_POST['gender']);
         $activity = mysqli_real_escape_string($conn, $_POST['activity']);
         $goal = mysqli_real_escape_string($conn, $_POST['goal']);
-        $user_id = $_SESSION['userId'];
+        $user_email = $_SESSION['userEmail'];
+        $select = " SELECT * FROM user WHERE userEmail = '$user_email'  ";
+        $result = mysqli_query($conn, $select); 
+        $row = mysqli_fetch_array($result);
+        $user_id = $row['userId'];
 
         $sql = "UPDATE trainee SET weight = ?, height = ?, age = ?, gender = ?, activity = ?, goal = ? WHERE userId = ?";
         $stmt = $conn->prepare($sql);
@@ -68,7 +72,13 @@ if(isset($_POST['submit'])){
                 <div class="ps-item">
                     <h3 style="font-size:40px">Personal Details</h3>
                     <?php
-                        $user_id = $_SESSION['userId'];
+                        $user_email = $_SESSION['userEmail'];
+                        $select = " SELECT * FROM user WHERE userEmail = '$user_email'  ";
+                        $result = mysqli_query($conn, $select); 
+                        $row = mysqli_fetch_array($result);
+                        $user_id = $row['userId'];
+
+                        
                        $select = " SELECT * FROM trainee WHERE userId = '$user_id'  ";
                        $result = mysqli_query($conn, $select); 
                        $row = mysqli_fetch_array($result);
