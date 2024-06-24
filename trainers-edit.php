@@ -12,9 +12,10 @@ if(!isset($_SESSION['adminName'])){
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<style><?php 
-                include 'C:\wamp64\www\omgym_plaza\css\admin-style.css'; 
-            ?>
+    <style>
+        <?php 
+            include 'C:\wamp64\www\omgym_plaza\css\admin-style.css'; 
+        ?>
         .trainers {
             display: flex;
             flex-wrap: wrap;
@@ -26,38 +27,55 @@ if(!isset($_SESSION['adminName'])){
             height: auto;
         }
     </style>
-   <meta charset="UTF-8">
-   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-   <title>admin page</title>
-
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Page</title>
 </head>
 <body>
     <?php include 'admin-menu.php'; ?>
     <div class="container">
         <div class="trainers">
-            <div class="card">
-                <img src="img\team\team-3.jpg" alt="team-3">
-                <h3>Trainer 1</h3>
-                <p class="price">Rating: 4.5/5.0</p>
-                <p>Role: Fitness Trainer</p>
-                <button type="submit" class="delete">Delete</button>
-            </div>
-            <div class="card">
-                <img src="img\team\team-3.jpg" alt="team-3">
-                <h3>Trainer 2</h3>
-                <p class="price">Rating: 4.7/5.0</p>
-                <p>Role: Fitness Trainer</p>
-                <button type="submit" class="delete">Delete</button>
-            </div>
-            <div class="card">
-                <img src="img\team\team-3.jpg" alt="team-3">
-                <h3>Trainer 3</h3>
-                <p class="price">Rating: 4.8/5.0</p>
-                <p>Role: Fitness Trainer</p>
-                <button type="submit" class="delete">Delete</button>
-            </div>
-            <!-- Add more trainers as needed -->
+            <?php
+                $sql = "SELECT trainerName, trainerImg, rating, muscle_building, weight_loss, strength, raiting_avg FROM trainer ORDER BY trainerId";
+                $result = mysqli_query($conn, $sql);
+
+                if ($result) {
+                    while($row = mysqli_fetch_assoc($result)) {
+                        $trainerName = $row['trainerName'];
+                        $trainerImg = $row['trainerImg'];
+                        $rating = $row['rating'];
+                        $muscle_building = $row['muscle_building'];
+                        $weight_loss = $row['weight_loss'];
+                        $strength = $row['strength'];
+                        $raiting_avg = $row['raiting_avg'];
+                        
+                        echo "
+                        <div class='card'>
+                            <img src='img/team/$trainerImg' alt='$trainerName'>
+                            <h3>$trainerName</h3>
+                            <p class='price'>Rating: $rating/5.0</p>
+                            <p>Roles:</p>";
+                        
+                        if ($muscle_building) {
+                            echo "<p>Muscle Building</p>";
+                        }
+                        if ($weight_loss) {
+                            echo "<p>Weight Loss</p>";
+                        }
+                        if ($strength) {
+                            echo "<p>Strength</p>";
+                        }
+                        
+                        echo "
+                            <button type='submit' class='delete'>Delete</button>
+                        </div>
+                        ";
+                    }
+                } else {
+                    echo "<p>No trainers found.</p>";
+                }
+            ?>
         </div>
     </div>
 </body>
