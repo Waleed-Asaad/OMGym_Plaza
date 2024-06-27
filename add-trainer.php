@@ -13,17 +13,65 @@ if(isset($_POST['submit'])){
     
     $target = "img/team/".basename($_FILES['image']['name']);
     $trainerName = $_POST['trainerName'];
+    $password = $_POST['password'];
+    $address = $_POST['address'];
+    $email = $_POST['email'];
     $image = $_FILES['image']['name'];
     
     $muscle_building = isset($_POST['muscle_building']) ? 1 : 0;
     $weight_loss = isset($_POST['weight_loss']) ? 1 : 0;
     $strength = isset($_POST['strength']) ? 1 : 0;
     
-    $sql = "INSERT INTO trainer (trainerName, trainerImg, muscle_building, weight_loss, strength) VALUES ('$trainerName', '$image', '$muscle_building', '$weight_loss', '$strength')";
-    
+    $sql = "INSERT INTO user (userName, userEmail, userAddress, userPassword, status) VALUES ('$trainerName', '$email', '$address', '$password', 'trainer')";
+    mysqli_query($conn, $sql);
+    $select = " SELECT * FROM user WHERE userEmail = '$email'  ";
+    $result = mysqli_query($conn, $select); 
+    $row = mysqli_fetch_array($result);
+    $user_id = $row['userId'];
+    $sql = "INSERT INTO trainer (trainerName, trainerImg, muscle_building, weight_loss, strength, userId) VALUES ('$trainerName', '$image', '$muscle_building', '$weight_loss', '$strength','$user_id')";
     if (mysqli_query($conn, $sql)) {
         if (move_uploaded_file($_FILES['image']['tmp_name'], $target)) {
             $msg = "Trainer added successfully";
+            $select1 = " SELECT * FROM trainer WHERE userId = '$user_id'  ";
+            $result1 = mysqli_query($conn, $select1); 
+            $row1 = mysqli_fetch_array($result1);
+            $trainer_id = $row1['trainerId'];
+
+            $days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+
+            foreach ($days as $day) {
+                $sql = "INSERT INTO trainerDay (days, trainerId) VALUES ('$day', $trainer_id)";
+                if (!mysqli_query($conn, $sql)) {
+                    echo "Error: " . mysqli_error($conn);
+                }
+            }
+
+            $select1 = " SELECT * FROM trainerDay WHERE days = 'sunday' &&trainerId = '$trainer_id'  ";
+            $result1 = mysqli_query($conn, $select1); 
+            $row1 = mysqli_fetch_array($result1);
+            $day_id = $row1['dayId'];
+
+            $hours = [
+                '7:00-8:00',
+                '8:00-9:00',
+                '9:00-10:00',
+                '10:00-11:00',
+                '11:00-12:00',
+                '12:00-13:00',
+                '13:00-14:00',
+                '14:00-15:00',
+                '15:00-16:00',
+                '16:00-17:00',
+                '17:00-18:00',
+                '18:00-19:00'
+            ];
+        
+            foreach ($hours as $hour) {
+                $sql = "INSERT INTO trainerHours (hours, dayId) VALUES ('$hour', $day_id)";
+                if (!mysqli_query($conn, $sql)) {
+                    echo "Error: " . mysqli_error($conn);
+                }
+            }
         } else {
             $msg = "Failed to upload image";
         }
@@ -49,6 +97,9 @@ if(isset($_POST['submit'])){
     <form method="post" action="" enctype="multipart/form-data">
         <h3>Add a new trainer</h3>
         <input type="text" name="trainerName" placeholder="Enter trainer name" required>
+        <input type="password" name="password" required placeholder="enter trainer password">
+        <input type="text" name="address" required placeholder="enter trainer address">
+        <input type="email" name="email" required placeholder="Enter trainer email">
         <div>
             <label>Specialty:</label><br>
             <input type="checkbox" id="muscle_building" name="muscle_building" value="muscle_building">

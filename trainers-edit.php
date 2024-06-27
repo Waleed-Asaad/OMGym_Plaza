@@ -37,7 +37,7 @@ if(!isset($_SESSION['adminName'])){
     <div class="container">
         <div class="trainers">
             <?php
-                $sql = "SELECT trainerName, trainerImg, rating, muscle_building, weight_loss, strength, raiting_avg FROM trainer ORDER BY trainerId";
+                $sql = "SELECT * FROM trainer ORDER BY trainerId";
                 $result = mysqli_query($conn, $sql);
 
                 if ($result) {
@@ -48,7 +48,7 @@ if(!isset($_SESSION['adminName'])){
                         $muscle_building = $row['muscle_building'];
                         $weight_loss = $row['weight_loss'];
                         $strength = $row['strength'];
-                        $raiting_avg = $row['raiting_avg'];
+                        $raiting_avg = $row['rating'];
                         
                         echo "
                         <div class='card'>
