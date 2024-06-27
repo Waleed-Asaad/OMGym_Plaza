@@ -41,37 +41,40 @@ if(isset($_POST['submit'])){
 
             foreach ($days as $day) {
                 $sql = "INSERT INTO trainerDay (days, trainerId) VALUES ('$day', $trainer_id)";
-                if (!mysqli_query($conn, $sql)) {
-                    echo "Error: " . mysqli_error($conn);
-                }
-            }
+                if (mysqli_query($conn, $sql)){
+                    $select1 = " SELECT * FROM trainerDay WHERE days = 'sunday' &&trainerId = '$trainer_id'  ";
+                    $result1 = mysqli_query($conn, $select1); 
+                    $row1 = mysqli_fetch_array($result1);
+                    $day_id = $row1['dayId'];
 
-            $select1 = " SELECT * FROM trainerDay WHERE days = 'sunday' &&trainerId = '$trainer_id'  ";
-            $result1 = mysqli_query($conn, $select1); 
-            $row1 = mysqli_fetch_array($result1);
-            $day_id = $row1['dayId'];
-
-            $hours = [
-                '7:00-8:00',
-                '8:00-9:00',
-                '9:00-10:00',
-                '10:00-11:00',
-                '11:00-12:00',
-                '12:00-13:00',
-                '13:00-14:00',
-                '14:00-15:00',
-                '15:00-16:00',
-                '16:00-17:00',
-                '17:00-18:00',
-                '18:00-19:00'
-            ];
+                    $hours = [
+                             '7:00-8:00',
+                             '8:00-9:00',
+                             '9:00-10:00',
+                             '10:00-11:00',
+                             '11:00-12:00',
+                             '12:00-13:00',
+                             '13:00-14:00',
+                             '14:00-15:00',
+                             '15:00-16:00',
+                             '16:00-17:00',
+                             '17:00-18:00',
+                             '18:00-19:00'
+                             ];
         
-            foreach ($hours as $hour) {
-                $sql = "INSERT INTO trainerHours (hours, dayId) VALUES ('$hour', $day_id)";
-                if (!mysqli_query($conn, $sql)) {
+                     foreach ($hours as $hour) {
+                       $sql = "INSERT INTO trainerHours (hours, dayId) VALUES ('$hour', $day_id)";
+                       if (!mysqli_query($conn, $sql)) {
+                          echo "Error: " . mysqli_error($conn);
+                      }
+            }
+                } 
+                else{
                     echo "Error: " . mysqli_error($conn);
                 }
             }
+
+            
         } else {
             $msg = "Failed to upload image";
         }
