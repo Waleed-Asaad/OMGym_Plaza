@@ -54,6 +54,7 @@ if(isset($_POST['submit'])){
        }else{
           $insert = "INSERT INTO user(userName,userAddress, userEmail, userPassword,status) VALUES('$name','$address','$email','$pass','user')";
           mysqli_query($conn, $insert);
+          $_SESSION['userEmail'] = $email;
           header('location:user-home.php');
        }
     }

@@ -3,7 +3,7 @@ include "connection.php";
 session_start();
 if(isset($_POST['submit'])){
     
-        $weight = $_POST['weight'];
+        
         $height = $_POST['height'];
         $age = $_POST['age'];
         $gender = mysqli_real_escape_string($conn, $_POST['gender']);
@@ -15,10 +15,10 @@ if(isset($_POST['submit'])){
         $row = mysqli_fetch_array($result);
         $user_id = $row['userId'];
 
-        $sql = "UPDATE trainee SET weight = ?, height = ?, age = ?, gender = ?, activity = ?, goal = ? WHERE userId = ?";
+        $sql = "UPDATE trainee SET  height = ?, age = ?, gender = ?, activity = ?, goal = ? WHERE userId = ?";
         $stmt = $conn->prepare($sql);
         if ($stmt) {
-            $stmt->bind_param("iiisssi", $weight, $height, $age, $gender, $activity, $goal, $user_id);
+            $stmt->bind_param("iisssi", $height, $age, $gender, $activity, $goal, $user_id);
             if($stmt->execute()){
                 echo "Record updated successfully";
             } else {
@@ -84,7 +84,6 @@ if(isset($_POST['submit'])){
                        $row = mysqli_fetch_array($result);
                     ?>
                     <ul>
-                        <li style="font-size:25px;margin-bottom: 5px">Weight: <?php echo $row['weight'] ?></li>
                         <li style="font-size:25px;margin-bottom: 5px">Height: <?php echo $row['height'] ?></li>
                         <li style="font-size:25px;margin-bottom: 5px">Age: <?php echo $row['age'] ?></li>
                         <li style="font-size:25px;margin-bottom: 5px">Gender: <?php echo $row['gender'] ?></li>
@@ -117,7 +116,6 @@ if(isset($_POST['submit'])){
                              };
                            };
                          ?>
-                            <input type="number" name="weight" required placeholder="enter your weight">
                             <input type="number" name="height" required placeholder="enter your height">
                             <input type="number" name="age" required placeholder="enter your age">
                              <input type="text" name="gender" required placeholder="enter your gender">

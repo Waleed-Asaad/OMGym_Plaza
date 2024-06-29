@@ -21,6 +21,9 @@ if(isset($_POST['submit'])){
     $muscle_building = isset($_POST['muscle_building']) ? 1 : 0;
     $weight_loss = isset($_POST['weight_loss']) ? 1 : 0;
     $strength = isset($_POST['strength']) ? 1 : 0;
+    $endurance = isset($_POST['endurance']) ? 1 : 0;
+    $flexibility = isset($_POST['flexibility']) ? 1 : 0;
+    $body_building = isset($_POST['body_building']) ? 1 : 0;
     
     $sql = "INSERT INTO user (userName, userEmail, userAddress, userPassword, status) VALUES ('$trainerName', '$email', '$address', '$password', 'trainer')";
     mysqli_query($conn, $sql);
@@ -28,7 +31,7 @@ if(isset($_POST['submit'])){
     $result = mysqli_query($conn, $select); 
     $row = mysqli_fetch_array($result);
     $user_id = $row['userId'];
-    $sql = "INSERT INTO trainer (trainerName, trainerImg, muscle_building, weight_loss, strength, userId) VALUES ('$trainerName', '$image', '$muscle_building', '$weight_loss', '$strength','$user_id')";
+    $sql = "INSERT INTO trainer (trainerName, trainerImg, muscle_building, weight_loss, strength,endurance,	flexibility,body_building, userId) VALUES ('$trainerName', '$image', '$muscle_building', '$weight_loss', '$strength','$endurance','$flexibility','$body_building','$user_id')";
     if (mysqli_query($conn, $sql)) {
         if (move_uploaded_file($_FILES['image']['tmp_name'], $target)) {
             $msg = "Trainer added successfully";
@@ -42,7 +45,7 @@ if(isset($_POST['submit'])){
             foreach ($days as $day) {
                 $sql = "INSERT INTO trainerDay (days, trainerId) VALUES ('$day', $trainer_id)";
                 if (mysqli_query($conn, $sql)){
-                    $select1 = " SELECT * FROM trainerDay WHERE days = 'sunday' &&trainerId = '$trainer_id'  ";
+                    $select1 = " SELECT * FROM trainerDay WHERE days = '$day' &&trainerId = '$trainer_id'  ";
                     $result1 = mysqli_query($conn, $select1); 
                     $row1 = mysqli_fetch_array($result1);
                     $day_id = $row1['dayId'];
@@ -68,7 +71,7 @@ if(isset($_POST['submit'])){
                           echo "Error: " . mysqli_error($conn);
                       }
             }
-                } 
+         } 
                 else{
                     echo "Error: " . mysqli_error($conn);
                 }
@@ -111,6 +114,12 @@ if(isset($_POST['submit'])){
             <label for="weight_loss">Weight Loss</label><br>
             <input type="checkbox" id="strength" name="strength" value="strength">
             <label for="strength">Strength</label><br>
+            <input type="checkbox" id="endurance" name="endurance" value="endurance">
+            <label for="endurance">Endurance</label><br>
+            <input type="checkbox" id="flexibility" name="flexibility" value="flexibility">
+            <label for="flexibility">Flexibility</label><br>
+            <input type="checkbox" id="body_building" name="body_building" value="body_building">
+            <label for="body_building">Body Building</label><br>
         </div>
         <input type="file" name="image" accept="image/png, image/jpg, image/jpeg" required>
         <input type="submit" name="submit" value="Add" class="form-btn" required>

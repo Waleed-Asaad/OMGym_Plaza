@@ -153,8 +153,8 @@ if(isset($_POST['checkout'])) {
 
 <?php
     
-    $user_id = $_SESSION['userId'];
-   $select = " SELECT * FROM user WHERE userId = '$user_id'  ";
+    $user_email = $_SESSION['userEmail'];
+   $select = " SELECT * FROM user WHERE userEmail = '$user_email'  ";
    $result = mysqli_query($conn, $select); 
    $row = mysqli_fetch_array($result);
    if($row['status']=="trainee"){
@@ -163,7 +163,7 @@ if(isset($_POST['checkout'])) {
    else if($row['status']=="user"){
     include 'userMenu.php';
    }
-   else{
+   else if($row['status']=="trainer"){
       include 'trainer_menu.php';
      }
 ?>
