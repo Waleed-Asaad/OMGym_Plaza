@@ -3,7 +3,7 @@ include "connection.php";
 session_start();
 if(isset($_POST['submit'])){
     
-        // $target = "img/trainees/".basename($_FILES['img']['name']);
+        $target = "img/trainees/".basename($_FILES['image']['name']);
         $height = $_POST['height'];
         $age = $_POST['age'];
         $gender = mysqli_real_escape_string($conn, $_POST['gender']);
@@ -14,15 +14,16 @@ if(isset($_POST['submit'])){
         $result = mysqli_query($conn, $select); 
         $row = mysqli_fetch_array($result);
         $user_id = $row['userId'];
-        // $image = $_FILES['img']['name'];
+        $image = $_FILES['image']['name'];
 
+        
 
-        $sql = "UPDATE trainee SET trainerImg = ?, height = ?, age = ?, gender = ?, activity = ?, goal = ? WHERE userId = ?";
+        $sql = "UPDATE trainee SET traineeImg = ?, height = ?, age = ?, gender = ?, activity = ?, goal = ? WHERE userId = ?";
         $stmt = $conn->prepare($sql);
         if ($stmt) {
             $stmt->bind_param("siisssi",$image, $height, $age, $gender, $activity, $goal, $user_id);
             if($stmt->execute()){
-                // move_uploaded_file($_FILES['img']['tmp_name'], $target);
+                move_uploaded_file($_FILES['image']['tmp_name'], $target);
                 echo "Record updated successfully";
             } else {
                 echo "Error updating record: " . $stmt->error;
@@ -31,6 +32,9 @@ if(isset($_POST['submit'])){
         } else {
             echo "Error preparing statement: " . $conn->error;
         }
+
+        header("Location:traineeHome.php");
+    exit;
 }
 ?>
 <!DOCTYPE html>
@@ -110,7 +114,7 @@ if(isset($_POST['submit'])){
                             <div class="hi-text">
                             <div class="container" style="width:800px; ">
                 <div class="form-container" style="padding:5px 5px 5px 5px" >
-                    <form action="" style="width:800px; " method="post">
+                    <form action="" style="width:800px; " method="post" enctype="multipart/form-data">
                          <h1 style="font-size:35px;margin-bottom: 0;">Update Personal details</h1>
                         <?php
                           if(isset($err)){
@@ -124,7 +128,7 @@ if(isset($_POST['submit'])){
                              <input type="text" name="gender" required placeholder="enter your gender">
                              <input type="text" name="activity" required placeholder="enter your activity">
                              <input type="text" name="goal" required placeholder="enter your goal">
-                             <!-- <input type="file" name="img" accept="image/png, image/jpg, image/jpeg" required> -->
+                             <input type="file" name="image" accept="image/png, image/jpg, image/jpeg" required>
                              <input type="submit" name="submit" value="Submit" class="form-btn">
                         </form>
                     </div>
