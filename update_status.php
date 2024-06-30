@@ -28,7 +28,7 @@ if ($stmt->execute()) {
     // הוספת פרטי המשתמש לטבלת trainee
     $sql = "INSERT INTO trainee (userId,traineeName,membershipId) VALUES (?,?,'$membership_id')";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("is", $user_id,$traine_name);
+    $stmt->bind_param("is", $user_id,$trainee_name);
 
     if ($stmt->execute()) {
         echo "User status updated to trainee.";

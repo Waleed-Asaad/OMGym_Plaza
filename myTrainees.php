@@ -63,7 +63,18 @@ $user_id = $_SESSION['userId'];
     
         <div class="trainers">
             <?php
-                $sql = "SELECT * FROM trainee ORDER BY traineeId";
+                $email = $_SESSION['userEmail'];
+                $select = " SELECT * FROM user WHERE userEmail = '$email'  ";
+                $result = mysqli_query($conn, $select); 
+                $row = mysqli_fetch_array($result);
+                $user_id = $row['userId'];
+
+                $sql = "SELECT * FROM trainer WHERE userId = '$user_id'";
+                $result = mysqli_query($conn, $sql);
+                $row = mysqli_fetch_array($result);
+                $trainer_id = $row['trainerId'];
+
+                $sql = "SELECT * FROM trainee WHERE trainerId = '$trainer_id'";
                 $result = mysqli_query($conn, $sql);
                 
                 

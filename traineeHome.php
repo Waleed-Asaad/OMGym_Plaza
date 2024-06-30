@@ -3,7 +3,7 @@ include "connection.php";
 session_start();
 if(isset($_POST['submit'])){
     
-        
+        // $target = "img/trainees/".basename($_FILES['img']['name']);
         $height = $_POST['height'];
         $age = $_POST['age'];
         $gender = mysqli_real_escape_string($conn, $_POST['gender']);
@@ -14,12 +14,15 @@ if(isset($_POST['submit'])){
         $result = mysqli_query($conn, $select); 
         $row = mysqli_fetch_array($result);
         $user_id = $row['userId'];
+        // $image = $_FILES['img']['name'];
 
-        $sql = "UPDATE trainee SET  height = ?, age = ?, gender = ?, activity = ?, goal = ? WHERE userId = ?";
+
+        $sql = "UPDATE trainee SET trainerImg = ?, height = ?, age = ?, gender = ?, activity = ?, goal = ? WHERE userId = ?";
         $stmt = $conn->prepare($sql);
         if ($stmt) {
-            $stmt->bind_param("iisssi", $height, $age, $gender, $activity, $goal, $user_id);
+            $stmt->bind_param("siisssi",$image, $height, $age, $gender, $activity, $goal, $user_id);
             if($stmt->execute()){
+                // move_uploaded_file($_FILES['img']['tmp_name'], $target);
                 echo "Record updated successfully";
             } else {
                 echo "Error updating record: " . $stmt->error;
@@ -121,8 +124,9 @@ if(isset($_POST['submit'])){
                              <input type="text" name="gender" required placeholder="enter your gender">
                              <input type="text" name="activity" required placeholder="enter your activity">
                              <input type="text" name="goal" required placeholder="enter your goal">
+                             <!-- <input type="file" name="img" accept="image/png, image/jpg, image/jpeg" required> -->
                              <input type="submit" name="submit" value="Submit" class="form-btn">
-                         </form>
+                        </form>
                     </div>
                 </div>
                             </div>
