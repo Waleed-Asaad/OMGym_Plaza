@@ -19,7 +19,6 @@
                 <li><a href="./team.php">Our Team</a></li>
                 <li><a href="#">Pages</a>
                     <ul class="dropdown">
-                        <li><a href="./class-timetable.php">Classes timetable</a></li>
                         <li><a href="./bmi-calculator.php">Bmi calculate</a></li>
                         <li><a href="./gallery.php">Gallery</a></li>
                     </ul>
@@ -49,7 +48,6 @@
                             <li><a href="./team.php">Our Team</a></li>
                             <li><a href="#">Pages</a>
                                 <ul class="dropdown">
-                                    <li><a href="./class-timetable.php">Classes timetable</a></li>
                                     <li><a href="./bmi-calculator.php">Bmi calculate</a></li>
                                     <li><a href="./gallery.php">Gallery</a></li>
                                 </ul>

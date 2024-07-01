@@ -56,7 +56,7 @@ session_start()
                             <div class="hi-text">
                                 <span>Shape your body</span>
                                 <h1>Be <strong>strong</strong> traning hard</h1>
-                                <a href="#" class="primary-btn">Get info</a>
+                                <a href="user-login.php" class="primary-btn">SIGN UP NOW</a>
                             </div>
                         </div>
                     </div>
@@ -176,54 +176,44 @@ session_start()
             </div>
             <div class="row">
                 <div class="ts-slider owl-carousel">
-                    <div class="col-lg-4">
-                        <div class="ts-item set-bg" data-setbg="img/team/team-1.jpg">
-                            <div class="ts_text">
-                                <h4>Athart Rachel</h4>
-                                <span>Gym Trainer</span>
-                            </div>
+                <?php
+                $sql = "SELECT * FROM trainer";
+                $result = mysqli_query($conn, $sql);
+
+                if ($result) {
+                    while($row = mysqli_fetch_assoc($result)) {
+                        $trainerName = $row['trainerName'];
+                        $trainerImg = $row['trainerImg'];
+                        $rating = $row['rating'];
+                        $muscle_building = $row['muscle_building'];
+                        $weight_loss = $row['weight_loss'];
+                        $strength = $row['strength'];
+                        $raiting_avg = $row['rating'];
+                        echo "
+                <div class='col-lg-4 col-sm-6'>
+                    <div class='ts-item set-bg' data-setbg='img/team/$trainerImg'>
+                        <div class='ts_text'>
+                            <h4>$trainerName</h4>";
+                                if ($muscle_building) {
+                                    echo "<span>Muscle Building trainer</span>";
+                                }
+                                if ($weight_loss) {
+                                    echo "<span>Weight Loss trainer</span>";
+                                }
+                                if ($strength) {
+                                    echo "<span>Strength trainer</span>";
+                                }
+                            
+                            echo "<span class='price'>Rating: $rating/5.0</span>";
+                            echo "
                         </div>
                     </div>
-                    <div class="col-lg-4">
-                        <div class="ts-item set-bg" data-setbg="img/team/team-2.jpg">
-                            <div class="ts_text">
-                                <h4>Athart Rachel</h4>
-                                <span>Gym Trainer</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-4">
-                        <div class="ts-item set-bg" data-setbg="img/team/team-3.jpg">
-                            <div class="ts_text">
-                                <h4>Athart Rachel</h4>
-                                <span>Gym Trainer</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-4">
-                        <div class="ts-item set-bg" data-setbg="img/team/team-4.jpg">
-                            <div class="ts_text">
-                                <h4>Athart Rachel</h4>
-                                <span>Gym Trainer</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-4">
-                        <div class="ts-item set-bg" data-setbg="img/team/team-5.jpg">
-                            <div class="ts_text">
-                                <h4>Athart Rachel</h4>
-                                <span>Gym Trainer</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-4">
-                        <div class="ts-item set-bg" data-setbg="img/team/team-6.jpg">
-                            <div class="ts_text">
-                                <h4>Athart Rachel</h4>
-                                <span>Gym Trainer</span>
-                            </div>
-                        </div>
-                    </div>
+                </div>";
+            }
+                } else {
+                    echo '<p>No trainers found.</p>';
+                }
+            ?>
                 </div>
             </div>
         </div>
