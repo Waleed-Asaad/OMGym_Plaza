@@ -7,12 +7,7 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// בדיקת אם המשתמש מחובר
-if (!isset($_SESSION['userId'])) {
-    die("User not logged in.");
-}
 
-$user_id = $_SESSION['userId'];
 ?>
 <script>
         function enrollNow() {

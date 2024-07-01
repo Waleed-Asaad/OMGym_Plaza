@@ -50,11 +50,7 @@
 include 'connection.php';
 session_start();
 
-$user_id = $_SESSION['userId'];
 
-if(!isset($user_id)){
-   header('location:user-login.php');
-};
 
 
 if(isset($_POST['update_cart'])){
@@ -205,6 +201,11 @@ if(isset($message)){
       </thead>
       <tbody>
       <?php
+         $user_email = $_SESSION['userEmail'];
+         $select = " SELECT * FROM user WHERE userEmail = '$user_email'  ";
+         $result = mysqli_query($conn, $select); 
+         $row = mysqli_fetch_array($result);
+         $user_id = @row['userId'];
          $cart_query = mysqli_query($conn, "SELECT * FROM cart WHERE userId = '$user_id'");
          $grand_total = 0;
          if(mysqli_num_rows($cart_query) > 0){

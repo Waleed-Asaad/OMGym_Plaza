@@ -128,11 +128,7 @@ session_start();
     </section> -->
     <!-- Banner Section End -->
 
-    <!-- Pricing Section Begin -->
-    <!-- <?php
-        include 'pricing.php';
-    ?> -->
-    <!-- Pricing Section End -->
+    
 
     <!-- Gallery Section Begin -->
     <div class="gallery-section">

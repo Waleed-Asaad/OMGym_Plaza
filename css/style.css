@@ -1790,15 +1790,7 @@ ol {
 }
 
 .class-timetable.details-timetable td.dark-bg {
-	background: #e0f904;
-}
-
-.class-timetable.details-timetable td.green-bg {
-	background: #099105;
-}
-
-.class-timetable.details-timetable td.red-bg {
-	background: #e95b5b;
+	background: #0a0a0a;
 }
 
 .class-timetable table {
@@ -1819,11 +1811,9 @@ ol {
 	font-weight: 400;
 }
 
-
-
 .class-timetable table tbody tr td {
 	width: 146px;
-	padding: 0;
+	padding: 35px 0;
 }
 
 .class-timetable table tbody tr td.class-time {
@@ -1835,14 +1825,6 @@ ol {
 
 .class-timetable table tbody tr td.dark-bg {
 	background: #090909;
-}
-
-.class-timetable table tbody tr td.green-bg {
-	background: #3cf735;
-}
-
-.class-timetable table tbody tr td.red-bg {
-	background: #e95b5b;
 }
 
 .class-timetable table tbody tr td.hover-bg {
@@ -3443,6 +3425,4 @@ ol {
 	.search-model-form input {
 		font-size: 28px;
 	}
-
-	
 }
