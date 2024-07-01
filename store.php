@@ -74,7 +74,7 @@ if (isset($_GET['productId'])) {
 <?php
     
     $user_email = $_SESSION['userEmail'];
-   $select = " SELECT * FROM user WHERE userId = '$user_email'  ";
+   $select = " SELECT * FROM user WHERE userEmail = '$user_email'  ";
    $result = mysqli_query($conn, $select); 
    $row = mysqli_fetch_array($result);
    if($row['status']=="trainee"){
