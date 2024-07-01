@@ -42,11 +42,11 @@ if (isset($_POST['edit'])) {
             ?>
             <div class="product-container">
             <div class="product">
+                <?php $productImg = $row['image']; echo "<img src ='img/products/$productImg'".$row['image']."'>";?>
                 <h2><?php echo $row["productName"]; ?></h2>
                 <p><?php echo $row["description"]; ?></p>
                 <p>Price: $<?php echo $row["price"]; ?></p>
                 <p>Quantity: <?php echo $row["quantity"]; ?></p>
-                <?php // echo "<img src ='images/".$row['image']."'>";?>
 				<div class="product-actions">
                     <form method="post" action="">
                         <input type="hidden" name="delete" value="<?php echo $row["productId"]; ?>">

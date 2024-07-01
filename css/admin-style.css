@@ -27,7 +27,7 @@ body{
    align-items: center;
    justify-content: center;
    padding:20px;
-   
+   margin: 20px;
 }
 
 .container .content{
@@ -81,7 +81,7 @@ body{
    justify-content: center;
    padding:20px;
    padding-bottom: 60px;
-   background: #eee;
+   background: #ffffff;
 }
 
 .form-container form{
@@ -321,18 +321,17 @@ td a:hover {
 .product-actions {
    display: flex;
    justify-content: left;
-padding: 5px;
-margin: 5px;
+   padding: 5px;
+   margin: 5px;
 }
 
 img {
-   width: 400px;
-   height: 400px;
+   width: 150px;
+   height: 150px;
 }
 
 .product {
    border: 1px solid #e3e3e3;
    padding: 10px;
    margin-bottom: 10px;
-   height: 300px;
 }

@@ -12,15 +12,15 @@ if(!isset($_SESSION['adminName'])){
 $msg = "";
 if(isset($_POST['submit'])){
 	
-	//$target = "images/".basename($_FILES['image']['name']);
+	$target = "img/products/".basename($_FILES['image']['name']);
 	//$productId=$_POST['productId'];
 	$productName=$_POST['productName'];
 	$quantity=$_POST['quantity'];
 	$description=$_POST['description'];
 	$price=$_POST['price'];
-	//$image = $_FILES['image']['name'];
+	$image = $_FILES['image']['name'];
 	
-	$sql = "INSERT INTO products (productName,quantity,description,price) VALUES ('$productName','$quantity','$description','$price')";
+	$sql = "INSERT INTO products (productName,image,quantity,description,price) VALUES ('$productName','$image','$quantity','$description','$price')";
 	mysqli_query($conn,$sql);
 	
 }
@@ -45,7 +45,7 @@ if(isset($_POST['submit'])){
 	  <input type="number" name="quantity" min="0" placeholder="Enter the quantity" required>
 	  <input type="text" name="description" placeholder="Enter description" required>
 	  <input type="number" name="price" min="0" placeholder="Enter the price" required>
-	  <!-- <input type="file" name="image" value="Upload Image"accept="image/png, image/jpg, image/jpeg" required> -->
+	  <input type="file" name="image" value="Upload Image"accept="image/png, image/jpg, image/jpeg" required>
 	  <input type="submit" name="submit" value="Add" class="form-btn" required>
    </form>
 

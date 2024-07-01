@@ -106,20 +106,21 @@ if(isset($_POST['submit'])){
         <input type="password" name="password" required placeholder="enter trainer password">
         <input type="text" name="address" required placeholder="enter trainer address">
         <input type="email" name="email" required placeholder="Enter trainer email">
-        <div>
+        <div class="specialty">
             <label>Specialty:</label><br>
-            <input type="checkbox" id="muscle_building" name="muscle_building" value="muscle_building">
             <label for="muscle_building">Muscle Building</label><br>
-            <input type="checkbox" id="weight_loss" name="weight_loss" value="weight_loss">
+            <input type="checkbox" id="muscle_building" name="muscle_building" value="muscle_building">
             <label for="weight_loss">Weight Loss</label><br>
-            <input type="checkbox" id="strength" name="strength" value="strength">
+            <input type="checkbox" id="weight_loss" name="weight_loss" value="weight_loss">
             <label for="strength">Strength</label><br>
-            <input type="checkbox" id="endurance" name="endurance" value="endurance">
+            <input type="checkbox" id="strength" name="strength" value="strength">
             <label for="endurance">Endurance</label><br>
-            <input type="checkbox" id="flexibility" name="flexibility" value="flexibility">
+            <input type="checkbox" id="endurance" name="endurance" value="endurance">
             <label for="flexibility">Flexibility</label><br>
-            <input type="checkbox" id="body_building" name="body_building" value="body_building">
+            <input type="checkbox" id="flexibility" name="flexibility" value="flexibility">
             <label for="body_building">Body Building</label><br>
+            <input type="checkbox" id="body_building" name="body_building" value="body_building">
+            
         </div>
         <input type="file" name="image" accept="image/png, image/jpg, image/jpeg" required>
         <input type="submit" name="submit" value="Add" class="form-btn" required>
