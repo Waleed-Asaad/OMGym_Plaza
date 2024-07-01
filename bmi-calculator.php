@@ -92,25 +92,27 @@
                         <h2>CALCULATE YOUR BMI</h2>
                     </div>
                     <div class="chart-calculate-form">
-                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut
-                            labore et dolore magna aliqua. Quis ipsum suspendisse ultrices gravida. Risus commodo
-                            viverra maecenas accumsan lacus vel facilisis.</p>
-                        <form action="#">
+                    <p>Maintaining a healthy BMI is crucial for overall well-being.
+                         Use this calculator to find your BMI and assess your body weight status.</p>
+                        <form id="bmiForm" onsubmit="calculateBMI(event)">
                             <div class="row">
                                 <div class="col-sm-6">
-                                    <input type="text" placeholder="Height / cm">
+                                    <input type="text" id="height" placeholder="Height / cm">
                                 </div>
                                 <div class="col-sm-6">
-                                    <input type="text" placeholder="Weight / kg">
+                                    <input type="text" id="weight" placeholder="Weight / kg">
                                 </div>
                                 <div class="col-sm-6">
-                                    <input type="text" placeholder="Age">
+                                    <input type="text" id="age" placeholder="Age">
                                 </div>
                                 <div class="col-sm-6">
-                                    <input type="text" placeholder="Sex">
+                                    <input type="text" id="sex" placeholder="Sex">
                                 </div>
                                 <div class="col-lg-12">
                                     <button type="submit">Calculate</button>
+                                </div>
+                                <div class="col-lg-12">
+                                    <p id="bmiResult"></p>
                                 </div>
                             </div>
                         </form>
@@ -143,7 +145,67 @@
     <script src="js/owl.carousel.min.js"></script>
     <script src="js/main.js"></script>
 
+    <script>
+        function calculateBMI(event) {
+            event.preventDefault();
+            const height = parseFloat(document.getElementById('height').value);
+            const weight = parseFloat(document.getElementById('weight').value);
+            const age = parseInt(document.getElementById('age').value);
+            const sex = document.getElementById('sex').value.toLowerCase();
+            const bmi = (weight / ((height / 100) ** 2)).toFixed(1);
 
+            let status;
+            if (sex === 'male') {
+                if (age < 18) {
+                    if (bmi < 18.5) {
+                        status = 'Underweight';
+                    } else if (bmi >= 18.5 && bmi < 24.9) {
+                        status = 'Healthy';
+                    } else if (bmi >= 25 && bmi < 29.9) {
+                        status = 'Overweight';
+                    } else if(bmi >= 30){
+                        status = 'Obese';
+                    }
+                } else {
+                    if (bmi < 20) {
+                        status = 'Underweight';
+                    } else if (bmi >= 20 && bmi < 25) {
+                        status = 'Healthy';
+                    } else if (bmi >= 25 && bmi < 30) {
+                        status = 'Overweight';
+                    } else if(bmi >= 30){
+                        status = 'Obese';
+                    }
+                }
+            } else if (sex === 'female') {
+                if (age < 18) {
+                    if (bmi < 18.5) {
+                        status = 'Underweight';
+                    } else if (bmi >= 18.5 && bmi < 24.9) {
+                        status = 'Healthy';
+                    } else if (bmi >= 25 && bmi < 29.9) {
+                        status = 'Overweight';
+                    } else if(bmi >= 30){
+                        status = 'Obese';
+                    }
+                } else {
+                    if (bmi < 18.5) {
+                        status = 'Underweight';
+                    } else if (bmi >= 18.5 && bmi <= 24.9) {
+                        status = 'Healthy';
+                    } else if (bmi >= 25 && bmi < 29.9) {
+                        status = 'Overweight';
+                    } else if(bmi >= 30){
+                        status = 'Obese';
+                    }
+                }
+            } else {
+                status = 'Invalid sex';
+            }
+
+            document.getElementById('bmiResult').innerText = `Your BMI is ${bmi}, which is considered ${status}.`;
+        }
+    </script>
 
 </body>
 

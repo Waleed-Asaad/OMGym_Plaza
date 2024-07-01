@@ -65,96 +65,44 @@
                 </div>
             </div>
             <div class="row">
-                <div class="col-lg-4 col-sm-6">
-                    <div class="ts-item set-bg" data-setbg="img/team/team-1.jpg">
-                        <div class="ts_text">
-                            <h4>Athart Rachel</h4>
-                            <span>Gym Trainer</span>
-                            <div class="tt_social">
-                                <a href="#"><i class="fa fa-facebook"></i></a>
-                                <a href="#"><i class="fa fa-twitter"></i></a>
-                                <a href="#"><i class="fa fa-youtube-play"></i></a>
-                                <a href="#"><i class="fa fa-instagram"></i></a>
-                                <a href="#"><i class="fa  fa-envelope-o"></i></a>
-                            </div>
+            <?php
+                $sql = "SELECT * FROM trainer";
+                $result = mysqli_query($conn, $sql);
+
+                if ($result) {
+                    while($row = mysqli_fetch_assoc($result)) {
+                        $trainerName = $row['trainerName'];
+                        $trainerImg = $row['trainerImg'];
+                        $rating = $row['rating'];
+                        $muscle_building = $row['muscle_building'];
+                        $weight_loss = $row['weight_loss'];
+                        $strength = $row['strength'];
+                        $raiting_avg = $row['rating'];
+                        echo "
+                <div class='col-lg-4 col-sm-6'>
+                    <div class='ts-item set-bg' data-setbg='img/team/$trainerImg'>
+                        <div class='ts_text'>
+                            <h4>$trainerName</h4>";
+                                if ($muscle_building) {
+                                    echo "<span>Muscle Building trainer</span>";
+                                }
+                                if ($weight_loss) {
+                                    echo "<span>Weight Loss trainer</span>";
+                                }
+                                if ($strength) {
+                                    echo "<span>Strength trainer</span>";
+                                }
+                            
+                            echo "<span class='price'>Rating: $rating/5.0</span>";
+                            echo "
                         </div>
                     </div>
-                </div>
-                <div class="col-lg-4 col-sm-6">
-                    <div class="ts-item set-bg" data-setbg="img/team/team-2.jpg">
-                        <div class="ts_text">
-                            <h4>Athart Rachel</h4>
-                            <span>Gym Trainer</span>
-                            <div class="tt_social">
-                                <a href="#"><i class="fa fa-facebook"></i></a>
-                                <a href="#"><i class="fa fa-twitter"></i></a>
-                                <a href="#"><i class="fa fa-youtube-play"></i></a>
-                                <a href="#"><i class="fa fa-instagram"></i></a>
-                                <a href="#"><i class="fa  fa-envelope-o"></i></a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-4 col-sm-6">
-                    <div class="ts-item set-bg" data-setbg="img/team/team-3.jpg">
-                        <div class="ts_text">
-                            <h4>Athart Rachel</h4>
-                            <span>Gym Trainer</span>
-                            <div class="tt_social">
-                                <a href="#"><i class="fa fa-facebook"></i></a>
-                                <a href="#"><i class="fa fa-twitter"></i></a>
-                                <a href="#"><i class="fa fa-youtube-play"></i></a>
-                                <a href="#"><i class="fa fa-instagram"></i></a>
-                                <a href="#"><i class="fa  fa-envelope-o"></i></a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-4 col-sm-6">
-                    <div class="ts-item set-bg" data-setbg="img/team/team-4.jpg">
-                        <div class="ts_text">
-                            <h4>Athart Rachel</h4>
-                            <span>Gym Trainer</span>
-                            <div class="tt_social">
-                                <a href="#"><i class="fa fa-facebook"></i></a>
-                                <a href="#"><i class="fa fa-twitter"></i></a>
-                                <a href="#"><i class="fa fa-youtube-play"></i></a>
-                                <a href="#"><i class="fa fa-instagram"></i></a>
-                                <a href="#"><i class="fa  fa-envelope-o"></i></a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-4 col-sm-6">
-                    <div class="ts-item set-bg" data-setbg="img/team/team-5.jpg">
-                        <div class="ts_text">
-                            <h4>Athart Rachel</h4>
-                            <span>Gym Trainer</span>
-                            <div class="tt_social">
-                                <a href="#"><i class="fa fa-facebook"></i></a>
-                                <a href="#"><i class="fa fa-twitter"></i></a>
-                                <a href="#"><i class="fa fa-youtube-play"></i></a>
-                                <a href="#"><i class="fa fa-instagram"></i></a>
-                                <a href="#"><i class="fa  fa-envelope-o"></i></a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-4 col-sm-6">
-                    <div class="ts-item set-bg" data-setbg="img/team/team-6.jpg">
-                        <div class="ts_text">
-                            <h4>Athart Rachel</h4>
-                            <span>Gym Trainer</span>
-                            <div class="tt_social">
-                                <a href="#"><i class="fa fa-facebook"></i></a>
-                                <a href="#"><i class="fa fa-twitter"></i></a>
-                                <a href="#"><i class="fa fa-youtube-play"></i></a>
-                                <a href="#"><i class="fa fa-instagram"></i></a>
-                                <a href="#"><i class="fa  fa-envelope-o"></i></a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                </div>";
+            }
+                } else {
+                    echo '<p>No trainers found.</p>';
+                }
+            ?>
             </div>
         </div>
     </section>

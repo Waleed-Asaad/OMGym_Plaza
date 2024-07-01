@@ -71,9 +71,7 @@
                 <div class="col-lg-3 order-lg-2 col-md-6 p-0">
                     <div class="ss-text">
                         <h4>Personal training</h4>
-                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor ut dolore
-                            facilisis.</p>
-                        <a href="#">Explore</a>
+                        <p>Personal training helps you achieve your fitness goals with customized workouts and dedicated support.</p>
                     </div>
                 </div>
                 <div class="col-lg-3 order-lg-3 col-md-6 p-0">
@@ -83,9 +81,8 @@
                 </div>
                 <div class="col-lg-3 order-lg-4 col-md-6 p-0">
                     <div class="ss-text">
-                        <h4>Group fitness classes</h4>
-                        <p>Quis ipsum suspendisse ultrices gravida. Risus commodo viverra maecenas accumsan lacus.</p>
-                        <a href="#">Explore</a>
+                        <h4>Weight loss</h4>
+                        <p>Effective weight loss through our training programs combines tailored workouts and nutritional guidance for lasting results.</p>
                     </div>
                 </div>
                 <div class="col-lg-3 order-lg-8 col-md-6 p-0">
@@ -96,9 +93,7 @@
                 <div class="col-lg-3 order-lg-7 col-md-6 p-0">
                     <div class="ss-text second-row">
                         <h4>Body building</h4>
-                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor ut dolore
-                            facilisis.</p>
-                        <a href="#">Explore</a>
+                        <p>Achieve your muscle-building goals with our specialized bodybuilding programs, designed to maximize strength and growth.</p>
                     </div>
                 </div>
                 <div class="col-lg-3 order-lg-6 col-md-6 p-0">
@@ -109,8 +104,7 @@
                 <div class="col-lg-3 order-lg-5 col-md-6 p-0">
                     <div class="ss-text second-row">
                         <h4>Strength training</h4>
-                        <p>Quis ipsum suspendisse ultrices gravida. Risus commodo viverra maecenas accumsan lacus.</p>
-                        <a href="#">Explore</a>
+                        <p>Enhance your power and endurance with our focused strength training programs, tailored to build robust muscle and resilience.</p>
                     </div>
                 </div>
             </div>
