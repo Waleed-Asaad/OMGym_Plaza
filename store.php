@@ -5,8 +5,8 @@ session_start();
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
-$sql = "SELECT productId, productName, description, image,price FROM products";
-$result = $conn->query($sql);
+$sql = "SELECT * FROM products";
+$result = mysqli_query($conn, $sql);
 
 if (isset($_GET['productId'])) {
     $productId = $_GET['productId'];
@@ -63,8 +63,8 @@ if (isset($_GET['productId'])) {
     <link rel="stylesheet" href="css/style.css" type="text/css">
     <style>
         .product-image {
-            width: 150px;
-            height: 150px;
+            width: 180px;
+            height: 230px;
             object-fit: cover;
         }
     </style>
@@ -75,12 +75,12 @@ if (isset($_GET['productId'])) {
     
     $user_email = $_SESSION['userEmail'];
    $select = " SELECT * FROM user WHERE userEmail = '$user_email'  ";
-   $result = mysqli_query($conn, $select); 
-   $row = mysqli_fetch_array($result);
-   if($row['status']=="trainee"){
+   $result1 = mysqli_query($conn, $select); 
+   $row1 = mysqli_fetch_array($result1);
+   if($row1['status']=="trainee"){
     include 'traineeMenu.php';
    }
-   else if($row['status']=="user"){
+   else if($row1['status']=="user"){
     include 'userMenu.php';
    }
    else{
@@ -108,7 +108,7 @@ if (isset($_GET['productId'])) {
     <!-- Breadcrumb Section End -->
 
     <!-- Class Timetable Section Begin -->
-    <section class="class-timetable-section spad">
+    <!-- <section class="class-timetable-section spad">
         <div class="container">
             <div class="row">
                 <div class="col-lg-6">
@@ -129,15 +129,13 @@ if (isset($_GET['productId'])) {
             </div>
         </div>
     
-    </section>
+    </section> -->
     <section class="pricing-section spad">
     <div class="container">
-        
         <div class="row justify-content-center">
             <?php
             if ($result->num_rows > 0) {
-                // פלט של כל מוצר ככרטיס נפרד
-                while ($row = $result->fetch_assoc()) { ?>
+                while ($row = mysqli_fetch_assoc($result)) { ?>
                     <div class="col-lg-4 col-md-8">
                         <div class="ps-item">
                             <h2 style="color:beige"><?php echo $row["productName"]; ?></h2>
