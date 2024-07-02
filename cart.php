@@ -75,12 +75,12 @@ if(isset($_GET['remove'])){
 }
   
 if(isset($_GET['delete_all'])){
-   mysqli_query($conn, "DELETE FROM cart WHERE userId = '$user_id'");
+   mysqli_query($conn, "DELETE FROM cart WHERE userId = '$userId'");
    header('location:cart.php');
 }
 
 if(isset($_POST['checkout'])) {
-   $cart_query = mysqli_query($conn, "SELECT * FROM cart WHERE userId = '$user_id'");
+   $cart_query = mysqli_query($conn, "SELECT * FROM cart WHERE userId = '$userId'");
    $purchase_succeeded = false;
    
    while($fetch_cart = mysqli_fetch_assoc($cart_query)){
@@ -115,7 +115,7 @@ if(isset($_POST['checkout'])) {
     }
 	if($purchase_succeeded){
 		$message[] = 'Purchase succeeded!';
-		mysqli_query($conn, "DELETE FROM cart WHERE userId = '$user_id'");
+		mysqli_query($conn, "DELETE FROM cart WHERE userId = '$userId'");
     }
 	  
 }
@@ -189,11 +189,11 @@ if(isset($message)){
 }
 ?>
 
-<div class="shopping-cart">
-   <h1 class="heading">shopping cart</h1>
+   <h1>shopping cart</h1>
+   <div class="chart-table">
    <table>
       <thead>
-         <th>model</th>
+         <th>Product name</th>
          <th>price</th>
          <th>quantity</th>
          <th>total price</th>
@@ -208,8 +208,8 @@ if(isset($message)){
          $user_id = @row['userId'];
          $cart_query = mysqli_query($conn, "SELECT * FROM cart WHERE userId = '$user_id'");
          $grand_total = 0;
-         if(mysqli_num_rows($cart_query) > 0){
-            while($fetch_cart = mysqli_fetch_assoc($cart_query)){
+         if (mysqli_num_rows($cart_query) > 0) {
+            while ($fetch_cart = mysqli_fetch_assoc($cart_query)) {
       ?>
          <tr>
             <td><?php echo $fetch_cart['productName']; ?></td>
@@ -218,17 +218,17 @@ if(isset($message)){
                <form action="" method="post">
                   <input type="hidden" name="cart_id" value="<?php echo $fetch_cart['id']; ?>">
                   <input type="number" min="1" name="cart_quantity" value="<?php echo $fetch_cart['quantity']; ?>">
-                  <input type="submit" name="update_cart" value="update" class="edit1">
+                  <input type="submit" name="update_cart" value="Update" class="edit1">
                </form>
             </td>
             <td>$<?php echo $sub_total = ($fetch_cart['price'] * $fetch_cart['quantity']); ?></td>
-            <td><a href="cart.php?remove=<?php echo $fetch_cart['id']; ?>" class="delete-btn" onclick="return confirm('remove item from cart?');">remove</a></td>
+            <td><a href="cart.php?remove=<?php echo $fetch_cart['id']; ?>" class="delete-btn" onclick="return confirm('Remove item from cart?');">Remove</a></td>
          </tr>
       <?php
          $grand_total += $sub_total;
             }
-         }else{
-            echo '<tr><td style="padding:20px; text-transform:capitalize;" colspan="6">no item added</td></tr>';
+         } else {
+            echo '<tr><td style="padding:20px; text-transform:capitalize;" colspan="6">No item added</td></tr>';
          }
       ?>
       <tr class="table-bottom">
@@ -238,7 +238,7 @@ if(isset($message)){
       </tr>
    </tbody>
    </table>
-
+   </div>
    <form method="post" action="">  
 		<p><a  class="formBtn1" href = "product.php">Continue Shopping </a></p><br>
 		<button type="submit" name="checkout" class="formBtn2">Check out</button>
@@ -246,7 +246,6 @@ if(isset($message)){
 
 </div>
 
-</div>
 </section>
 
 <!-- Js Plugins -->

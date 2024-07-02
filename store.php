@@ -108,7 +108,7 @@ if (isset($_GET['productId'])) {
     <!-- Breadcrumb Section End -->
 
     <!-- Class Timetable Section Begin -->
-    <!-- <section class="class-timetable-section spad">
+    <section class="class-timetable-section spad">
         <div class="container">
             <div class="row">
                 <div class="col-lg-6">
@@ -116,7 +116,7 @@ if (isset($_GET['productId'])) {
                         <span>WELCOME TO OUR STORE</span>
                     </div>
                 </div>
-                <div class="col-lg-6">
+                <!-- <div class="col-lg-6">
                     <div class="table-controls">
                         <ul>
                             <li class="active" data-tsfilter="all">All products</li>
@@ -125,11 +125,11 @@ if (isset($_GET['productId'])) {
                             <li data-tsfilter="Supplements">Supplements</li>
                         </ul>
                     </div>
-                </div>
+                </div> -->
             </div>
         </div>
     
-    </section> -->
+    </section>
     <section class="pricing-section spad">
     <div class="container">
         <div class="row justify-content-center">
