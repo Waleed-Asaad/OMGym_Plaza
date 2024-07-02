@@ -110,7 +110,7 @@ if(isset($_POST['submit'])){
             <div class="hs-item set-bg" data-setbg="img/hero/hero-2.jpg">
                 <div class="container">
                     <div class="row">
-                        <div class="col-lg-6 offset-lg-6">
+                        <div class="col-lg-6 offset-lg-4">
                             <div class="hi-text">
                             <div class="container" style="width:800px; ">
                 <div class="form-container" style="padding:5px 5px 5px 5px" >
@@ -204,11 +204,7 @@ if(isset($_POST['submit'])){
     </section> -->
     <!-- Banner Section End -->
 
-    <!-- Pricing Section Begin -->
-    <!-- <?php
-        include 'pricing.php';
-    ?> -->
-    <!-- Pricing Section End -->
+    
 
     <!-- Gallery Section Begin -->
     <div class="gallery-section">
