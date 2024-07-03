@@ -144,6 +144,14 @@ if(isset($_POST['checkout'])) {
     <link rel="stylesheet" href="css/slicknav.min.css" type="text/css">
     <link rel="stylesheet" href="css/style.css" type="text/css">
     <link rel="stylesheet" href="css/cart.css" type="text/css">
+    <style>
+      h1 {
+         text-align: center;
+         margin-bottom: 20px;
+         font-size: 4em;
+         color: #333;
+      }
+   </style>
 </head>
 <body>
 
@@ -205,7 +213,7 @@ if(isset($message)){
          $select = " SELECT * FROM user WHERE userEmail = '$user_email'  ";
          $result = mysqli_query($conn, $select); 
          $row = mysqli_fetch_array($result);
-         $user_id = @row['userId'];
+         $user_id = $row['userId'];
          $cart_query = mysqli_query($conn, "SELECT * FROM cart WHERE userId = '$user_id'");
          $grand_total = 0;
          if (mysqli_num_rows($cart_query) > 0) {

@@ -10,11 +10,13 @@ $result = mysqli_query($conn, $sql);
 
 if (isset($_GET['productId'])) {
     $productId = $_GET['productId'];
-    $userId = $_SESSION['userId'];
-
-    $existingQuery = "SELECT * FROM cart WHERE userId = '$userId' AND productId = '$productId'";
+    $userEmail = $_SESSION['userEmail'];
+    $user_id = "SELECT userId FROM user WHERE userEmail = '$userEmail'";
+    $existingQuery = "SELECT * FROM cart WHERE userEmail = '$userEmail' AND productId = '$productId'";
     $existingResult = mysqli_query($conn, $existingQuery);
-
+    $user_result = mysqli_query($conn, $user_id);
+    $user = mysqli_fetch_assoc($user_result);
+    $userId = $user['userId'];
     if ($existingResult->num_rows > 0) {
         echo "This product is already in the cart.";
     } 
@@ -144,7 +146,7 @@ if (isset($_GET['productId'])) {
                                 <h2><?php echo "$" . $row["price"]; ?></h2>
                                 <span><?php echo $row["description"]; ?></span>
                             </div>
-                            <button class="primary-btn pricing-btn"><a href="store.php ? productId=<?php echo $row["productId"]; ?>">Order Now</a></button>
+                            <button class="primary-btn pricing-btn"><a href="store.php ? productId=<?php echo $row["productId"]; ?>">Add to Cart</a></button>
                         </div>
                     </div>
                 <?php }
