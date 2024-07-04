@@ -145,13 +145,8 @@ if(isset($_POST['checkout'])) {
     <link rel="stylesheet" href="css/style.css" type="text/css">
     <link rel="stylesheet" href="css/cart.css" type="text/css">
     <style>
-      h1 {
-         text-align: center;
-         margin-bottom: 20px;
-         font-size: 4em;
-         color: #333;
-      }
-   </style>
+      <?php include 'cart.css';?>
+    </style>
 </head>
 <body>
 
@@ -188,7 +183,7 @@ if(isset($_POST['checkout'])) {
             </div>
         </div>
     </section>
-<section class="cart-section spad">
+<section  class="cart-section spad">
 <?php
 if(isset($message)){
    foreach($message as $message){
@@ -197,8 +192,7 @@ if(isset($message)){
 }
 ?>
 
-   <h1>shopping cart</h1>
-   <div class="chart-table">
+   <h1 class="h1Cart">Shopping Cart</h1>
    <table>
       <thead>
          <th>Product name</th>
@@ -230,7 +224,7 @@ if(isset($message)){
                </form>
             </td>
             <td>$<?php echo $sub_total = ($fetch_cart['price'] * $fetch_cart['quantity']); ?></td>
-            <td><a href="cart.php?remove=<?php echo $fetch_cart['id']; ?>" class="delete-btn" onclick="return confirm('Remove item from cart?');">Remove</a></td>
+            <td><a href="cart.php?remove=<?php echo $fetch_cart['id']; ?>" class="delete1" onclick="return confirm('Remove item from cart?');">Remove</a></td>
          </tr>
       <?php
          $grand_total += $sub_total;
@@ -240,19 +234,18 @@ if(isset($message)){
          }
       ?>
       <tr class="table-bottom">
-         <td colspan="4">grand total :</td>
-         <td>$<?php echo $grand_total; ?></td>
+         <td></td>
+         <td></td>
+         <td colspan="4">grand total : $<?php echo $grand_total; ?></td>
          <td><a href="cart.php?delete_all" onclick="return confirm('delete all from cart?');" class="delete1 <?php echo ($grand_total > 1)?'':'disabled'; ?>">Delete all</a></td>
       </tr>
    </tbody>
    </table>
-   </div>
    <form method="post" action="">  
 		<p><a  class="formBtn1" href = "product.php">Continue Shopping </a></p><br>
 		<button type="submit" name="checkout" class="formBtn2">Check out</button>
    </form>
 
-</div>
 
 </section>
 

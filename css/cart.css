@@ -4,8 +4,16 @@
 
 table {
     border-collapse: solid 1px black;
-    width: 50%;
+    width: 100%;
     text-align: center;
+    color: white;
+  }
+
+  .h1Cart{
+    text-align: center;
+    margin-bottom: 20px;
+    font-size: 4em;
+    color: #ffff;
   }
 
   th, td {
@@ -13,11 +21,11 @@ table {
   }
   
   th {
-    background-color: Orange;
+    background-color: rgb(221, 144, 0);
   }
 
   tr:hover {
-    background-color: #f5f5f5;
+    background-color: #8f8f8f;
   }
   
   td a {
@@ -26,19 +34,42 @@ table {
   }
   
   td a:hover {
-    color: #f00;
+    color: rgb(243, 119, 119);
   }
   
   .delete1{
-      background: red;
-     color: white;
-     font-size: 15px;
-     cursor: pointer;
-     border-radius: 5px;
-     padding:1px;
-     margin:1px;
+  background: red;
+   color: white;
+   font-size: 15px;
+   cursor: pointer;
+   border-radius: 5px;
+   padding:3px;
+   margin:3px;
   }
   
+  .formBtn1{
+      background: rgb(221, 144, 0);
+      color: white;
+      text-transform: capitalize;
+      font-size: 15px;
+      cursor: pointer;
+      border-radius: 5px;
+      padding:5px;
+      margin:5px;
+  }
+
+  .formBtn2{
+    top: 50%;
+    left: 50%;
+      background: rgb(221, 144, 0);
+      color: white;
+      text-transform: capitalize;
+      font-size: 15px;
+      cursor: pointer;
+      border-radius: 5px;
+      padding: 10px 20px;
+      margin:5px;
+  }
   .edit1{
       background: Orange;
       color: white;
@@ -46,8 +77,8 @@ table {
       font-size: 10px;
       cursor: pointer;
       border-radius: 5px;
-      padding:1px;
-      margin:1px;
+      padding:2px;
+      margin:2px;
   }
   
   .cart-btn{
