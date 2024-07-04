@@ -12,7 +12,10 @@
                 <li><a href="./traineeHome.php">Trainee Home</a></li>
                 <li><a href="./store.php">Store</a></li>
                 <li><a href="./cart.php">Cart</a></li>
-                <li><a href="./subscription.php">Subscription</a></li>
+                <li><a href="./trainers.php">Trainers</a></li>
+                <li><a href="./mealPlans.php">Meal Plans</a></li>
+                <li><a href="./trainingPlans.php">Training Plans</a></li>
+                <li><a href="./myClasses.php">My Classes</a></li>
                 <li><a href="./logout.php">Logout</a></li>  
             </ul>
         </nav>
@@ -35,7 +38,9 @@
                             <li><a href="./traineeHome.php">Trainee Home</a></li>
                             <li><a href="./store.php">Store</a></li>
                             <li><a href="./cart.php">Cart</a></li>
-                            <li><a href="./myPlans.php">My Plans</a></li>
+                            <li><a href="./trainers.php">Trainers</a></li>
+                            <li><a href="./mealPlans.php">Meal Plans</a></li>
+                            <li><a href="./trainingPlans.php">Training Plans</a></li>
                             <li><a href="./myClasses.php">My Classes</a></li>
                             <li><a href="./logout.php">Logout</a></li>
                             
