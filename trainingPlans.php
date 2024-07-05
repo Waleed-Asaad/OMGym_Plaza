@@ -66,7 +66,7 @@ if (isset($_GET['change'])) {
 ?>
 
     <!-- Breadcrumb Section Begin -->
-    <section style="height:2000px" class="breadcrumb-section set-bg" data-setbg="img/breadcrumb-bg.jpg">
+    <section style="height:2000px" class="breadcrumb-section set-bg" data-setbg="img/hero/hero-1.jpg">
         <div class="container">
             <div class="row">
                 <div class="col-lg-12 text-center">

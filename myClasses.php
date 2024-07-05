@@ -2,31 +2,69 @@
 session_start();
 include 'connection.php';
 
-function change($hour, $conn) {
-
-        $sql = "SELECT * FROM trainerHours WHERE hourId = ?";
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param("i", $hour);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        $row = $result->fetch_assoc();
-                if($row['available'] == 0)
-                $available = ($row['available'] + 1) % 3;
-                else
-                $available = ($row['available'] + 2) % 3;
-                $sql_update = "UPDATE trainerHours SET available = ? WHERE hourId = ?";
-                $stmt_update = $conn->prepare($sql_update);
-                $stmt_update->bind_param("ii", $available, $hour);
-                $stmt_update->execute();
-            
-        
+function change($hour, $day, $conn) {
+    $sql = "SELECT * FROM traineeHours WHERE hourId = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("i", $hour);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $row = $result->fetch_assoc();
     
-    header("Location: trainerSchedule.php");
+    $scheduled = ($row['scheduled'] + 2) % 3;
+    $sql_update = "UPDATE traineeHours SET scheduled = ? WHERE hourId = ?";
+    $stmt_update = $conn->prepare($sql_update);
+    $stmt_update->bind_param("ii", $scheduled, $hour);
+    $stmt_update->execute();
+
+    $user_email = $_SESSION['userEmail'];
+    $select = "SELECT * FROM user WHERE userEmail = ?";
+    $stmt = $conn->prepare($select);
+    $stmt->bind_param("s", $user_email);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $row = $result->fetch_assoc();
+    $user_id = $row['userId'];
+
+    $select = "SELECT * FROM trainee WHERE userId = ?";
+    $stmt = $conn->prepare($select);
+    $stmt->bind_param("i", $user_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $row = $result->fetch_assoc();
+    $trainer_id = $row['trainerId'];
+
+    $select = "SELECT * FROM trainerDay WHERE trainerId = ? ORDER BY dayId ASC";
+    $stmt = $conn->prepare($select);
+    $stmt->bind_param("i", $trainer_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    while ($row = $result->fetch_assoc()) {
+        $day_id = $row['dayId'];
+        if ($day_id % 7 == $day % 7) {
+            $sql = "SELECT * FROM trainerHours WHERE dayId = ? ORDER BY hourId ASC";
+            $stmt_hours = $conn->prepare($sql);
+            $stmt_hours->bind_param("i", $day_id);
+            $stmt_hours->execute();
+            $result_hours = $stmt_hours->get_result();
+            while ($row_hours = $result_hours->fetch_assoc()) {
+                $hour_id = $row_hours['hourId'];
+                if ($hour_id % 12 == $hour % 12) {
+                    $available = ($row['available'] + 1) % 3;
+                    $sql_update = "UPDATE trainerHours SET available = ? WHERE hourId = ?";
+                    $stmt_update = $conn->prepare($sql_update);
+                    $stmt_update->bind_param("ii", $available, $hour_id);
+                    $stmt_update->execute();
+                }
+            }
+        }
+    }
+
+    header("Location: myClasses.php");
     exit;
 }
 
-if (isset($_GET['change'])) {
-    change(intval($_GET['change']), $conn);
+if (isset($_GET['change1']) && isset($_GET['change2'])) {
+    change(intval($_GET['change1']), intval($_GET['change2']), $conn);
 }
 ?>
 
@@ -58,7 +96,7 @@ if (isset($_GET['change'])) {
 
 <body>
 <?php
-    include 'trainer_menu.php';
+    include 'traineeMenu.php';
 ?>
 
     <!-- Breadcrumb Section Begin -->
@@ -86,7 +124,7 @@ if (isset($_GET['change'])) {
             <div class="row">
                 <div class="col-lg-6">
                     <div class="section-title">
-                        <h2>Update your Schedule</h2>
+                        <h2>PICK CLASSES</h2>
                     </div>
                 </div>
             </div>
@@ -122,54 +160,61 @@ if (isset($_GET['change'])) {
                                     $result = $stmt->get_result();
                                     $row = $result->fetch_assoc();
                                     $user_id = $row['userId'];
-
-
-                                    $select = "SELECT * FROM trainer WHERE userId = ?";
+                                
+                                    $select = "SELECT * FROM trainee WHERE userId = ?";
                                     $stmt = $conn->prepare($select);
                                     $stmt->bind_param("i", $user_id);
                                     $stmt->execute();
                                     $result = $stmt->get_result();
                                     $row = $result->fetch_assoc();
-                                    $trainer_id = $row['trainerId'];
+                                    
+                                    $trainee_id = $row['traineeId'];
 
 
-                                    $select = "SELECT * FROM trainerDay WHERE trainerId = ? ORDER BY dayId ASC";
+                                    $select = "SELECT * FROM traineeDay WHERE traineeId = ? ORDER BY dayId ASC";
                                     $stmt = $conn->prepare($select);
-                                    $stmt->bind_param("i", $trainer_id);
+                                    $stmt->bind_param("i", $trainee_id);
                                     $stmt->execute();
                                     $result = $stmt->get_result();
                                     while ($row = $result->fetch_assoc()) {
                                         $day_id = $row['dayId'];
                                         $day = $row['days'];
                                         echo "<tr><td style='padding: 0' class='class-time'>$day</td>";
-                                        $sql = "SELECT * FROM trainerHours WHERE dayId = ? ORDER BY hourId ASC";
+                                        $sql = "SELECT * FROM traineeHours WHERE dayId = ? ORDER BY hourId ASC";
                                         $stmt_hours = $conn->prepare($sql);
                                         $stmt_hours->bind_param("i", $day_id);
                                         $stmt_hours->execute();
                                         $result_hours = $stmt_hours->get_result();
                                         while ($row_hours = $result_hours->fetch_assoc()) {
-                                            $hour_id = $row_hours['hourId'] ;
+                                            $hour_id = $row_hours['hourId'];
                                             $button_text = "";
                                             $button_color = "";
-                                            switch ($row_hours['available']) {
+                                            switch ($row_hours['scheduled']) {
+                                                
+                                                case 1:
+                                                    $button_text = "Scheduled";
+                                                    $button_color = "#099105";
+                                                    $text_color = "#e0f904";
+                                                    break;
+                                                case 2:
+                                                    $button_text = "Not Scheduled";
+                                                    $button_color = "#e95b5b";
+                                                    $text_color = "#e0f904";
+                                                    break;
                                                 case 0:
                                                     $button_text = "Empty";
                                                     $button_color = "#0a0a0a";
                                                     $text_color = "#e0f904";
                                                     break;
-                                                case 1:
-                                                    $button_text = "Valid";
-                                                    $button_color = "#099105";
-                                                    $text_color = "#e0f904";
-                                                    break;
-                                                case 2:
-                                                    $button_text = "Not Valid";
-                                                    $button_color = "#e95b5b";
-                                                    $text_color = "#e0f904";
-                                                    break;
                                             }
-
-                                            if($row_hours['available']==2){
+                                            if($row_hours['scheduled']==1){
+                                                
+                                                echo "<td style='padding: 0; ' class='ts-meta'>
+                                                <button style='padding: 0 ; width: 100%; background: $button_color; color: $text_color' onclick='changeStatus($hour_id, $day_id);'>$button_text</button>
+                                                </td>";
+                                            }
+                                            
+                                            else if($row_hours['scheduled']==2){
                                                 echo "<td style='padding: 0; ' class='ts-meta'>
                                                 <button style='padding: 0 ; width: 100%; background: $button_color; color: $text_color'>$button_text</button>
                                                 </td>";
@@ -177,8 +222,8 @@ if (isset($_GET['change'])) {
 
                                             else{
                                                 echo "<td style='padding: 0; ' class='ts-meta'>
-                                                <button style='padding: 0 ; width: 100%; background: $button_color; color: $text_color' onclick='changeStatus($hour_id);'>$button_text</button>
-                                                </td>";
+                                                <button style='padding: 0 ; width: 100%; background: $button_color; color: $text_color'>$button_text</button>
+                                                </td>"; 
                                             }
                                             
                                         }
@@ -210,9 +255,8 @@ if (isset($_GET['change'])) {
     <script src="js/main.js"></script>
 
     <script>
-        function changeStatus(hour) {
-            
-            window.location.href = "trainerSchedule.php?change=" + hour ;
+        function changeStatus(hour, day) {
+            window.location.href = "myclasses.php?change1=" + hour + "&change2=" + day;
         }
     </script>
 </body>

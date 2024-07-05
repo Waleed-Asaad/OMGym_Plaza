@@ -15,6 +15,7 @@
                 <li><a href="./trainers.php">Trainers</a></li>
                 <li><a href="./mealPlans.php">Meal Plans</a></li>
                 <li><a href="./trainingPlans.php">Training Plans</a></li>
+                <li><a href="./traineeTrainerSchedule.php">Trainer Schedule</a></li>
                 <li><a href="./myClasses.php">My Classes</a></li>
                 <li><a href="./logout.php">Logout</a></li>  
             </ul>
@@ -41,6 +42,7 @@
                             <li><a href="./trainers.php">Trainers</a></li>
                             <li><a href="./mealPlans.php">Meal Plans</a></li>
                             <li><a href="./trainingPlans.php">Training Plans</a></li>
+                            <li><a href="./traineeTrainerSchedule.php">Trainer Schedule</a></li>
                             <li><a href="./myClasses.php">My Classes</a></li>
                             <li><a href="./logout.php">Logout</a></li>
                             
