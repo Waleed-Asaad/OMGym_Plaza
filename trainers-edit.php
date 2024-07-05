@@ -46,7 +46,7 @@ if(!isset($_SESSION['adminName'])){
                         $trainerImg = $row['trainerImg'];
                         $rating = $row['rating'];
                         $muscle_building = $row['muscle_building'];
-                        $fat_loss = $row['fat_loss'];
+                        $weight_loss = $row['weight_loss'];
                         $strength = $row['strength'];
                         $raiting_avg = $row['rating'];
                         
@@ -60,8 +60,8 @@ if(!isset($_SESSION['adminName'])){
                         if ($muscle_building) {
                             echo "<p>Muscle Building</p>";
                         }
-                        if ($fat_loss) {
-                            echo "<p>Fat Loss</p>";
+                        if ($weight_loss) {
+                            echo "<p>weight Loss</p>";
                         }
                         if ($strength) {
                             echo "<p>Strength</p>";

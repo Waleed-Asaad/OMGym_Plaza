@@ -122,7 +122,7 @@ if (isset($_GET['change'])) {
                                 $goal = $row['goal'];
 
                                 // List of attributes to check for
-                                $attributes = ["strength", "flexibility", "endurance", "fat loss", "muscle building", "body building"];
+                                $attributes = ["strength", "flexibility", "endurance", "weight loss", "muscle building", "body building"];
 
                                 $trainers = [];
 
@@ -132,7 +132,23 @@ if (isset($_GET['change'])) {
                                     $score = 0;
                                     foreach ($attributes as $attribute) {
                                          if (strpos($goal, $attribute) !== false) {
-                                            if ($row[$attribute] == 1) {
+                                            if($attribute == "weight loss" )
+                                            {
+                                                if ($row['weight_loss'] == 1) {
+                                                    $score++;
+                                            }
+
+                                            else if( $attribute == "muscle building" || $attribute == "body building")
+                                            {
+                                                if ($row['muscle_building'] == 1) {
+                                                    $score++;
+                                            }
+                                            else if(  $attribute == "body building")
+                                            {
+                                                if ($row['body_building'] == 1) {
+                                                    $score++;
+                                            }
+                                            else if ($row[$attribute] == 1) {
                                                $score++;
                                            }
                                         }
