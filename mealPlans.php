@@ -137,16 +137,19 @@ if (isset($_GET['change'])) {
                                                     $score++;
                                             }
 
+                                        }
                                             else if( $attribute == "muscle building" || $attribute == "body building")
                                             {
                                                 if ($row['muscle_building'] == 1) {
                                                     $score++;
                                             }
+                                        }
                                             else if(  $attribute == "body building")
                                             {
                                                 if ($row['body_building'] == 1) {
                                                     $score++;
                                             }
+                                        }
                                             else if ($row[$attribute] == 1) {
                                                $score++;
                                            }
