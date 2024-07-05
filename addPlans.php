@@ -27,7 +27,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $flexibility = isset($_POST['flexibility1']) ? 1 : 0;
             $body_building = isset($_POST['body_building1']) ? 1 : 0;
 
-            $sql = "INSERT INTO training_plan (planImage, trainerId, muscle_building, weight_loss, strength, endurance, flexibility, body_building) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+            $sql = "INSERT INTO training_plan (planImage, trainerId, muscle building, weight loss, strength, endurance, flexibility, body building) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
             $stmt = $conn->prepare($sql);
             if ($stmt) {
                 $stmt->bind_param("siiiiiii", $image, $trainer_id, $muscle_building, $weight_loss, $strength, $endurance, $flexibility, $body_building);
@@ -61,7 +61,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $flexibility = isset($_POST['flexibility2']) ? 1 : 0;
             $body_building = isset($_POST['body_building2']) ? 1 : 0;
 
-            $sql = "INSERT INTO meal_plans (planImage, trainerId, muscle_building, weight_loss, strength, endurance, flexibility, body_building) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+            $sql = "INSERT INTO meal_plans (planImage, trainerId, muscle building, weight loss, strength, endurance, flexibility, body building) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
             $stmt = $conn->prepare($sql);
             if ($stmt) {
                 $stmt->bind_param("siiiiiii", $image, $trainer_id, $muscle_building, $weight_loss, $strength, $endurance, $flexibility, $body_building);
