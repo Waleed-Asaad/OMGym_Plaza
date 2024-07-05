@@ -19,7 +19,7 @@ if(isset($_POST['submit'])){
     $image = $_FILES['image']['name'];
     
     $muscle_building = isset($_POST['muscle_building']) ? 1 : 0;
-    $weight_loss = isset($_POST['weight_loss']) ? 1 : 0;
+    $fat_loss = isset($_POST['fat_loss']) ? 1 : 0;
     $strength = isset($_POST['strength']) ? 1 : 0;
     $endurance = isset($_POST['endurance']) ? 1 : 0;
     $flexibility = isset($_POST['flexibility']) ? 1 : 0;
@@ -31,7 +31,7 @@ if(isset($_POST['submit'])){
     $result = mysqli_query($conn, $select); 
     $row = mysqli_fetch_array($result);
     $user_id = $row['userId'];
-    $sql = "INSERT INTO trainer (trainerName, trainerImg, muscle_building, weight_loss, strength,endurance,	flexibility,body_building, userId) VALUES ('$trainerName', '$image', '$muscle_building', '$weight_loss', '$strength','$endurance','$flexibility','$body_building','$user_id')";
+    $sql = "INSERT INTO trainer (trainerName, trainerImg, muscle building, fat loss, strength,endurance, flexibility,body building, userId) VALUES ('$trainerName', '$image', '$muscle_building', '$fat_loss', '$strength','$endurance','$flexibility','$body_building','$user_id')";
     if (mysqli_query($conn, $sql)) {
         if (move_uploaded_file($_FILES['image']['tmp_name'], $target)) {
             $msg = "Trainer added successfully";
@@ -110,8 +110,8 @@ if(isset($_POST['submit'])){
             <label>Specialty:</label><br>
             <label for="muscle_building">Muscle Building</label><br>
             <input type="checkbox" id="muscle_building" name="muscle_building" value="muscle_building">
-            <label for="weight_loss">Weight Loss</label><br>
-            <input type="checkbox" id="weight_loss" name="weight_loss" value="weight_loss">
+            <label for="fat_loss">Fat Loss</label><br>
+            <input type="checkbox" id="fat_loss" name="fat_loss" value="fat_loss">
             <label for="strength">Strength</label><br>
             <input type="checkbox" id="strength" name="strength" value="strength">
             <label for="endurance">Endurance</label><br>

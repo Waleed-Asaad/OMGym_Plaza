@@ -121,7 +121,7 @@ if (isset($_GET['change'])) {
                                 $goal = $row['goal'];
 
                                 // List of attributes to check for
-                                $attributes = ["strength", "flexibility", "endurance", "weight loss", "muscle building", "body building"];
+                                $attributes = ["strength", "flexibility", "endurance", "fat loss", "muscle building", "body building"];
 
                                 $trainers = [];
 

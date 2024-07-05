@@ -9,6 +9,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $row = mysqli_fetch_array($result);
     $user_id = $row['userId'];
 
+    echo '<h1>worked</h1>';
+
     $sql = "SELECT * FROM trainer WHERE userId = '$user_id'";
     $result = mysqli_query($conn, $sql);
     $row = mysqli_fetch_array($result);
@@ -21,16 +23,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         if ($_FILES['image1']['error'] === 0) {
             $muscle_building = isset($_POST['muscle_building1']) ? 1 : 0;
-            $weight_loss = isset($_POST['weight_loss1']) ? 1 : 0;
+            $fat_loss = isset($_POST['fat_loss1']) ? 1 : 0;
             $strength = isset($_POST['strength1']) ? 1 : 0;
             $endurance = isset($_POST['endurance1']) ? 1 : 0;
             $flexibility = isset($_POST['flexibility1']) ? 1 : 0;
             $body_building = isset($_POST['body_building1']) ? 1 : 0;
 
-            $sql = "INSERT INTO training_plan (planImage, trainerId, muscle building, weight loss, strength, endurance, flexibility, body building) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+            $sql = "INSERT INTO training_plan (planImage, trainerId, muscle building, fat loss, strength, endurance, flexibility, body building) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
             $stmt = $conn->prepare($sql);
             if ($stmt) {
-                $stmt->bind_param("siiiiiii", $image, $trainer_id, $muscle_building, $weight_loss, $strength, $endurance, $flexibility, $body_building);
+                $stmt->bind_param("siiiiiii", $image, $trainer_id, $muscle_building, $fat_loss, $strength, $endurance, $flexibility, $body_building);
                 if ($stmt->execute()) {
                     move_uploaded_file($_FILES['image1']['tmp_name'], $target);
                     echo "Record updated successfully";
@@ -55,16 +57,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         if ($_FILES['image2']['error'] === 0) {
             $muscle_building = isset($_POST['muscle_building2']) ? 1 : 0;
-            $weight_loss = isset($_POST['weight_loss2']) ? 1 : 0;
+            $fat_loss = isset($_POST['fat_loss2']) ? 1 : 0;
             $strength = isset($_POST['strength2']) ? 1 : 0;
             $endurance = isset($_POST['endurance2']) ? 1 : 0;
             $flexibility = isset($_POST['flexibility2']) ? 1 : 0;
             $body_building = isset($_POST['body_building2']) ? 1 : 0;
 
-            $sql = "INSERT INTO meal_plans (planImage, trainerId, muscle building, weight loss, strength, endurance, flexibility, body building) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+            $sql = "INSERT INTO meal_plans (planImage, trainerId, muscle building, fat loss, strength, endurance, flexibility, body building) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
             $stmt = $conn->prepare($sql);
             if ($stmt) {
-                $stmt->bind_param("siiiiiii", $image, $trainer_id, $muscle_building, $weight_loss, $strength, $endurance, $flexibility, $body_building);
+                $stmt->bind_param("siiiiiii", $image, $trainer_id, $muscle_building, $fat_loss, $strength, $endurance, $flexibility, $body_building);
                 if ($stmt->execute()) {
                     move_uploaded_file($_FILES['image2']['tmp_name'], $target);
                     echo "Record updated successfully";
@@ -153,8 +155,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                 <label style="color:white">Specialty:</label><br>
                                 <label for="muscle_building" style="color:white">Muscle Building</label><br>
                                 <input type="checkbox" id="muscle_building1" name="muscle_building1" value="muscle_building">
-                                <label for="weight_loss" style="color:white">Weight Loss</label><br>
-                                <input type="checkbox" id="weight_loss1" name="weight_loss1" value="weight_loss">
+                                <label for="fat_loss" style="color:white">Fat Loss</label><br>
+                                <input type="checkbox" id="fat_loss1" name="fat_loss1" value="fat_loss">
                                 <label for="strength" style="color:white">Strength</label><br>
                                 <input type="checkbox" id="strength1" name="strength1" value="strength">
                                 <label for="endurance" style="color:white">Endurance</label><br>
@@ -197,8 +199,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                 <label style="color:white">Specialty:</label><br>
                                 <label for="muscle_building" style="color:white">Muscle Building</label><br>
                                 <input type="checkbox" id="muscle_building" name="muscle_building2" value="muscle_building">
-                                <label for="weight_loss" style="color:white">Weight Loss</label><br>
-                                <input type="checkbox" id="weight_loss" name="weight_loss2" value="weight_loss">
+                                <label for="fat_loss" style="color:white">Fat Loss</label><br>
+                                <input type="checkbox" id="fat_loss" name="fat_loss2" value="fat_loss">
                                 <label for="strength" style="color:white">Strength</label><br>
                                 <input type="checkbox" id="strength" name="strength2" value="strength">
                                 <label for="endurance" style="color:white">Endurance</label><br>

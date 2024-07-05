@@ -111,7 +111,7 @@
                             <div class="tags">
                                 <a href="#">Body buiding</a>
                                 <a href="#">Yoga</a>
-                                <a href="#">Weightloss</a>
+                                <a href="#">Fatloss</a>
                                 <a href="#">Streching</a>
                             </div>
                             <div class="share">
