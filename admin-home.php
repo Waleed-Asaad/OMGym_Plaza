@@ -6,22 +6,14 @@ session_start();
 if(!isset($_SESSION['adminName'])){
    header('location:admin-login.php');
 }
+$query = "SELECT p.productId, p.productName, p.image, SUM(po.quantity) as total_sold
+          FROM products p
+          JOIN productinorder po ON p.productId = po.productId
+          GROUP BY p.productId, p.productName, p.image
+          ORDER BY total_sold DESC
+          LIMIT 5";
 
-$sql = "SELECT * FROM products";
-$result = mysqli_query($conn, $sql);
-
-if (isset($_POST['delete'])) {
-    $productId = $_POST['delete'];
-
-    $deleteSql = "DELETE FROM products WHERE productId = $productId";
-    mysqli_query($conn, $deleteSql);
-	header("Location: admin-home.php");
-}
-
-if (isset($_POST['edit'])) {
-    $productId = $_POST['edit'];
-    header("Location: admin-edit.php?productId=$productId");
-}
+$result = mysqli_query($conn, $query);
 ?>
 
 <!DOCTYPE html>
@@ -36,37 +28,28 @@ if (isset($_POST['edit'])) {
 </head>
 <body>
     <?php include 'admin-menu.php'; ?>
-<?php
-    if (mysqli_num_rows($result) > 0) {
-        while ($row = mysqli_fetch_assoc($result)) {
-            ?>
-            <div class="product-container">
-            <div class="product">
-                <?php $productImg = $row['image']; echo "<img src ='img/products/$productImg'".$row['image']."'>";?>
-                <h2><?php echo $row["productName"]; ?></h2>
-                <p><?php echo $row["description"]; ?></p>
-                <p>Price: $<?php echo $row["price"]; ?></p>
-                <p>Quantity: <?php echo $row["quantity"]; ?></p>
-				<div class="product-actions">
-                    <form method="post" action="">
-                        <input type="hidden" name="delete" value="<?php echo $row["productId"]; ?>">
-                        <button type="submit" class="delete">Delete</button>
-                    </form>
-                    <form method="post" action="">
-                        <input type="hidden" name="edit" value="<?php echo $row["productId"]; ?>">
-                        <button type="submit" class="edit">Edit</button>
-                    </form>
-                </div>
-            </div>
-            </div>
-            <?php
-        }
-    } else {
-        echo "No products found.";
-    }
 
-
-    ?>
+    <div class="top-products">
+    <h2>Top 5 Selling Products</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Product Name</th>
+                <th>Image</th>
+                <th>Total Sold</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php while($row = mysqli_fetch_assoc($result)): ?>
+            <tr>
+                <td><?php echo $row['productName']; ?></td>
+                <td><img src="img/products/<?php echo $row['image']; ?>" alt="<?php echo $row['productName']; ?>" style="width:100px;"></td>
+                <td><?php echo $row['total_sold']; ?></td>
+            </tr>
+            <?php endwhile; ?>
+        </tbody>
+    </table>
+</div>
 
 </body>
 </html>
