@@ -49,7 +49,13 @@
 
 include 'connection.php';
 session_start();
+$user_email = $_SESSION['userEmail'];
 
+
+$select_user = "SELECT userId FROM user WHERE userEmail = '$user_email'";
+$result_user = mysqli_query($conn, $select_user);
+$row_user = mysqli_fetch_assoc($result_user);
+$user_id = $row_user['userId'];
 
 
 
@@ -75,12 +81,12 @@ if(isset($_GET['remove'])){
 }
   
 if(isset($_GET['delete_all'])){
-   mysqli_query($conn, "DELETE FROM cart WHERE userId = '$userId'");
+   mysqli_query($conn, "DELETE FROM cart WHERE userId = '$user_id'");
    header('location:cart.php');
 }
 
 if(isset($_POST['checkout'])) {
-   $cart_query = mysqli_query($conn, "SELECT * FROM cart WHERE userId = '$userId'");
+   $cart_query = mysqli_query($conn, "SELECT * FROM cart WHERE userId = '$user_id'");
    $purchase_succeeded = false;
    
    while($fetch_cart = mysqli_fetch_assoc($cart_query)){
@@ -114,8 +120,25 @@ if(isset($_POST['checkout'])) {
 	   }
     }
 	if($purchase_succeeded){
-		$message[] = 'Purchase succeeded!';
-		mysqli_query($conn, "DELETE FROM cart WHERE userId = '$userId'");
+		$sql = "INSERT INTO tborder () VALUES ()";
+      if (mysqli_query($conn, $sql)) {
+        $order_id = mysqli_insert_id($conn); // קבלת ה-orderId של ההזמנה החדשה
+
+        // קבלת כל המוצרים מה-cart של המשתמש
+        $cart_query = mysqli_query($conn, "SELECT * FROM cart WHERE userId = '$user_id'");
+        while ($cart_row = mysqli_fetch_assoc($cart_query)) {
+            $product_id = $cart_row['productId'];
+            $quantity = $cart_row['quantity'];
+
+            // הוספת המוצר לטבלה productinorder
+            $productinorder_sql = "INSERT INTO productinorder (orderId, productId, quantity, userId) VALUES ('$order_id', '$product_id', '$quantity', '$user_id')";
+            mysqli_query($conn, $productinorder_sql);
+        }
+
+        // מחיקת המוצרים מה-cart לאחר הוספתם ל-order
+        mysqli_query($conn, "DELETE FROM cart WHERE userId = '$user_id'");
+
+    }
     }
 	  
 }
@@ -152,7 +175,7 @@ if(isset($_POST['checkout'])) {
 
 <?php
     
-    $user_email = $_SESSION['userEmail'];
+   $user_email = $_SESSION['userEmail'];
    $select = " SELECT * FROM user WHERE userEmail = '$user_email'  ";
    $result = mysqli_query($conn, $select); 
    $row = mysqli_fetch_array($result);
@@ -237,7 +260,7 @@ if(isset($message)){
          <td></td>
          <td></td>
          <td colspan="4">grand total : $<?php echo $grand_total; ?></td>
-         <td><a href="cart.php?delete_all" onclick="return confirm('delete all from cart?');" class="delete1 <?php echo ($grand_total > 1)?'':'disabled'; ?>">Delete all</a></td>
+         <td><a href="cart.php ? delete_all" onclick="return confirm('delete all from cart?');" class="delete1" <?php echo ($grand_total > 1)?'':'disabled'; ?>>Delete all</a></td>
       </tr>
    </tbody>
    </table>
