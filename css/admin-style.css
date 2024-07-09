@@ -335,3 +335,20 @@ img {
    padding: 10px;
    margin-bottom: 10px;
 }
+
+.top-products {
+   text-align: center;
+   margin: 20px;
+}
+
+.top-products h2 {
+   margin-bottom: 20px;
+}
+
+.top-products canvas {
+   display: block;
+   margin: 0 auto;
+   max-width: 800px;
+   width: 100%;
+   height: 400px;
+}
