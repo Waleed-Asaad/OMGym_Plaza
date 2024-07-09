@@ -5,22 +5,92 @@ session_start();
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
+
 $sql = "SELECT * FROM products";
 $result = mysqli_query($conn, $sql);
+
+// קוד להמלצות על מוצרים דומים
+$userEmail = $_SESSION['userEmail'];
+$user_query = "SELECT userId FROM user WHERE userEmail = '$userEmail'";
+$user_result = mysqli_query($conn, $user_query);
+$user_row = mysqli_fetch_assoc($user_result);
+$userId = $user_row['userId'];
+
+// שליפת הקטגוריות שהמשתמש קנה מהם
+$category_query = "
+    SELECT p.category, COUNT(*) as category_count
+    FROM products p
+    JOIN productinorder po ON p.productId = po.productId
+    JOIN tborder o ON po.orderId = o.orderId
+    WHERE po.userId = '$userId'
+    GROUP BY p.category
+    ORDER BY category_count DESC";
+$category_result = mysqli_query($conn, $category_query);
+
+$categories = [];
+while ($category_row = mysqli_fetch_assoc($category_result)) {
+    $categories[] = $category_row['category'];
+}
+
+$recommended_products = [];
+foreach ($categories as $category) {
+    $similar_products_query = "
+        SELECT *
+        FROM products
+        WHERE category = '$category'
+        AND productId NOT IN (
+            SELECT po.productId
+            FROM productinorder po
+            JOIN tborder o ON po.orderId = o.orderId
+            WHERE po.userId = '$userId'
+        )
+        LIMIT 1";
+    $similar_products_result = mysqli_query($conn, $similar_products_query);
+
+    if (mysqli_num_rows($similar_products_result) > 0) {
+        while ($product_row = mysqli_fetch_assoc($similar_products_result)) {
+            $recommended_products[] = $product_row;
+        }
+    }
+
+    // לוודא שלא הצגנו כבר מוצר מאותה קטגוריה פעמיים
+    if (count($recommended_products) >= 2) {
+        break;
+    }
+}
+
+// אם לא מצאנו שני מוצרים בקטגוריות השונות, נוסיף מוצרים מקטגוריות אחרות
+if (count($recommended_products) < 2) {
+    $other_products_query = "
+        SELECT *
+        FROM products
+        WHERE category NOT IN ('" . implode("','", $categories) . "')
+        AND productId NOT IN (
+            SELECT po.productId
+            FROM productinorder po
+            JOIN tborder o ON po.orderId = o.orderId
+            WHERE po.userId = '$userId'
+        )
+        LIMIT " . (2 - count($recommended_products));
+    $other_products_result = mysqli_query($conn, $other_products_query);
+
+    while ($product_row = mysqli_fetch_assoc($other_products_result)) {
+        $recommended_products[] = $product_row;
+    }
+}
 
 if (isset($_GET['productId'])) {
     $productId = $_GET['productId'];
     $userEmail = $_SESSION['userEmail'];
     $user_id = "SELECT userId FROM user WHERE userEmail = '$userEmail'";
-    $existingQuery = "SELECT * FROM cart WHERE userEmail = '$userEmail' AND productId = '$productId'";
+    $existingQuery = "SELECT * FROM cart WHERE userId = '$userId' AND productId = '$productId'";
     $existingResult = mysqli_query($conn, $existingQuery);
     $user_result = mysqli_query($conn, $user_id);
     $user = mysqli_fetch_assoc($user_result);
     $userId = $user['userId'];
     if ($existingResult->num_rows > 0) {
         echo "This product is already in the cart.";
-    } 
-	else {
+    } else {
         $productQuery = "SELECT * FROM products WHERE productId = '$productId'";
         $productResult = mysqli_query($conn, $productQuery);
 
@@ -29,7 +99,7 @@ if (isset($_GET['productId'])) {
             $productName = $item['productName'];
             $price = $item['price'];
             $quantity = 1;
-			$productId=$item['productId'];
+            $productId = $item['productId'];
 
             $insertQuery = "INSERT INTO cart (userId, productId, productName, quantity, price) VALUES ('$userId', '$productId', '$productName', '$quantity', '$price')";
             mysqli_query($conn, $insertQuery);
@@ -118,46 +188,65 @@ if (isset($_GET['productId'])) {
                         <span>WELCOME TO OUR STORE</span>
                     </div>
                 </div>
-                <!-- <div class="col-lg-6">
-                    <div class="table-controls">
-                        <ul>
-                            <li class="active" data-tsfilter="all">All products</li>
-                            <li data-tsfilter="Protein Powders">Protein Powders</li>
-                            <li data-tsfilter="Protein Bars">Protein Bars</li>
-                            <li data-tsfilter="Supplements">Supplements</li>
-                        </ul>
-                    </div>
-                </div> -->
             </div>
         </div>
-    
     </section>
-    <section class="pricing-section spad">
-    <div class="container">
-        <div class="row justify-content-center">
-            <?php
-            if ($result->num_rows > 0) {
-                while ($row = mysqli_fetch_assoc($result)) { ?>
-                    <div class="col-lg-4 col-md-8">
-                        <div class="ps-item">
-                            <h2 style="color:beige"><?php echo $row["productName"]; ?></h2>
-                            <?php echo "<img class='product-image' src ='img/products/".$row['image']."'>";?>
-                            <div class="pi-price">
-                                <h2><?php echo "$" . $row["price"]; ?></h2>
-                                <span><?php echo $row["description"]; ?></span>
+    
+    <!-- Recommended Products Section Begin -->
+    <section class="pricing-section ">
+        <div class="container">
+        <h3 style="color: #ffffff;">Recommended for You</h3>
+            <div class="row justify-content-center">
+                <?php
+                if (count($recommended_products) > 0) {
+                    foreach ($recommended_products as $product) { ?>
+                        <div class="col-lg-4 col-md-8">
+                            <div class="ps-item">
+                                <h2 style="color:beige"><?php echo $product["productName"]; ?></h2>
+                                <?php echo "<img class='product-image' src ='img/products/".$product['image']."'>";?>
+                                <div class="pi-price">
+                                    <h2><?php echo "$" . $product["price"]; ?></h2>
+                                    <span><?php echo $product["description"]; ?></span>
+                                </div>
+                                <button class="primary-btn pricing-btn"><a href="store.php ? productId=<?php echo $product["productId"]; ?>">Add to Cart</a></button>
                             </div>
-                            <button class="primary-btn pricing-btn"><a href="store.php ? productId=<?php echo $row["productId"]; ?>">Add to Cart</a></button>
                         </div>
-                    </div>
-                <?php }
-            } else {
-                echo "<p>No products found.</p>";
-            } ?>
+                    <?php }
+                } else {
+                    echo "<p>No recommended products found.</p>";
+                } ?>
+            </div>
         </div>
-    </div>
-</section>
-
-    <!-- Class Timetable Section End -->
+    </section>
+    <!-- Recommended Products Section End -->
+    
+    <!-- All Products Section Begin -->
+    <section class="pricing-section spad">
+        <div class="container">
+        <h3 style="color: #ec5606; padding: 20px;">* All Products *</h3>
+            <div class="row justify-content-center">
+                <?php
+                if ($result->num_rows > 0) {
+                    while ($row = mysqli_fetch_assoc($result)) { ?>
+                        <div class="col-lg-4 col-md-8">
+                            <div class="ps-item">
+                                <h2 style="color:beige"><?php echo $row["productName"]; ?></h2>
+                                <?php echo "<img class='product-image' src ='img/products/".$row['image']."'>";?>
+                                <div class="pi-price">
+                                    <h2><?php echo "$" . $row["price"]; ?></h2>
+                                    <span><?php echo $row["description"]; ?></span>
+                                </div>
+                                <button class="primary-btn pricing-btn"><a href="store.php ? productId=<?php echo $row["productId"]; ?>">Add to Cart</a></button>
+                            </div>
+                        </div>
+                    <?php }
+                } else {
+                    echo "<p>No products found.</p>";
+                } ?>
+            </div>
+        </div>
+    </section>
+    <!-- All Products Section End -->
 
     <!-- Get In Touch Section Begin -->
     <?php 
@@ -180,8 +269,6 @@ if (isset($_GET['productId'])) {
     <script src="js/jquery.slicknav.js"></script>
     <script src="js/owl.carousel.min.js"></script>
     <script src="js/main.js"></script>
-
-
 
 </body>
 
