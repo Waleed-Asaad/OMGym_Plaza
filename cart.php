@@ -103,7 +103,7 @@ if (isset($_POST['checkout'])) {
     <link rel="stylesheet" href="css/style.css" type="text/css">
     <link rel="stylesheet" href="css/cart.css" type="text/css">
     <style>
-      <?php include 'cart.css';?>
+      <?php include 'C:\wamp64\www\omgym_plaza\css\cart.css'; ?>
     </style>
 </head>
 <body>
@@ -198,8 +198,8 @@ if (isset($message)) {
 </tbody>
 </table>
 <form method="post" action="">
-    <p><a class="formBtn1" href="product.php">Continue Shopping </a></p><br>
-    <button type="submit" name="checkout" class="formBtn2">Check out</button>
+    <p><a class="ContinueBtn" href="store.php">Continue Shopping </a></p><br>
+    <button type="submit" name="checkout" class="formBtn2">Buy</button>
 </form>
 
 </section>
