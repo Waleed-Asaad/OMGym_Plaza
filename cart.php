@@ -1,146 +1,81 @@
 <?php
-// session_start();
-
-// if (!isset($_SESSION['cart'])) {
-//     $_SESSION['cart'] = array();
-// }
-
-// // בדיקת חיבור ל-Database
-// include 'connection.php';
-
-// if ($conn->connect_error) {
-//     die("Connection failed: " . $conn->connect_error);
-// }
-
-
-// if (isset($_POST['add_to_cart'])) {
-//     $product_id = $_POST['product_id'];
-//     $quantity = $_POST['quantity'];
-
-//     $sql = "SELECT * FROM products WHERE productId = $product_id";
-//     $result = $conn->query($sql);
-
-//     if ($result->num_rows > 0) {
-//         $product = $result->fetch_assoc();
-
-//         $cart_item = array(
-//             'id' => $product['productId'],
-//             'name' => $product['productName'],
-//             'price' => $product['price'],
-//             'quantity' => $quantity
-//         );
-
-//         array_push($_SESSION['cart'], $cart_item);
-//     }
-// }
-
-
-// if (isset($_GET['action']) && $_GET['action'] == 'remove') {
-//     $product_id = $_GET['id'];
-//     foreach ($_SESSION['cart'] as $key => $item) {
-//         if ($item['id'] == $product_id) {
-//             unset($_SESSION['cart'][$key]);
-//             break;
-//         }
-//     }
-// }
-?>
-<?php
-
 include 'connection.php';
 session_start();
 $user_email = $_SESSION['userEmail'];
-
 
 $select_user = "SELECT userId FROM user WHERE userEmail = '$user_email'";
 $result_user = mysqli_query($conn, $select_user);
 $row_user = mysqli_fetch_assoc($result_user);
 $user_id = $row_user['userId'];
 
-
-
-if(isset($_POST['update_cart'])){
-   $update_quantity = $_POST['cart_quantity'];
-   $update_id = $_POST['cart_id'];
-   $products_query = mysqli_query($conn, "SELECT * FROM products WHERE productId = (SELECT productId FROM cart WHERE id = '$update_id')");
-   $fetch_product = mysqli_fetch_assoc($products_query);
-   $quantity = $fetch_product['quantity'];
-   if($update_quantity>$quantity){
-	   $message[] = 'The quantity selected for '.$fetch_product['productName'].' is greater than the available quantity.';
-   }
-   else{
-		mysqli_query($conn, "UPDATE cart SET quantity = '$update_quantity' WHERE id = '$update_id'");
-		$message[] = 'cart quantity updated successfully!';
-   }
-}
-
-if(isset($_GET['remove'])){
-   $remove_id = $_GET['remove'];
-   mysqli_query($conn, "DELETE FROM cart WHERE id = '$remove_id'");
-   header('location:cart.php');
-}
-  
-if(isset($_GET['delete_all'])){
-   mysqli_query($conn, "DELETE FROM cart WHERE userId = '$user_id'");
-   header('location:cart.php');
-}
-
-if(isset($_POST['checkout'])) {
-   $cart_query = mysqli_query($conn, "SELECT * FROM cart WHERE userId = '$user_id'");
-   $purchase_succeeded = false;
-   
-   while($fetch_cart = mysqli_fetch_assoc($cart_query)){
-      $update_id = $fetch_cart['id'];
-      $update_quantity = $fetch_cart['quantity'];
-      $product_query = mysqli_query($conn, "SELECT quantity FROM products WHERE productId = (SELECT productId FROM cart WHERE id = '$update_id')");
-	  $fetch_product = mysqli_fetch_assoc($product_query);
-	  if($fetch_product==null){
-		  $message[] = 'The '.$fetch_cart['productName'].' is out of stock';
-	  } 
-	  else{
-			$available_quantity = $fetch_product['quantity'];
-      
-		if($update_quantity > $available_quantity){
-			$message[] = 'The quantity selected for '.$fetch_cart['productName'].' is greater than the available quantity.';
-		} 
-		else {
-			mysqli_query($conn, "UPDATE cart SET quantity = '$update_quantity' WHERE id = '$update_id'");
-		 
-			if($update_quantity == $available_quantity){
-				$purchase_succeeded = true;
-				$updated_quantity = $available_quantity - $update_quantity;
-				mysqli_query($conn, "UPDATE products SET quantity = '$updated_quantity' WHERE productId = (SELECT productId FROM cart WHERE id = '$update_id')");
-			}
-			else {
-				$updated_quantity = $available_quantity - $update_quantity;
-				$purchase_succeeded = true;
-				mysqli_query($conn, "UPDATE products SET quantity = '$updated_quantity' WHERE productId = (SELECT productId FROM cart WHERE id = '$update_id')");
-			}
-		}
-	   }
+if (isset($_POST['update_cart'])) {
+    $update_quantity = $_POST['cart_quantity'];
+    $update_id = $_POST['cart_id'];
+    $products_query = mysqli_query($conn, "SELECT * FROM products WHERE productId = (SELECT productId FROM cart WHERE id = '$update_id')");
+    $fetch_product = mysqli_fetch_assoc($products_query);
+    $quantity = $fetch_product['quantity'];
+    if ($update_quantity > $quantity) {
+        $message[] = 'The quantity selected for ' . $fetch_product['productName'] . ' is greater than the available quantity.';
+    } else {
+        mysqli_query($conn, "UPDATE cart SET quantity = '$update_quantity' WHERE id = '$update_id'");
+        $message[] = 'Cart quantity updated successfully!';
     }
-	if($purchase_succeeded){
-		$sql = "INSERT INTO tborder () VALUES ()";
-      if (mysqli_query($conn, $sql)) {
-        $order_id = mysqli_insert_id($conn); // קבלת ה-orderId של ההזמנה החדשה
+}
 
-        // קבלת כל המוצרים מה-cart של המשתמש
-        $cart_query = mysqli_query($conn, "SELECT * FROM cart WHERE userId = '$user_id'");
-        while ($cart_row = mysqli_fetch_assoc($cart_query)) {
-            $product_id = $cart_row['productId'];
-            $quantity = $cart_row['quantity'];
+if (isset($_GET['remove'])) {
+    $remove_id = $_GET['remove'];
+    mysqli_query($conn, "DELETE FROM cart WHERE id = '$remove_id'");
+    header('location:cart.php');
+}
 
-            // הוספת המוצר לטבלה productinorder
-            $productinorder_sql = "INSERT INTO productinorder (orderId, productId, quantity, userId) VALUES ('$order_id', '$product_id', '$quantity', '$user_id')";
-            mysqli_query($conn, $productinorder_sql);
+if (isset($_GET['delete_all'])) {
+    mysqli_query($conn, "DELETE FROM cart WHERE userId = '$user_id'");
+    header('location:cart.php');
+}
+
+if (isset($_POST['checkout'])) {
+    $cart_query = mysqli_query($conn, "SELECT * FROM cart WHERE userId = '$user_id'");
+    $purchase_succeeded = false;
+    $grand_total = 0;
+
+    while ($fetch_cart = mysqli_fetch_assoc($cart_query)) {
+        $update_id = $fetch_cart['id'];
+        $update_quantity = $fetch_cart['quantity'];
+        $product_query = mysqli_query($conn, "SELECT quantity FROM products WHERE productId = (SELECT productId FROM cart WHERE id = '$update_id')");
+        $fetch_product = mysqli_fetch_assoc($product_query);
+        if ($fetch_product == null) {
+            $message[] = 'The ' . $fetch_cart['productName'] . ' is out of stock';
+        } else {
+            $available_quantity = $fetch_product['quantity'];
+            if ($update_quantity > $available_quantity) {
+                $message[] = 'The quantity selected for ' . $fetch_cart['productName'] . ' is greater than the available quantity.';
+            } else {
+                mysqli_query($conn, "UPDATE cart SET quantity = '$update_quantity' WHERE id = '$update_id'");
+                $updated_quantity = $available_quantity - $update_quantity;
+                $purchase_succeeded = true;
+                mysqli_query($conn, "UPDATE products SET quantity = '$updated_quantity' WHERE productId = (SELECT productId FROM cart WHERE id = '$update_id')");
+                $grand_total += $fetch_cart['price'] * $update_quantity;
+            }
         }
-
-        // מחיקת המוצרים מה-cart לאחר הוספתם ל-order
-        mysqli_query($conn, "DELETE FROM cart WHERE userId = '$user_id'");
-
     }
+
+    if ($purchase_succeeded) {
+        $sql = "INSERT INTO tborder (total_price) VALUES ('$grand_total')";
+        if (mysqli_query($conn, $sql)) {
+            $order_id = mysqli_insert_id($conn);
+
+            $cart_query = mysqli_query($conn, "SELECT * FROM cart WHERE userId = '$user_id'");
+            while ($cart_row = mysqli_fetch_assoc($cart_query)) {
+                $product_id = $cart_row['productId'];
+                $quantity = $cart_row['quantity'];
+
+                $productinorder_sql = "INSERT INTO productinorder (orderId, productId, quantity, userId) VALUES ('$order_id', '$product_id', '$quantity', '$user_id')";
+                mysqli_query($conn, $productinorder_sql);
+            }
+
+            mysqli_query($conn, "DELETE FROM cart WHERE userId = '$user_id'");
+        }
     }
-	  
 }
 ?>
 <!DOCTYPE html>
@@ -174,101 +109,98 @@ if(isset($_POST['checkout'])) {
 <body>
 
 <?php
-    
-   $user_email = $_SESSION['userEmail'];
-   $select = " SELECT * FROM user WHERE userEmail = '$user_email'  ";
-   $result = mysqli_query($conn, $select); 
-   $row = mysqli_fetch_array($result);
-   if($row['status']=="trainee"){
+
+$user_email = $_SESSION['userEmail'];
+$select = " SELECT * FROM user WHERE userEmail = '$user_email'  ";
+$result = mysqli_query($conn, $select);
+$row = mysqli_fetch_array($result);
+if ($row['status'] == "trainee") {
     include 'traineeMenu.php';
-   }
-   else if($row['status']=="user"){
+} else if ($row['status'] == "user") {
     include 'userMenu.php';
-   }
-   else if($row['status']=="trainer"){
-      include 'trainer_menu.php';
-     }
+} else if ($row['status'] == "trainer") {
+    include 'trainer_menu.php';
+}
 ?>
 
 <section class="breadcrumb-section set-bg" data-setbg="img/breadcrumb-bg.jpg">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-12 text-center">
-                    <div class="breadcrumb-text">
-                        <h2>Cart</h2>
-                        <div class="bt-option">
-                            <a href="./index.html">Home</a>
-                            <a href="#">Pages</a>
-                            <span>Cart</span>
-                        </div>
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12 text-center">
+                <div class="breadcrumb-text">
+                    <h2>Cart</h2>
+                    <div class="bt-option">
+                        <a href="./index.html">Home</a>
+                        <a href="#">Pages</a>
+                        <span>Cart</span>
                     </div>
                 </div>
             </div>
         </div>
-    </section>
-<section  class="cart-section spad">
+    </div>
+</section>
+<section class="cart-section spad">
 <?php
-if(isset($message)){
-   foreach($message as $message){
-      echo '<div class="message" onclick="this.remove();">'.$message.'</div>';
-   }
+if (isset($message)) {
+    foreach ($message as $message) {
+        echo '<div class="message" onclick="this.remove();">' . $message . '</div>';
+    }
 }
 ?>
 
-   <h1 class="h1Cart">Shopping Cart</h1>
-   <table>
-      <thead>
-         <th>Product name</th>
-         <th>price</th>
-         <th>quantity</th>
-         <th>total price</th>
-         <th>action</th>
-      </thead>
-      <tbody>
-      <?php
-         $user_email = $_SESSION['userEmail'];
-         $select = " SELECT * FROM user WHERE userEmail = '$user_email'  ";
-         $result = mysqli_query($conn, $select); 
-         $row = mysqli_fetch_array($result);
-         $user_id = $row['userId'];
-         $cart_query = mysqli_query($conn, "SELECT * FROM cart WHERE userId = '$user_id'");
-         $grand_total = 0;
-         if (mysqli_num_rows($cart_query) > 0) {
+<h1 class="h1Cart">Shopping Cart</h1>
+<table>
+    <thead>
+        <th>Product name</th>
+        <th>price</th>
+        <th>quantity</th>
+        <th>total price</th>
+        <th>action</th>
+    </thead>
+    <tbody>
+    <?php
+        $user_email = $_SESSION['userEmail'];
+        $select = " SELECT * FROM user WHERE userEmail = '$user_email'  ";
+        $result = mysqli_query($conn, $select);
+        $row = mysqli_fetch_array($result);
+        $user_id = $row['userId'];
+        $cart_query = mysqli_query($conn, "SELECT * FROM cart WHERE userId = '$user_id'");
+        $grand_total = 0;
+        if (mysqli_num_rows($cart_query) > 0) {
             while ($fetch_cart = mysqli_fetch_assoc($cart_query)) {
-      ?>
-         <tr>
+    ?>
+        <tr>
             <td><?php echo $fetch_cart['productName']; ?></td>
             <td>$<?php echo $fetch_cart['price']; ?></td>
             <td>
-               <form action="" method="post">
-                  <input type="hidden" name="cart_id" value="<?php echo $fetch_cart['id']; ?>">
-                  <input type="number" min="1" name="cart_quantity" value="<?php echo $fetch_cart['quantity']; ?>">
-                  <input type="submit" name="update_cart" value="Update" class="edit1">
-               </form>
+                <form action="" method="post">
+                    <input type="hidden" name="cart_id" value="<?php echo $fetch_cart['id']; ?>">
+                    <input type="number" min="1" name="cart_quantity" value="<?php echo $fetch_cart['quantity']; ?>">
+                    <input type="submit" name="update_cart" value="Update" class="edit1">
+                </form>
             </td>
             <td>$<?php echo $sub_total = ($fetch_cart['price'] * $fetch_cart['quantity']); ?></td>
             <td><a href="cart.php?remove=<?php echo $fetch_cart['id']; ?>" class="delete1" onclick="return confirm('Remove item from cart?');">Remove</a></td>
-         </tr>
-      <?php
-         $grand_total += $sub_total;
+        </tr>
+    <?php
+        $grand_total += $sub_total;
             }
-         } else {
+        } else {
             echo '<tr><td style="padding:20px; text-transform:capitalize;" colspan="6">No item added</td></tr>';
-         }
-      ?>
-      <tr class="table-bottom">
-         <td></td>
-         <td></td>
-         <td colspan="4">grand total : $<?php echo $grand_total; ?></td>
-         <td><a href="cart.php ? delete_all" onclick="return confirm('delete all from cart?');" class="delete1" <?php echo ($grand_total > 1)?'':'disabled'; ?>>Delete all</a></td>
-      </tr>
-   </tbody>
-   </table>
-   <form method="post" action="">  
-		<p><a  class="formBtn1" href = "product.php">Continue Shopping </a></p><br>
-		<button type="submit" name="checkout" class="formBtn2">Check out</button>
-   </form>
-
+        }
+    ?>
+    <tr class="table-bottom">
+        <td></td>
+        <td></td>
+        <td colspan="4">grand total : $<?php echo $grand_total; ?></td>
+        <td><a href="cart.php ? delete_all" onclick="return confirm('delete all from cart?');" class="delete1" <?php echo ($grand_total > 1) ? '' : 'disabled'; ?>>Delete all</a></td>
+    </tr>
+</tbody>
+</table>
+<form method="post" action="">
+    <p><a class="formBtn1" href="product.php">Continue Shopping </a></p><br>
+    <button type="submit" name="checkout" class="formBtn2">Check out</button>
+</form>
 
 </section>
 
