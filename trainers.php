@@ -56,6 +56,48 @@ if (isset($_GET['change'])) {
     <link rel="stylesheet" href="css/magnific-popup.css" type="text/css">
     <link rel="stylesheet" href="css/slicknav.min.css" type="text/css">
     <link rel="stylesheet" href="css/style.css" type="text/css">
+
+    <style>
+        .star-rating {
+             position: relative;
+             display: inline-flex;
+            flex-direction: row-reverse;
+            justify-content: flex-end;
+            margin: 0 -0.25rem;
+        }
+
+        .star-input {
+             position: absolute;
+             opacity: 0;
+            }
+
+        .star-label {
+             cursor: pointer;
+             color: grey;
+             padding: 0 0.25rem;
+             transition: color 0.15s;
+            }
+
+        .star-input:checked ~ label {
+             color: gold;
+        }
+
+        .star-input:hover ~ label {
+             color: goldenrod;
+             transition: none;
+        }
+
+         .star-label:active {
+             color: darkgoldenrod !important;
+            }
+
+        .star-input:focus-visible + label {
+             outline-offset: 1px;
+             outline: #4f46e5 solid 2px;
+            }
+
+
+    </style>
 </head>
 
 <body>
@@ -89,6 +131,18 @@ if (isset($_GET['change'])) {
                                     echo '<div style="width:300px ; margin-left:420px" class="gs-item grid-wide set-bg" data-setbg="img/team/'.$trainerImg.'">
                                     <a href="img/team/'.$trainerImg.'" class="thumb-icon image-popup"><i class="fa fa-picture-o"></i></a>
                                     <p style="font-size:20px ; color:white">'.$trainerName.'</p>
+                                    <div class="star-rating">
+                                        <input type="radio" class="star-input" id="sr-0-5" name="star-rating-0" value="5" />
+                                        <label for="sr-0-5" class="star-label">★</label>
+                                         <input type="radio" class="star-input" id="sr-0-4" name="star-rating-0" value="4" />
+                                        <label for="sr-0-4" class="star-label">★</label>
+                                        <input type="radio" class="star-input" id="sr-0-3" name="star-rating-0" value="3" />
+                                        <label for="sr-0-3" class="star-label">★</label>
+                                        <input type="radio" class="star-input" id="sr-0-2" name="star-rating-0" value="2" />
+                                        <label for="sr-0-2" class="star-label">★</label>
+                                        <input type="radio" class="star-input" id="sr-0-1" name="star-rating-0" value="1" />
+                                        <label for="sr-0-1" class="star-label" >★</label>
+                                    </div>
                                 </div>';
                                 }
                                 else{
@@ -96,6 +150,37 @@ if (isset($_GET['change'])) {
                                 }
                                 
                         ?>
+                        <script>
+                            for (const starRating of document.getElementsByClassName("star-rating")) {
+  starRating.addEventListener("keydown", (e) => {
+    let action;
+    if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+      action = "next";
+    } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+      action = "previous";
+    } else {
+      return;
+    }
+
+    e.preventDefault();
+
+    const inputs = Array.from(starRating.querySelectorAll("input"));
+
+    for (let i = 0; i < inputs.length; i++) {
+      if (document.activeElement === inputs[i]) {
+        // focus the next/previous element, since we have reversed the order of the elements we need to subtract on next and add on previous
+        let focusToIndex = action === "next" ? i - 1 : i + 1;
+        if (focusToIndex < 0) focusToIndex = inputs.length - 1;
+        if (focusToIndex >= inputs.length) focusToIndex = 0;
+
+        inputs[focusToIndex].focus();
+        inputs[focusToIndex].checked = true;
+        break;
+      }
+    }
+  });
+}
+                        </script>
                     </div>
                 </div>
                 </div>
