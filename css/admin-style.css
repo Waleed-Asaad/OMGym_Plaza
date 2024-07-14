@@ -352,3 +352,20 @@ img {
    width: 80%;
    height: 400px;
 }
+
+.top-trainers{
+   text-align: center;
+   margin: 20px;
+}
+
+.top-trainers h2 {
+   margin-bottom: 20px;
+}
+
+.top-trainers canvas {
+   display: block;
+   margin: 0 auto;
+   max-width: 800px;
+   width: 80%;
+   height: 400px;
+}
