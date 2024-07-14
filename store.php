@@ -1,7 +1,6 @@
 <?php
 include 'connection.php';
 session_start();
-// בדיקת חיבור
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
@@ -9,73 +8,71 @@ if ($conn->connect_error) {
 $sql = "SELECT * FROM products";
 $result = mysqli_query($conn, $sql);
 
-// קוד להמלצות על מוצרים דומים
+// המלצות על מוצרים דומים
 $userEmail = $_SESSION['userEmail'];
 $user_query = "SELECT userId FROM user WHERE userEmail = '$userEmail'";
 $user_result = mysqli_query($conn, $user_query);
 $user_row = mysqli_fetch_assoc($user_result);
 $userId = $user_row['userId'];
 
-// שליפת הקטגוריות שהמשתמש קנה מהם
-$category_query = "
-    SELECT p.category, COUNT(*) as category_count
-    FROM products p
-    JOIN productinorder po ON p.productId = po.productId
+// בדיקת הקנייה האחרונה של המשתמש
+$last_order_query = "
+    SELECT p.productId, p.category
+    FROM productinorder po
     JOIN tborder o ON po.orderId = o.orderId
+    JOIN products p ON po.productId = p.productId
     WHERE po.userId = '$userId'
-    GROUP BY p.category
-    ORDER BY category_count DESC";
-$category_result = mysqli_query($conn, $category_query);
+    ORDER BY o.dateOfPurchase DESC
+    LIMIT 3";
+$last_order_result = mysqli_query($conn, $last_order_query);
+$last_order_products = [];
+$last_order_categories = [];
 
-$categories = [];
-while ($category_row = mysqli_fetch_assoc($category_result)) {
-    $categories[] = $category_row['category'];
+if (mysqli_num_rows($last_order_result) > 0) {
+    while ($row = mysqli_fetch_assoc($last_order_result)) {
+        $last_order_products[] = $row['productId'];
+        $last_order_categories[] = $row['category'];
+    }
 }
 
 $recommended_products = [];
-foreach ($categories as $category) {
-    $similar_products_query = "
+$recommended_categories = [];
+
+if (count($last_order_products) > 0) {
+    // אם הייתה קנייה אחרונה, מוצרים שלא נרכשו מקטגוריות שונות
+    $recommended_products_query = "
         SELECT *
         FROM products
-        WHERE category = '$category'
-        AND productId NOT IN (
-            SELECT po.productId
-            FROM productinorder po
-            JOIN tborder o ON po.orderId = o.orderId
-            WHERE po.userId = '$userId'
-        )
-        LIMIT 1";
-    $similar_products_result = mysqli_query($conn, $similar_products_query);
+        WHERE category NOT IN ('" . implode("','", $last_order_categories) . "')
+        AND productId NOT IN (" . implode(",", $last_order_products) . ")
+        GROUP BY category
+        LIMIT 3";
+    $recommended_products_result = mysqli_query($conn, $recommended_products_query);
 
-    if (mysqli_num_rows($similar_products_result) > 0) {
-        while ($product_row = mysqli_fetch_assoc($similar_products_result)) {
+    if (mysqli_num_rows($recommended_products_result) > 0) {
+        while ($product_row = mysqli_fetch_assoc($recommended_products_result)) {
             $recommended_products[] = $product_row;
+            $recommended_categories[] = $product_row['category'];
         }
-    }
-
-    // לוודא שלא הצגנו כבר מוצר מאותה קטגוריה פעמיים
-    if (count($recommended_products) >= 2) {
-        break;
     }
 }
 
-// אם לא מצאנו שני מוצרים בקטגוריות השונות, נוסיף מוצרים מקטגוריות אחרות
-if (count($recommended_products) < 2) {
-    $other_products_query = "
+// אם לא מצאנו שלושה מוצרים מקטגוריות שונות, נוסיף מוצרים רנדומליים מקטגוריות שונות
+if (count($recommended_products) < 3) {
+    $remaining_count = 3 - count($recommended_products);
+    $random_products_query = "
         SELECT *
         FROM products
-        WHERE category NOT IN ('" . implode("','", $categories) . "')
-        AND productId NOT IN (
-            SELECT po.productId
-            FROM productinorder po
-            JOIN tborder o ON po.orderId = o.orderId
-            WHERE po.userId = '$userId'
-        )
-        LIMIT " . (2 - count($recommended_products));
-    $other_products_result = mysqli_query($conn, $other_products_query);
+        WHERE category NOT IN ('" . implode("','", $recommended_categories) . "')
+        AND productId NOT IN (" . implode(",", $last_order_products) . ")
+        GROUP BY category
+        ORDER BY RAND()
+        LIMIT $remaining_count";
+    $random_products_result = mysqli_query($conn, $random_products_query);
 
-    while ($product_row = mysqli_fetch_assoc($other_products_result)) {
+    while ($product_row = mysqli_fetch_assoc($random_products_result)) {
         $recommended_products[] = $product_row;
+        $recommended_categories[] = $product_row['category'];
     }
 }
 
@@ -102,7 +99,7 @@ if (isset($_GET['productId'])) {
             $quantity = 1;
             $productId = $item['productId'];
 
-            $insertQuery = "INSERT INTO cart (userId, productId, productName,image, quantity, price) VALUES ('$userId', '$productId', '$productName','$image', '$quantity', '$price')";
+            $insertQuery = "INSERT INTO cart (userId, productId, productName, image, quantity, price) VALUES ('$userId', '$productId', '$productName', '$image', '$quantity', '$price')";
             mysqli_query($conn, $insertQuery);
 
             header('location: cart.php');
@@ -209,7 +206,7 @@ if (isset($_GET['productId'])) {
                                     <h2><?php echo "$" . $product["price"]; ?></h2>
                                     <span><?php echo $product["description"]; ?></span>
                                 </div>
-                                <button class="primary-btn pricing-btn"><a href="store.php ? productId=<?php echo $product["productId"]; ?>">Add to Cart</a></button>
+                                <button class="primary-btn pricing-btn"><a href="store.php?productId=<?php echo $product["productId"]; ?>">Add to Cart</a></button>
                             </div>
                         </div>
                     <?php }
@@ -237,7 +234,7 @@ if (isset($_GET['productId'])) {
                                     <h2><?php echo "$" . $row["price"]; ?></h2>
                                     <span><?php echo $row["description"]; ?></span>
                                 </div>
-                                <button class="primary-btn pricing-btn"><a href="store.php ? productId=<?php echo $row["productId"]; ?>">Add to Cart</a></button>
+                                <button class="primary-btn pricing-btn"><a href="store.php?productId=<?php echo $row["productId"]; ?>">Add to Cart</a></button>
                             </div>
                         </div>
                     <?php }
