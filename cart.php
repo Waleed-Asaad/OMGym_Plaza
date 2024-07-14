@@ -151,11 +151,12 @@ if (isset($message)) {
 <h1 class="h1Cart">Shopping Cart</h1>
 <table>
     <thead>
-        <th>Product name</th>
-        <th>price</th>
-        <th>quantity</th>
-        <th>total price</th>
-        <th>action</th>
+        <th>Image</th>
+        <th>Product Name</th>
+        <th>Price</th>
+        <th>Quantity</th>
+        <th>Total Price</th>
+        <th>Action</th>
     </thead>
     <tbody>
     <?php
@@ -170,6 +171,7 @@ if (isset($message)) {
             while ($fetch_cart = mysqli_fetch_assoc($cart_query)) {
     ?>
         <tr>
+            <td><?php echo "<img class='product-image' src ='img/products/".$fetch_cart['image']."'>"; ?></td>
             <td><?php echo $fetch_cart['productName']; ?></td>
             <td>$<?php echo $fetch_cart['price']; ?></td>
             <td>
@@ -192,7 +194,8 @@ if (isset($message)) {
     <tr class="table-bottom">
         <td></td>
         <td></td>
-        <td colspan="4">grand total : $<?php echo $grand_total; ?></td>
+        <td></td>
+        <td colspan="4">Grand total : $<?php echo $grand_total; ?></td>
         <td><a href="cart.php ? delete_all" onclick="return confirm('delete all from cart?');" class="delete1" <?php echo ($grand_total > 1) ? '' : 'disabled'; ?>>Delete all</a></td>
     </tr>
 </tbody>

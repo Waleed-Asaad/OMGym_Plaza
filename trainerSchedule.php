@@ -153,7 +153,7 @@ if (isset($_GET['change'])) {
                                             $button_color = "";
                                             switch ($row_hours['available']) {
                                                 case 0:
-                                                    $button_text = "Empty";
+                                                    $button_text = " / ";
                                                     $button_color = "#0a0a0a";
                                                     $text_color = "#e0f904";
                                                     break;
@@ -163,7 +163,7 @@ if (isset($_GET['change'])) {
                                                     $text_color = "#e0f904";
                                                     break;
                                                 case 2:
-                                                    $button_text = "Not Valid";
+                                                    $button_text = "Booked";
                                                     $button_color = "#e95b5b";
                                                     $text_color = "#e0f904";
                                                     break;

@@ -97,11 +97,12 @@ if (isset($_GET['productId'])) {
         if ($productResult->num_rows > 0) {
             $item = $productResult->fetch_assoc();
             $productName = $item['productName'];
+            $image = $item['image'];
             $price = $item['price'];
             $quantity = 1;
             $productId = $item['productId'];
 
-            $insertQuery = "INSERT INTO cart (userId, productId, productName, quantity, price) VALUES ('$userId', '$productId', '$productName', '$quantity', '$price')";
+            $insertQuery = "INSERT INTO cart (userId, productId, productName,image, quantity, price) VALUES ('$userId', '$productId', '$productName','$image', '$quantity', '$price')";
             mysqli_query($conn, $insertQuery);
 
             header('location: cart.php');

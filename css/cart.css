@@ -1,10 +1,12 @@
 .cart-section{
   background: #151515;
+  display: grid;
+  justify-content: center;
 }
 
 table {
     border-collapse: solid 1px black;
-    width: 100%;
+    width: 1000px;
     text-align: center;
     color: white;
   }
@@ -21,11 +23,11 @@ table {
   }
   
   th {
-    background-color: rgb(221, 144, 0);
+    background-color: rgb(193, 80, 5);
   }
 
   tr:hover {
-    background-color: #8f8f8f;
+    background-color: #000000;
   }
   
   td a {
@@ -48,7 +50,7 @@ table {
   }
   
   .formBtn1{
-      background: rgb(221, 144, 0);
+      background: rgb(193, 80, 5);
       color: white;
       text-transform: capitalize;
       font-size: 15px;
@@ -59,7 +61,7 @@ table {
   }
 
   .ContinueBtn{
-    background: rgb(221, 144, 0);
+    background: rgb(193, 80, 5);
     color: white;
     text-transform: capitalize;
     font-size: 15px;
@@ -72,7 +74,7 @@ table {
   .formBtn2{
     top: 50%;
     left: 50%;
-      background: rgb(210, 102, 0);
+      background: rgb(255, 149, 1);
       color: rgb(255, 255, 255);
       text-transform: capitalize;
       font-size: 18px;
@@ -83,7 +85,7 @@ table {
       
   }
   .edit1{
-      background: Orange;
+      background: rgb(193, 80, 5);
       color: white;
       text-transform: capitalize;
       font-size: 10px;
@@ -96,4 +98,10 @@ table {
   .cart-btn{
       display:inline-block;
       padding:10px 30px 10px;
+  }
+
+  .product-image{
+    width: 80px;
+    height: 80px;
+    padding: 5px;
   }

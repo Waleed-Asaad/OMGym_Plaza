@@ -2,6 +2,10 @@
     <!-- <div id="preloder">
         <div class="loader"></div>
     </div> -->
+    <head>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    </head>
 
     <!-- Offcanvas Menu Section Begin -->
     <div class="offcanvas-menu-overlay"></div>
@@ -16,9 +20,9 @@
             <ul>
                 <li><a href="./user-home.php">User Home</a></li>
                 <li><a href="./store.php">Store</a></li>
-                <li><a href="./cart.php">Cart</a></li>
                 <li><a href="./subscription.php">Subscription</a></li>
-                <li><a href="./logout.php">Logout</a></li>  
+                <li><a href="./cart.php">Cart <i class="fas fa-shopping-cart"></i></a></li>
+                <li><a href="./logout.php">Logout <i class="fas fa-sign-out-alt"></i></a></li>  
             </ul>
         </nav>
     </div>
@@ -39,9 +43,9 @@
                         <ul>
                             <li><a href="./user-home.php">User Home</a></li>
                             <li><a href="./store.php">Store</a></li>
-                            <li><a href="./cart.php">Cart</a></li>
                             <li><a href="./subscription.php">Subscription</a></li>
-                            <li><a href="./logout.php">Logout</a></li>
+                            <li><a href="./cart.php">Cart <i class="fas fa-shopping-cart"></i></a></li>
+                            <li><a href="./logout.php">Logout <i class="fas fa-sign-out-alt"></i></a></li>
                             
                         </ul>
                     </nav>

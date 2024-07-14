@@ -2,7 +2,11 @@
     <!-- <div id="preloder">
         <div class="loader"></div>
     </div> -->
-
+    <head>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- שאר הקוד שלך -->
+</head>
     <!-- Offcanvas Menu Section Begin -->
     <div class="offcanvas-menu-overlay"></div>
     <div class="offcanvas-menu-wrapper">
@@ -24,7 +28,7 @@
                     </ul>
                 </li>
                 <li><a href="./contact.php">Contact</a></li>
-                <li><a href="./user-login.php">Login</a></li>
+                <li><a href="./user-login.php">Login <i class="fas fa-sign-in-alt"></i></a></li>
             </ul>
         </nav>
     </div>
@@ -53,7 +57,7 @@
                                 </ul>
                             </li>
                             <li><a href="./contact.php">Contact</a></li>
-                            <li><a href="./user-login.php">Login</a></li>
+                            <li><a href="./user-login.php">Login <i class="fas fa-sign-in-alt"></i></a></li>
                         </ul>
                     </nav>
                 </div>

@@ -1,3 +1,7 @@
+<head>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
 <!-- Offcanvas Menu Section Begin -->
 <div class="offcanvas-menu-overlay"></div>
     <div class="offcanvas-menu-wrapper">
@@ -11,13 +15,13 @@
             <ul>
                 <li><a href="./traineeHome.php">Trainee Home</a></li>
                 <li><a href="./store.php">Store</a></li>
-                <li><a href="./cart.php">Cart</a></li>
+                <li><a href="./cart.php">Cart <i class="fas fa-shopping-cart"></i></a></li>
                 <li><a href="./trainers.php">Trainers</a></li>
                 <li><a href="./mealPlans.php">Meal Plans</a></li>
                 <li><a href="./trainingPlans.php">Training Plans</a></li>
                 <li><a href="./traineeTrainerSchedule.php">Trainer Schedule</a></li>
                 <li><a href="./myClasses.php">My Classes</a></li>
-                <li><a href="./logout.php">Logout</a></li>  
+                <li><a href="./logout.php">Logout <i class="fas fa-sign-out-alt"></i></a></li>  
             </ul>
         </nav>
     </div>
@@ -38,13 +42,13 @@
                         <ul>
                             <li><a href="./traineeHome.php">Trainee Home</a></li>
                             <li><a href="./store.php">Store</a></li>
-                            <li><a href="./cart.php">Cart</a></li>
+                            <li><a href="./cart.php">Cart <i class="fas fa-shopping-cart"></i></a></li>
                             <li><a href="./trainers.php">Trainers</a></li>
                             <li><a href="./mealPlans.php">Meal Plans</a></li>
                             <li><a href="./trainingPlans.php">Training Plans</a></li>
                             <li><a href="./traineeTrainerSchedule.php">Trainer Schedule</a></li>
                             <li><a href="./myClasses.php">My Classes</a></li>
-                            <li><a href="./logout.php">Logout</a></li>
+                            <li><a href="./logout.php">Logout <i class="fas fa-sign-out-alt"></i></a></li>
                             
                         </ul>
                     </nav>
