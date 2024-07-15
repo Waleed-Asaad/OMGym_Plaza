@@ -4,26 +4,9 @@ include 'connection.php';
 session_start();
 
 if(!isset($_SESSION['adminName'])){
-   header('location:admin-login.php');
+   header('location:admin-home.php');
 }
 
-if(isset($_GET['delete_id'])){
-    $delete_id = $_GET['delete_id'];
-    $select_user_id_sql = "SELECT userId FROM trainee WHERE traineeId = '$delete_id'";
-    $result = mysqli_query($conn, $select_user_id_sql);
-    $row = mysqli_fetch_assoc($result);
-    $user_id = $row['userId'];
-
-    $delete_sql = "DELETE FROM trainee WHERE traineeId = '$delete_id'";
-    if(mysqli_query($conn, $delete_sql)){
-        $update_status_sql = "UPDATE user SET status = 'user' WHERE userId = '$user_id'";
-        mysqli_query($conn, $update_status_sql);
-        
-        header('location:admin-trainees.php');
-    } else {
-        echo "Error deleting record: " . mysqli_error($conn);
-    }
-}
 ?>
 
 <!DOCTYPE html>
@@ -54,7 +37,13 @@ if(isset($_GET['delete_id'])){
     <div class="container">
         <div class="trainees">
             <?php
-                $sql = "SELECT * FROM trainee ORDER BY traineeId";
+                $sql = "SELECT t.traineeId, t.traineeName, t.traineeImg, 
+                               t.startingMembership,
+                               DATE_FORMAT(t.startingMembership, '%d-%m-%Y') as subscriptionDate, 
+                               m.period 
+                        FROM trainee t
+                        JOIN membership m ON t.membershipId = m.id
+                        ORDER BY t.traineeId";
                 $result = mysqli_query($conn, $sql);
 
                 if ($result) {
@@ -62,16 +51,23 @@ if(isset($_GET['delete_id'])){
                         $traineeId = $row['traineeId'];
                         $traineeName = $row['traineeName'];
                         $traineeImg = $row['traineeImg'];
-                        $subscriptionDate = $row['startingMembership'];
+                        $startingMembership = $row['startingMembership'];
+                        $subscriptionDate = $row['subscriptionDate'];
+                        $period = $row['period'];
+                        
+                        // חישוב הימים שנותרו למנוי
+                        $startingDate = new DateTime($startingMembership);
+                        $endingDate = clone $startingDate;
+                        $endingDate->modify("+$period months");
+                        $currentDate = new DateTime();
+                        $remainingDays = $currentDate > $endingDate ? 0 : $currentDate->diff($endingDate)->days;
                         
                         echo "
                         <div class='card'>
                             <img src='img/trainees/$traineeImg' alt='$traineeName'>
                             <h3>$traineeName</h3>
-                            <h5>$subscriptionDate</h5>";
-                        
-                        echo "
-                            <a href='admin-trainees.php?delete_id=$traineeId' class='delete' onclick='return confirm(\"Are you sure you want to delete this trainee?\")'>Delete</a>
+                            <h5>Subscription Date: $subscriptionDate</h5>
+                            <h5>Days Remaining: $remainingDays</h5>
                         </div>
                         ";
                     }

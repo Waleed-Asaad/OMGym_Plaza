@@ -353,16 +353,16 @@ img {
    height: 400px;
 }
 
-.top-trainers{
+.bottom-trainers{
    text-align: center;
    margin: 20px;
 }
 
-.top-trainers h2 {
+.bottom-trainers h2 {
    margin-bottom: 20px;
 }
 
-.top-trainers canvas {
+.bottom-trainers canvas {
    display: block;
    margin: 0 auto;
    max-width: 800px;
