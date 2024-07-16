@@ -12,13 +12,14 @@ if (!isset($_SESSION['userEmail'])) {
 }
 
 $user_email = $_SESSION['userEmail'];
-$membership_id=$_SESSION['priod'];
+$membership_id = isset($_POST['period']) ? $_POST['period'] : 0;
 
 $select = " SELECT * FROM user WHERE userEmail = '$user_email'  ";
 $result = mysqli_query($conn, $select); 
 $row = mysqli_fetch_array($result);
 $trainee_name = $row['userName'];
 $user_id = $row['userId'];
+
 // עדכון הסטטוס של המשתמש ל-trainee
 $sql = "UPDATE user SET status = 'trainee' WHERE userId = ?";
 $stmt = $conn->prepare($sql);
@@ -26,9 +27,9 @@ $stmt->bind_param("i", $user_id);
 
 if ($stmt->execute()) {
     // הוספת פרטי המשתמש לטבלת trainee
-    $sql = "INSERT INTO trainee (userId,traineeName,membershipId) VALUES (?,?,'$membership_id')";
+    $sql = "INSERT INTO trainee (userId, traineeName, membershipId) VALUES (?, ?, ?)";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("is", $user_id,$trainee_name);
+    $stmt->bind_param("isi", $user_id, $trainee_name, $membership_id);
 
     if ($stmt->execute()) {
         echo "User status updated to trainee.";
@@ -51,7 +52,7 @@ $days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'satu
 foreach ($days as $day) {
     $sql = "INSERT INTO traineeDay (days, traineeId) VALUES ('$day', $trainee_id)";
     if (mysqli_query($conn, $sql)){
-        $select1 = " SELECT * FROM traineeDay WHERE days = '$day' &&traineeId = '$trainee_id'  ";
+        $select1 = " SELECT * FROM traineeDay WHERE days = '$day' AND traineeId = '$trainee_id'  ";
         $result1 = mysqli_query($conn, $select1); 
         $row1 = mysqli_fetch_array($result1);
         $day_id = $row1['dayId'];
@@ -76,7 +77,7 @@ foreach ($days as $day) {
            if (!mysqli_query($conn, $sql)) {
               echo "Error: " . mysqli_error($conn);
           }
-}
-} 
+        }
+    } 
 }
 ?>
