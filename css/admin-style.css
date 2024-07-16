@@ -21,6 +21,41 @@ body{
    padding-bottom: 60px;
 }
 
+.membership-container{
+   min-height: 100vh;
+   display: flex;
+   justify-content: center;
+   padding:20px;
+   padding-bottom: 10px;
+}
+
+.membership-container table{
+   border-collapse: separate;
+   width: 50%;
+   height: 50%;
+   text-align: center;
+}
+
+.membership-container table th, td {
+   border: solid 1px;
+ }
+
+ .membership-updateBtn{
+   background: Orange;
+   color: white;
+   font-size: 12px;
+   border-radius: 4px;
+   padding:2px;
+   margin:2px;
+}
+.h2{
+   padding:20px;
+   font-size: 30px;
+   text-align: center;
+   text-transform: uppercase;
+   margin-bottom: 10px;
+   color:#333;
+}
 .product-container{
    display: inline-block;
    width: 280px;
