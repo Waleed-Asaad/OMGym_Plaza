@@ -133,7 +133,7 @@ session_start();
     <!-- Pricing Section End -->
 
     <!-- Gallery Section Begin -->
-    <div class="gallery-section">
+    <!-- <div class="gallery-section">
         <div class="gallery">
             <div class="grid-sizer"></div>
             <div class="gs-item grid-wide set-bg" data-setbg="img/gallery/gallery-1.jpg">
@@ -155,7 +155,7 @@ session_start();
                 <a href="img/gallery/gallery-6.jpg" class="thumb-icon image-popup"><i class="fa fa-picture-o"></i></a>
             </div>
         </div>
-    </div>
+    </div> -->
     <!-- Gallery Section End -->
 
     <!-- Get In Touch Section Begin -->
