@@ -15,10 +15,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_membership'])) 
     $id = $_POST['id'];
     $name = $_POST['name'];
     $price = $_POST['price'];
+    $period = $_POST['period'];
 
-    $update_sql = "UPDATE membership SET name = ?, price = ? WHERE id = ?";
+    $update_sql = "UPDATE membership SET name = ?, price = ?, period = ? WHERE id = ?";
     $stmt = $conn->prepare($update_sql);
-    $stmt->bind_param("sii", $name, $price, $id);
+    $stmt->bind_param("siii", $name, $price, $period, $id);
 
     if ($stmt->execute()) {
         $message = "Membership updated successfully!";
@@ -68,7 +69,7 @@ if ($result) {
                             <form method="post" action="">
                                 <td><input type="text" name="name" value="<?php echo $membership['name']; ?>"></td>
                                 <td><input type="number" name="price" value="<?php echo $membership['price']; ?>"></td>
-                                <td><?php echo $membership['period']; ?></td>
+                                <td><input type="number" name="period" value="<?php echo $membership['period']; ?>"></td>
                                 <td>
                                     <input type="hidden" name="id" value="<?php echo $membership['id']; ?>">
                                     <input type="submit" name="update_membership" value="Update" class="membership-updateBtn">

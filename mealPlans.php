@@ -56,8 +56,6 @@ if (isset($_GET['change'])) {
     <link rel="stylesheet" href="css/magnific-popup.css" type="text/css">
     <link rel="stylesheet" href="css/slicknav.min.css" type="text/css">
     <link rel="stylesheet" href="css/style.css" type="text/css">
-
-    
 </head>
 
 <body>
@@ -66,38 +64,36 @@ if (isset($_GET['change'])) {
 ?>
 
     <!-- Breadcrumb Section Begin -->
-    <section style="height:2000px" class="breadcrumb-section set-bg" data-setbg="img/hero/hero-2.jpg">
+    <section class="breadcrumb-section set-bg" data-setbg="img/hero/hero-2.jpg" style="height:2000px;">
         <div class="container">
             <div class="row">
                 <div class="col-lg-12 text-center">
                     <div class="breadcrumb-text">
                         <h2>MY MEAL PLAN</h2>
-                        <div style="" class="gallery">
-                        <div class="grid-sizer"></div>
-                        <?php
-                                $email = $_SESSION['userEmail'];
-                                $select = "SELECT * FROM user WHERE userEmail = '$email'";
-                                $result = mysqli_query($conn, $select);
-                                $row = mysqli_fetch_array($result);
-                                $user_id = $row['userId'];
+                        <div class="gallery">
+                            <div class="grid-sizer"></div>
+                            <?php
+                            $email = $_SESSION['userEmail'];
+                            $select = "SELECT * FROM user WHERE userEmail = '$email'";
+                            $result = mysqli_query($conn, $select);
+                            $row = mysqli_fetch_array($result);
+                            $user_id = $row['userId'];
 
-                                $sql = "SELECT t.planImage FROM trainee tr JOIN meal_plans t ON tr.meal_planId = t.meal_planId WHERE tr.userId = '$user_id'";
-                                $result = mysqli_query($conn, $sql);
-                                $row = mysqli_fetch_array($result);
-                                $mealPlanImg = $row['planImage'];
-                                
-                                if($mealPlanImg){
-                                    echo '<div style="width:800px;height:1300px;  margin-left:200px" class="gs-item grid-wide set-bg" data-setbg="img/meal_plans/'.$mealPlanImg.'">
-                                    <a href="img/meal_plans/'.$mealPlanImg.'"  class="thumb-icon image-popup"><i  class="fa fa-picture-o"></i></a>
-                                 </div>';
-                                }
-                                else{
-                                    echo '<h2>YOU DID NOT PICK MEAL PLAN YET</h2>';
-                                }
-                                    ?>
+                            $sql = "SELECT t.planImage FROM trainee tr JOIN meal_plans t ON tr.meal_planId = t.meal_planId WHERE tr.userId = '$user_id'";
+                            $result = mysqli_query($conn, $sql);
+                            $row = mysqli_fetch_array($result);
+                            $mealPlanImg = $row['planImage'];
+
+                            if ($mealPlanImg) {
+                                echo '<div class="gs-item grid-wide set-bg" data-setbg="img/meal_plans/'.$mealPlanImg.'" style="width:800px; height:1300px; margin-left:auto; margin-right:auto;">
+                                        <a href="img/meal_plans/'.$mealPlanImg.'" class="thumb-icon image-popup"><i class="fa fa-picture-o"></i></a>
+                                      </div>';
+                            } else {
+                                echo '<h2>YOU DID NOT PICK A MEAL PLAN YET</h2>';
+                            }
+                            ?>
+                        </div>
                     </div>
-                </div>
-                </div>
                 </div>
             </div>
         </div>
@@ -105,88 +101,68 @@ if (isset($_GET['change'])) {
     <!-- Breadcrumb Section End -->
 
     <!-- Gallery Section Begin -->
-    <div style="height:3000px" class="gallery-section">
+    <div class="gallery-section" style="height:3000px;">
         <div class="gallery">
             <div class="grid-sizer"></div>
             <?php
-                                $email = $_SESSION['userEmail'];
-                                $select = "SELECT * FROM user WHERE userEmail = '$email'";
-                                $result = mysqli_query($conn, $select);
-                                $row = mysqli_fetch_array($result);
-                                $user_id = $row['userId'];
+            $email = $_SESSION['userEmail'];
+            $select = "SELECT * FROM user WHERE userEmail = '$email'";
+            $result = mysqli_query($conn, $select);
+            $row = mysqli_fetch_array($result);
+            $user_id = $row['userId'];
 
-                                $sql = "SELECT goal FROM trainee WHERE userId = '$user_id'";
-                                $result = mysqli_query($conn, $sql);
-                                $row = mysqli_fetch_array($result);
-                                $goal = $row['goal'];
+            $sql = "SELECT * FROM trainee WHERE userId = '$user_id'";
+            $result = mysqli_query($conn, $sql);
+            $trainee_row = mysqli_fetch_array($result);
 
-                                // List of attributes to check for
-                                $attributes = ["strength", "flexibility", "endurance", "weight loss", "muscle building", "body building"];
+            // List of attributes to check for
+            $attributes = ["strength", "flexibility", "endurance", "weight_loss", "muscle_building", "body_building"];
+            $mealPlans = [];
 
-                                $trainers = [];
+            $sql = "SELECT * FROM meal_plans";
+            $result = mysqli_query($conn, $sql);
+            while ($row = mysqli_fetch_assoc($result)) {
+                $score = 0;
+                foreach ($attributes as $attribute) {
+                    if ($row[$attribute] == 1 && $trainee_row[$attribute] == 1) {
+                        $score++;
+                    }
+                }
+                if ($score > 0) {
+                    $mealPlans[] = ['mealPlan' => $row, 'score' => $score];
+                }
+            }
 
-                                $sql = "SELECT * FROM meal_plans";
-                                $result = mysqli_query($conn, $sql);
-                                while ($row = mysqli_fetch_assoc($result)) {
-                                    $score = 0;
-                                    foreach ($attributes as $attribute) {
-                                         if (strpos($goal, $attribute) !== false) {
-                                            if($attribute == "weight loss" )
-                                            {
-                                                if ($row['weight_loss'] == 1) {
-                                                    $score++;
-                                            }
+            if (!empty($mealPlans)) {
+                // Sort training plans by score in descending order
+                usort($mealPlans, function($a, $b) {
+                    return $b['score'] - $a['score'];
+                });
 
-                                        }
-                                            else if( $attribute == "muscle building" || $attribute == "body building")
-                                            {
-                                                if ($row['muscle_building'] == 1) {
-                                                    $score++;
-                                            }
-                                        }
-                                            else if(  $attribute == "body building")
-                                            {
-                                                if ($row['body_building'] == 1) {
-                                                    $score++;
-                                            }
-                                        }
-                                            else if ($row[$attribute] == 1) {
-                                               $score++;
-                                           }
-                                        }
-                                     }
-                                      $mealPlans[] = ['mealPlan' => $row, 'score' => $score];
-                                }
+                // Get the top 4 mealPlans
+                $top_mealPlans = array_slice($mealPlans, 0, 4);
 
-                                // Sort trainers by score in descending order
-                                usort($mealPlans, function($a, $b) {
-                                    return $b['score'] - $a['score'];
-                                });
-
-                                // Get the top 4 mealPlans
-                                $top_mealPlans = array_slice($mealPlans, 0, 4);
-
-                                // Display the top 4 mealPlans
-                                
-                                foreach ($top_mealPlans as $mealPlan) {
-                                   $mealPlanImg = $mealPlan['mealPlan']['planImage'];
-                                   echo '
-                                        <div style="width:750px;height:1200px;margin-top:100px" class="gs-item grid-wide set-bg" data-setbg="img/meal_plans/'.$mealPlanImg.'">
-                                         <a href="img/meal_plans/'.$mealPlanImg.'"  class="thumb-icon image-popup"><i style="width:2000px" class="fa fa-picture-o"></i></a>
-                                         <p style="font-size:20px ; color:white">'.$mealPlan["score"].' Matches</p>
-                                        <button style="padding: 0; width: 100%; background: #f36105; color: white" onclick="pickMealPlan('.$mealPlan['mealPlan']['meal_planId'].');">Pick This Meal Plan</button>
-                                         </div>';
-                                }
-                                   
-                            ?>
+                // Display the top 4 mealPlans
+                foreach ($top_mealPlans as $mealPlan) {
+                    if ($mealPlan['score'] > 0) {
+                        $mealPlanImg = $mealPlan['mealPlan']['planImage'];
+                        echo '<div class="gs-item grid-wide set-bg" data-setbg="img/meal_plans/'.$mealPlanImg.'" style="width:750px; height:1200px; margin-top:100px;">
+                                <a href="img/meal_plans/'.$mealPlanImg.'" class="thumb-icon image-popup"><i class="fa fa-picture-o"></i></a>
+                                <p style="font-size:20px; color:white">'.$mealPlan["score"].' Matches</p>
+                                <button style="padding: 0; width: 100%; background: #f36105; color: white" onclick="pickMealPlan('.$mealPlan['mealPlan']['meal_planId'].');">Pick This Meal Plan</button>
+                              </div>';
+                    }
+                }
+            } else {
+                echo '<h1 style="margin-left:600px; color:white" >NO MATCH</h1>';
+            }
+            ?>
         </div>
     </div>
     <!-- Gallery Section End -->
 
     <!-- Footer Section Begin -->
-    <?php 
-        include 'footer.php';
-    ?>
+    <?php include 'footer.php'; ?>
     <!-- Footer Section End -->
 
     <!-- Js Plugins -->
@@ -203,9 +179,7 @@ if (isset($_GET['change'])) {
         function pickMealPlan(mealPlanId) {
             window.location.href = "mealPlans.php?change=" + mealPlanId;
         }
-    </script>
 
-    <script>
         document.addEventListener("DOMContentLoaded", function() {
             document.querySelectorAll('.set-bg').forEach(function(element) {
                 var bg = element.getAttribute('data-setbg');

@@ -245,13 +245,13 @@ if (isset($_GET['change'])) {
                 $row = mysqli_fetch_array($result);
                 $user_id = $row['userId'];
 
-                $sql = "SELECT goal FROM trainee WHERE userId = '$user_id'";
+                $sql = "SELECT * FROM trainee WHERE userId = '$user_id'";
                 $result = mysqli_query($conn, $sql);
-                $row = mysqli_fetch_array($result);
-                $goal = $row['goal'];
+                $trainee_row = mysqli_fetch_array($result);
+                
 
                 // List of attributes to check for
-                $attributes = ["strength", "flexibility", "endurance", "weight loss", "muscle building", "body building"];
+                $attributes = ["strength", "flexibility", "endurance", "weight_loss", "muscle_building", "body_building"];
 
                 $trainers = [];
 
@@ -260,22 +260,16 @@ if (isset($_GET['change'])) {
                 while ($row = mysqli_fetch_assoc($result)) {
                     $score = 0;
                     foreach ($attributes as $attribute) {
-                        if (strpos($goal, $attribute) !== false) {
-                            if ($attribute == "weight loss" && $row['weight_loss'] == 1) {
-                                $score++;
-                            } else if ($attribute == "muscle building" && $row['muscle_building'] == 1) {
-                                $score++;
-                            } else if ($attribute == "body building" && $row['body_building'] == 1) {
-                                $score++;
-                            } else if ($row[$attribute] == 1) {
+                        
+                             if ($row[$attribute] == 1 && $trainee_row[$attribute] == 1) {
                                 $score++;
                             }
-                        }
+                        
                     }
                     $trainers[] = ['trainer' => $row, 'score' => $score];
                 }
-
-                // Sort trainers by score in descending order
+                if (!empty($trainers)){
+                    // Sort trainers by score in descending order
                 usort($trainers, function($a, $b) {
                     return $b['score'] - $a['score'];
                 });
@@ -285,14 +279,22 @@ if (isset($_GET['change'])) {
 
                 // Display the top 4 trainers
                 foreach ($top_trainers as $trainer) {
-                    $trainerImg = $trainer['trainer']['trainerImg'];
+                    if($trainer['score']>0){
+                         $trainerImg = $trainer['trainer']['trainerImg'];
                     echo '<div style="width:300px;" class="gs-item grid-wide set-bg" data-setbg="img/team/'.$trainerImg.'">
                             <a href="img/team/'.$trainerImg.'" class="thumb-icon image-popup"><i class="fa fa-picture-o"></i></a>
                             <p style="font-size:20px; color:white;">'.$trainer["trainer"]["trainerName"].'</p>
                             <p style="font-size:20px; color:white;">'.$trainer["score"].' Matches</p>
                             <button style="padding: 0; width: 100%; background: #f36105; color: white;" onclick="pickTrainer('.$trainer["trainer"]["trainerId"].');">Pick This Trainer</button>
                           </div>';
+                    }
+                   
                 }
+                }
+                else{
+                    echo '<h1 style="margin-left:600px; color:white" >NO MATCH</h1>';
+                }
+                
             ?>
         </div>
     </div>
