@@ -16,6 +16,7 @@
             <ul>
                 <li><a href="./admin-home.php">Home</a></li>
                 <li><a href="./admin-memberships.php">Membership</a></li>
+                <li><a href="./admin-gallery.php">Gallery</a></li>
                 <li><a href="./admin-products.php">Products</a></li>
                 <li><a href="./add-product.php">Add Product</a></li>
                 <li><a href="./trainers-edit.php">Trainers</a></li>
