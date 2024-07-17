@@ -114,8 +114,8 @@ if(isset($_POST['submit'])){
     <!-- Breadcrumb Section End -->
 
 <style><?php 
-        include "C:\wamp64\www\omgym_plaza\css\style.css";
-    ?></style>    
+        include "C:\wamp64\www\omgym_plaza\css\style.css";?>
+</style>    
 <div class="loginORregister"> 
 <div class="form-container">
    <form action="" method="post">

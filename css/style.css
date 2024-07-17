@@ -1266,7 +1266,7 @@ ol {
 	justify-content: center;
 	padding:35px;
 	padding-bottom: 60px;
-	background: #f3610f;
+	background: #151515;
  }
 
 
@@ -1296,7 +1296,7 @@ ol {
  
  .form-container form input,
  .form-container form select{
-	width: 100%;
+	width: 80%;
 	padding:10px 15px;
 	font-size: 17px;
 	margin:8px 0;
@@ -1405,7 +1405,7 @@ ol {
  .loginORregister{
 	display: flex;
 	justify-content: center;
-	background: #f36100;
+	background: #151515;
  }
 /* ----------------------------------- Other Pages Styles ----------------------------------- */
 

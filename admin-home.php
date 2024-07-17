@@ -105,8 +105,8 @@ while($row = mysqli_fetch_assoc($trainer_result)){
             datasets: [{
                 label: 'Rating',
                 data: <?php echo json_encode($trainer_ratings); ?>,
-                backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                borderColor: 'rgba(255, 99, 132, 1)',
+                backgroundColor: 'rgba(251, 90, 50, 0.6)',
+                borderColor: 'rgba(251, 90, 50, 0.6)',
                 borderWidth: 1
             }]
         },
