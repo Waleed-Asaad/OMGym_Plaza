@@ -192,7 +192,7 @@ if (isset($_GET['change1']) && isset($_GET['change2'])) {
                                             switch ($row_hours['scheduled']) {
                                                 
                                                 case 1:
-                                                    $button_text = "Scheduled";
+                                                    $button_text = "Booked";
                                                     $button_color = "#099105";
                                                     $text_color = "#e0f904";
                                                     break;
@@ -202,7 +202,7 @@ if (isset($_GET['change1']) && isset($_GET['change2'])) {
                                                     $text_color = "#e0f904";
                                                     break;
                                                 case 0:
-                                                    $button_text = "Empty";
+                                                    $button_text = " / ";
                                                     $button_color = "#0a0a0a";
                                                     $text_color = "#e0f904";
                                                     break;
