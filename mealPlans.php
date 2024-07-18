@@ -64,15 +64,7 @@ if (isset($_GET['change'])) {
 ?>
 
     <!-- Breadcrumb Section Begin -->
-    <section class="breadcrumb-section set-bg" data-setbg="img/hero/hero-2.jpg" style="height:2000px;">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-12 text-center">
-                    <div class="breadcrumb-text">
-                        <h2>MY MEAL PLAN</h2>
-                        <div class="gallery">
-                            <div class="grid-sizer"></div>
-                            <?php
+    <?php
                             $email = $_SESSION['userEmail'];
                             $select = "SELECT * FROM user WHERE userEmail = '$email'";
                             $result = mysqli_query($conn, $select);
@@ -83,9 +75,25 @@ if (isset($_GET['change'])) {
                             $result = mysqli_query($conn, $sql);
                             $row = mysqli_fetch_array($result);
                             $mealPlanImg = $row['planImage'];
+                            if ($mealPlanImg) {
+                                $height=2000;
+                            }
+                            else{
+                                $height=500; 
+                            }
+    echo '
+    <section class="breadcrumb-section set-bg" data-setbg="img/hero/hero-2.jpg" style="height:'.$height.'px">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12 text-center">
+                    <div class="breadcrumb-text">
+                        <h2>MY MEAL PLAN</h2>
+                        <div class="gallery">
+                            <div class="grid-sizer"></div>';
+                          
 
                             if ($mealPlanImg) {
-                                echo '<div class="gs-item grid-wide set-bg" data-setbg="img/meal_plans/'.$mealPlanImg.'" style="width:800px; height:1300px; margin-left:auto; margin-right:auto;">
+                                echo '<div class="gs-item grid-wide set-bg" data-setbg="img/meal_plans/'.$mealPlanImg.'" style="width:800px; height:1300px; margin-left:200px; margin-right:auto;">
                                         <a href="img/meal_plans/'.$mealPlanImg.'" class="thumb-icon image-popup"><i class="fa fa-picture-o"></i></a>
                                       </div>';
                             } else {
@@ -101,7 +109,7 @@ if (isset($_GET['change'])) {
     <!-- Breadcrumb Section End -->
 
     <!-- Gallery Section Begin -->
-    <div class="gallery-section" style="height:3000px;">
+    <div class="gallery-section" style="height:3500px;">
         <div class="gallery">
             <div class="grid-sizer"></div>
             <?php
@@ -146,15 +154,21 @@ if (isset($_GET['change'])) {
                 foreach ($top_mealPlans as $mealPlan) {
                     if ($mealPlan['score'] > 0) {
                         $mealPlanImg = $mealPlan['mealPlan']['planImage'];
-                        echo '<div class="gs-item grid-wide set-bg" data-setbg="img/meal_plans/'.$mealPlanImg.'" style="width:750px; height:1200px; margin-top:100px;">
+                        echo '<div class="gs-item grid-wide set-bg" data-setbg="img/meal_plans/'.$mealPlanImg.'" style="width:750px; height:1200px; margin-top:300px;">
                                 <a href="img/meal_plans/'.$mealPlanImg.'" class="thumb-icon image-popup"><i class="fa fa-picture-o"></i></a>
-                                <p style="font-size:20px; color:white">'.$mealPlan["score"].' Matches</p>
+                                <p style="font-size:20px; color:white">'.$mealPlan["score"].' Matches</p>';
+                               foreach ($attributes as $attribute) {
+                                if ($mealPlan['mealPlan'][$attribute]==1 && $trainee_row[$attribute] == 1) {
+                                    echo '<li style="font-size:25px;margin-bottom: 5px;color:white">'.ucwords(str_replace('_', ' ', $attribute)).'</li>';
+                                }
+                            }
+                            echo'
                                 <button style="padding: 0; width: 100%; background: #f36105; color: white" onclick="pickMealPlan('.$mealPlan['mealPlan']['meal_planId'].');">Pick This Meal Plan</button>
                               </div>';
                     }
                 }
             } else {
-                echo '<h1 style="margin-left:600px; color:white" >NO MATCH</h1>';
+                echo '<h1 style="margin-left:700px; color:white" >NO MATCH</h1>';
             }
             ?>
         </div>

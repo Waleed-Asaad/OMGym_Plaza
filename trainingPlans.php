@@ -62,15 +62,7 @@ if (isset($_GET['change'])) {
 <?php include 'traineeMenu.php'; ?>
 
     <!-- Breadcrumb Section Begin -->
-    <section class="breadcrumb-section set-bg" data-setbg="img/hero/hero-1.jpg" style="height:2000px;">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-12 text-center">
-                    <div class="breadcrumb-text">
-                        <h2>MY MEAL PLAN</h2>
-                        <div class="gallery">
-                            <div class="grid-sizer"></div>
-                            <?php
+    <?php
                             $email = $_SESSION['userEmail'];
                             $select = "SELECT * FROM user WHERE userEmail = '$email'";
                             $result = mysqli_query($conn, $select);
@@ -81,6 +73,22 @@ if (isset($_GET['change'])) {
                             $result = mysqli_query($conn, $sql);
                             $row = mysqli_fetch_array($result);
                             $trainingPlanImg = $row['planImage'];
+                            if ($trainingPlanImg) {
+                                $height="2000px";
+                            }
+                            else{
+                                $height="500px"; 
+                            }
+    echo'
+    <section class="breadcrumb-section set-bg" data-setbg="img/hero/hero-1.jpg" style="height:'.$height.';">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-12 text-center">
+                    <div class="breadcrumb-text">
+                        <h2>MY MEAL PLAN</h2>
+                        <div class="gallery">
+                            <div class="grid-sizer"></div>';
+                            
 
                             if ($trainingPlanImg) {
                                 echo '<div class="gs-item grid-wide set-bg" data-setbg="img/training_plans/'.$trainingPlanImg.'" style="width:800px; height:1300px; margin-left:200px;">
@@ -99,7 +107,7 @@ if (isset($_GET['change'])) {
     <!-- Breadcrumb Section End -->
 
     <!-- Gallery Section Begin -->
-    <div class="gallery-section" style="height:3000px;">
+    <div class="gallery-section" style="height:3500px;">
         <div class="gallery">
             <div class="grid-sizer"></div>
             <?php
@@ -144,9 +152,15 @@ if (isset($_GET['change'])) {
                 foreach ($top_trainingPlans as $trainingPlan) {
                     if ($trainingPlan['score'] > 0) {
                         $trainingPlanImg = $trainingPlan['trainingPlan']['planImage'];
-                        echo '<div class="gs-item grid-wide set-bg" data-setbg="img/training_plans/'.$trainingPlanImg.'" style="width:750px; height:1200px; margin-top:100px;">
+                        echo '<div class="gs-item grid-wide set-bg" data-setbg="img/training_plans/'.$trainingPlanImg.'" style="width:750px; height:1200px; margin-top:300px;">
                                 <a href="img/training_plans/'.$trainingPlanImg.'" class="thumb-icon image-popup"><i class="fa fa-picture-o"></i></a>
-                                <p style="font-size:20px; color:white">'.$trainingPlan["score"].' Matches</p>
+                                <p style="font-size:20px; color:white">'.$trainingPlan["score"].' Matches</p>';
+                                 foreach ($attributes as $attribute) {
+                                if ($trainingPlan['trainingPlan'][$attribute]==1 && $trainee_row[$attribute] == 1) {
+                                    echo '<li style="font-size:25px;margin-bottom: 5px;color:white">'.ucwords(str_replace('_', ' ', $attribute)).'</li>';
+                                }
+                            }
+                            echo'
                                 <button style="padding: 0; width: 100%; background: #f36105; color: white" onclick="pickTrainingPlan('.$trainingPlan['trainingPlan']['training_planId'].');">Pick This Training Plan</button>
                               </div>';
                     }

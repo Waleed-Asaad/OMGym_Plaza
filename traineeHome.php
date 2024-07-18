@@ -120,7 +120,9 @@ if (isset($_POST['submit'])) {
                                     <li style="font-size:25px;margin-bottom: 5px">Height: ' . htmlspecialchars($height) . '</li>
                                     <li style="font-size:25px;margin-bottom: 5px">Age: ' . htmlspecialchars($age) . '</li>
                                     <li style="font-size:25px;margin-bottom: 5px">Gender: ' . htmlspecialchars($gender) . '</li>
-                                    <li style="font-size:25px;margin-bottom: 5px">Activity: ' . htmlspecialchars($activity) . '</li>';
+                                    <li style="font-size:25px;margin-bottom: 5px">Activity: ' . htmlspecialchars($activity) . '</li>
+                                    <div class="specialty">
+                                    <li style="font-size:25px;margin-bottom: 5px">goal:</li>';
                                     if ($muscle_building) {
                                         echo '<li style="font-size:25px;margin-bottom: 5px">Muscle Building</li>';
                                     }
@@ -144,7 +146,8 @@ if (isset($_POST['submit'])) {
                                         echo '<li style="font-size:25px;margin-bottom: 5px">Flexibility</li>';
                                         
                                     }
-                                    echo '<li style="font-size:25px;margin-bottom: 20px">Starting Membership: ' . htmlspecialchars($startingMembership) . '</li>
+                                    echo '</div>
+                                    <li style="font-size:25px;margin-bottom: 20px">Starting Membership: ' . htmlspecialchars($startingMembership) . '</li>
                                     <li style="font-size:35px;margin-bottom: 5px;color:orange"><b>Slide To The Side To Update</b></li>
                                 </ul>';
                             ?>
