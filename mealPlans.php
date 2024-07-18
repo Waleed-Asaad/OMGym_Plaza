@@ -76,13 +76,13 @@ if (isset($_GET['change'])) {
                             $row = mysqli_fetch_array($result);
                             $mealPlanImg = $row['planImage'];
                             if ($mealPlanImg) {
-                                $height="3000px";
+                                $height=2000;
                             }
                             else{
-                                $height="1000px"; 
+                                $height=500; 
                             }
     echo '
-    <section class="breadcrumb-section set-bg" data-setbg="img/hero/hero-2.jpg" style="'.$height.'">
+    <section class="breadcrumb-section set-bg" data-setbg="img/hero/hero-2.jpg" style="height:'.$height.'px">
         <div class="container">
             <div class="row">
                 <div class="col-lg-12 text-center">
@@ -93,7 +93,7 @@ if (isset($_GET['change'])) {
                           
 
                             if ($mealPlanImg) {
-                                echo '<div class="gs-item grid-wide set-bg" data-setbg="img/meal_plans/'.$mealPlanImg.'" style="width:800px; height:1300px; margin-left:auto; margin-right:auto;">
+                                echo '<div class="gs-item grid-wide set-bg" data-setbg="img/meal_plans/'.$mealPlanImg.'" style="width:800px; height:1300px; margin-left:200px; margin-right:auto;">
                                         <a href="img/meal_plans/'.$mealPlanImg.'" class="thumb-icon image-popup"><i class="fa fa-picture-o"></i></a>
                                       </div>';
                             } else {

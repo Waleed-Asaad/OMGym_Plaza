@@ -74,13 +74,13 @@ if (isset($_GET['change'])) {
                             $row = mysqli_fetch_array($result);
                             $trainingPlanImg = $row['planImage'];
                             if ($trainingPlanImg) {
-                                $height="3000px";
+                                $height="2000px";
                             }
                             else{
-                                $height="1000px"; 
+                                $height="500px"; 
                             }
     echo'
-    <section class="breadcrumb-section set-bg" data-setbg="img/hero/hero-1.jpg" style="'.$height.';">
+    <section class="breadcrumb-section set-bg" data-setbg="img/hero/hero-1.jpg" style="height:'.$height.';">
         <div class="container">
             <div class="row">
                 <div class="col-lg-12 text-center">
