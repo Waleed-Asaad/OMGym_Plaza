@@ -6,40 +6,35 @@ if(!isset($_SESSION['adminName'])){
    header('location:admin-login.php');
 }
 
+if (!isset($_SESSION['token'])) {
+    $_SESSION['token'] = bin2hex(random_bytes(32));
+}
+
 if(isset($_POST['add_image'])){
-    $image = $_FILES['image']['name'];
-    $target = "img/gallery/".basename($image);
+    if (isset($_POST['token']) && $_POST['token'] === $_SESSION['token']) {
+        $image = $_FILES['image']['name'];
+        $target = "img/gallery/".basename($image);
 
-    $sql = "INSERT INTO galary (image) VALUES ('$image')";
-    if(mysqli_query($conn, $sql)){
-        if(move_uploaded_file($_FILES['image']['tmp_name'], $target)){
-            $message = "Image uploaded successfully";
-        } else {
-            $message = "Failed to upload image";
-        }
-    } else {
-        $message = "Error adding image: " . mysqli_error($conn);
+        $sql = "INSERT INTO galary (image) VALUES ('$image')";
+        mysqli_query($conn, $sql);
+        move_uploaded_file($_FILES['image']['tmp_name'], $target);
+
+        // מחיקת הטוקן כדי למנוע שימוש חוזר
+        unset($_SESSION['token']);
     }
 }
 
-if(isset($_GET['delete_id'])){
-    $delete_id = $_GET['delete_id'];
-    $sql = "SELECT image FROM galary WHERE galaryID = '$delete_id'";
-    $result = mysqli_query($conn, $sql);
-    $row = mysqli_fetch_assoc($result);
-    $image = $row['image'];
-
-    $sql = "DELETE FROM galary WHERE galaryID = '$delete_id'";
-    if(mysqli_query($conn, $sql)){
-        if(file_exists("img/gallery/".$image)){
-            unlink("img/gallery/".$image);
+if(isset($_POST['delete_selected'])){
+    if(!empty($_POST['selected_images'])){
+        $selected_images = $_POST['selected_images'];
+        foreach($selected_images as $image_id){
+            $sql = "DELETE FROM galary WHERE galaryID = '$image_id'";
+            mysqli_query($conn, $sql);
         }
-        $message = "Image deleted successfully";
-    } else {
-        $message = "Error deleting image: " . mysqli_error($conn);
     }
 }
 
+$_SESSION['token'] = bin2hex(random_bytes(32));
 ?>
 
 <!DOCTYPE html>
@@ -60,48 +55,58 @@ if(isset($_GET['delete_id'])){
             width: 100%;
             height: auto;
         }
-        .card{
+        .card {
             height: auto;
+            position: relative;
+        }
+        .checkbox-container {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 5px;
+            padding: 5px;
         }
     </style>
 </head>
 <body>
     <?php include 'admin-menu.php'; ?>
     <div class="add-image">
-            <form action="" method="post" enctype="multipart/form-data">
-                <input type="file" name="image" required>
-                <input type="submit" name="add_image" value="Add Image" class="add-image-btn">
-            </form>
-        </div>
+        <form action="" method="post" enctype="multipart/form-data">
+            <label for="add image">Add Photo : </label>
+            <input type="file" name="image" required>
+            <input type="hidden" name="token" value="<?php echo $_SESSION['token']; ?>">
+            <input type="submit" name="add_image" value="Add Image" class="add-image-btn">
+        </form>
+    </div>
     <div class="container">
-        <?php
-        if(isset($message)){
-            echo "<div class='message'>$message</div>";
-        }
-        ?>
-        
-        <div class="gallery-container">
-            <?php
-            $sql = "SELECT * FROM galary ORDER BY galaryID";
-            $result = mysqli_query($conn, $sql);
+        <form action="" method="post">
+            <input type="submit" name="delete_selected" value="Delete Selected" class="delete">
+            <div class="gallery-container">
+                <?php
+                $sql = "SELECT * FROM galary ORDER BY galaryID";
+                $result = mysqli_query($conn, $sql);
 
-            if ($result) {
-                while($row = mysqli_fetch_assoc($result)) {
-                    $galaryID = $row['galaryID'];
-                    $image = $row['image'];
-                    
-                    echo "
-                    <div class='card'>
-                        <img src='img/gallery/$image' alt='Gallery Image'>
-                        <a href='admin-gallery.php?delete_id=$galaryID' class='delete' onclick='return confirm(\"Are you sure you want to delete this image?\")'>Delete</a>
-                    </div>
-                    ";
+                if ($result) {
+                    while($row = mysqli_fetch_assoc($result)) {
+                        $galaryID = $row['galaryID'];
+                        $image = $row['image'];
+                        
+                        echo "
+                        <div class='card'>
+                            <div class='checkbox-container'>
+                                <input type='checkbox' name='selected_images[]' value='$galaryID'>
+                            </div>
+                            <img src='img/gallery/$image' alt='Gallery Image'>
+                        </div>
+                        ";
+                    }
+                } else {
+                    echo "<p>No images found.</p>";
                 }
-            } else {
-                echo "<p>No images found.</p>";
-            }
-            ?>
-        </div>
+                ?>
+            </div>
+        </form>
     </div>
 </body>
 </html>

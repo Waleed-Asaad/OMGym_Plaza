@@ -1,19 +1,11 @@
-    <!-- Page Preloder -->
-    <div id="preloder">
-        <div class="loader"></div>
-    </div>
-
+    
     <!-- Offcanvas Menu Section Begin -->
-    <div class="offcanvas-menu-overlay"></div>
     <div class="offcanvas-menu-wrapper">
-        <div class="canvas-close">
-            <i class="fa fa-close"></i>
-        </div>
-        <div class="canvas-search search-switch">
-            <i class="fa fa-search"></i>
-        </div>
         <nav class="canvas-menu mobile-menu">
             <ul>
+                <li class ="logo">
+                        <img src="img/logoo.png" alt="">
+                </li>
                 <li><a href="./admin-home.php">Home</a></li>
                 <li><a href="./admin-memberships.php">Membership</a></li>
                 <li><a href="./admin-gallery.php">Gallery</a></li>
@@ -26,6 +18,4 @@
             </ul>
         </nav>
     </div>
-
-    <!-- Header Section Begin -->
     

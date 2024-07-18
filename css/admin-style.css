@@ -12,6 +12,18 @@ body{
    background: #ffffff;
 }
 
+.logo{
+   height: 30px;
+   vertical-align: middle; 
+   width : 80px;
+}
+
+.logo img{
+   margin: 0px;
+   width: 75px;
+   height: 75px;
+}
+
 .container{
    min-height: 100vh;
    display: flex;
@@ -112,13 +124,13 @@ body{
 .add-image{
    min-height: 20vh;
    box-shadow: 0 5px 10px rgba(0,0,0,.1);
-   display: flex;
+   display: inline-flex;
    justify-content: center;
    align-items: center;
-   
-   padding:20px;
-   padding-bottom: 20px;
+   padding:10px;
    background: #ffffff;
+   margin-left: 500px;
+   margin-top: 20px;
 }
 
 .add-image-btn{
@@ -234,10 +246,15 @@ li {
 
 .card {
   box-shadow: 2px 4px 8px 2px rgba(0, 0, 0, 0.2);
-  max-width: 300px;
-  margin: 20px;
+  max-width: 400px;
+  margin: 10px;
+  padding-bottom: 10px;
   text-align: center;
   font-family: arial;
+}
+
+.card img{
+   padding: 10px;
 }
 
 .card p{
@@ -278,7 +295,7 @@ li {
 	background: red;
    color: white;
    text-transform: capitalize;
-   font-size: 20px;
+   font-size: 14px;
    cursor: pointer;
    border-radius: 5px;
    padding:2px;
