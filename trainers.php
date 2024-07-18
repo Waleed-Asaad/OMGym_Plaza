@@ -153,9 +153,9 @@ if (isset($_GET['change'])) {
     <section style="height:1000px" class="breadcrumb-section set-bg" data-setbg="img/breadcrumb-bg.jpg">
         <div class="container">
             <div class="row">
-                <div style="margin-left:420px" class="col-lg-12 text-center">
+                <div  class="col-lg-12 text-center">
                     <div class="breadcrumb-text">
-                        <h2 style="margin-right:840px">MY TRAINER</h2>
+                        <h2 >MY TRAINER</h2>
                         <div class="gallery" style="align-items: center;">
                             <div class="grid-sizer"></div>
                             <?php
@@ -265,8 +265,12 @@ if (isset($_GET['change'])) {
                                 $score++;
                             }
                         
+                            
                     }
-                    $trainers[] = ['trainer' => $row, 'score' => $score];
+                    if ($score > 0) {
+                        $trainers[] = ['trainer' => $row, 'score' => $score];
+                    }
+                    
                 }
                 if (!empty($trainers)){
                     // Sort trainers by score in descending order
@@ -279,20 +283,33 @@ if (isset($_GET['change'])) {
 
                 // Display the top 4 trainers
                 foreach ($top_trainers as $trainer) {
-                    if($trainer['score']>0){
+                    
                          $trainerImg = $trainer['trainer']['trainerImg'];
+                         $muscle_building = $trainer['trainer']['muscle_building'];
+                         $weight_loss = $trainer['trainer']['weight_loss'];
+                         $strength = $trainer['trainer']['strength'];
+                         $endurance = $trainer['trainer']['endurance'];
+                         $body_building = $trainer['trainer']['body_building'];
+                         $flexibility = $trainer['trainer']['flexibility'];
+
                     echo '<div style="width:300px;" class="gs-item grid-wide set-bg" data-setbg="img/team/'.$trainerImg.'">
                             <a href="img/team/'.$trainerImg.'" class="thumb-icon image-popup"><i class="fa fa-picture-o"></i></a>
                             <p style="font-size:20px; color:white;">'.$trainer["trainer"]["trainerName"].'</p>
-                            <p style="font-size:20px; color:white;">'.$trainer["score"].' Matches</p>
+                            <p style="font-size:20px; color:white;">'.$trainer["score"].' Matches</p>';
+                            foreach ($attributes as $attribute) {
+                                if ($trainer['trainer'][$attribute]==1 && $trainee_row[$attribute] == 1) {
+                                    echo '<li style="font-size:25px;margin-bottom: 5px;color:white">'.ucwords(str_replace('_', ' ', $attribute)).'</li>';
+                                }
+                            }
+                                    echo '
                             <button style="padding: 0; width: 100%; background: #f36105; color: white;" onclick="pickTrainer('.$trainer["trainer"]["trainerId"].');">Pick This Trainer</button>
                           </div>';
-                    }
+                    
                    
                 }
                 }
                 else{
-                    echo '<h1 style="margin-left:600px; color:white" >NO MATCH</h1>';
+                    echo '<h1 style="margin-left:700px; color:white" >NO MATCH</h1>';
                 }
                 
             ?>
