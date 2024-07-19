@@ -74,7 +74,7 @@ if(isset($_GET['delete_id'])){
                         <div class='card'>
                             <img src='img/team/$trainerImg' alt='$trainerName'>
                             <h3>$trainerName</h3>
-                            <p class='price'>Rating: $rating/5.0</p>
+                            <p class='price'>Rating: $rating/5</p>
                             <p>Roles:</p>";
                         
                         if ($muscle_building) {

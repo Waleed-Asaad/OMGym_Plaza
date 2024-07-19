@@ -77,6 +77,9 @@
                         $muscle_building = $row['muscle_building'];
                         $weight_loss = $row['weight_loss'];
                         $strength = $row['strength'];
+                        $endurance = $row['endurance'];
+                        $body_building = $row['body_building'];
+                        $flexibility = $row['flexibility'];
                         $raiting_avg = $row['rating'];
                         echo "
                 <div class='col-lg-4 col-sm-6'>
@@ -92,8 +95,17 @@
                                 if ($strength) {
                                     echo "<span>Strength trainer</span>";
                                 }
+                                if ($endurance) {
+                                    echo "<span>Endurance trainer</span>";
+                                }
+                                if ($body_building) {
+                                    echo "<span>Bodybuilding trainer</span>";
+                                }
+                                if ($flexibility) {
+                                    echo "<span>Flexibility trainer</span>";
+                                }
                             
-                            echo "<span class='price'>Rating: $rating/5.0</span>";
+                            echo "<span class='price'>Rating: $rating/5</span>";
                             echo "
                         </div>
                     </div>
