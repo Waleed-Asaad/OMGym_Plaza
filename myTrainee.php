@@ -68,7 +68,7 @@ if(isset($_POST['submit'])){
     <!-- Hero Section Begin -->
     <section class="hero-section">
         <div class="hs-slider owl-carousel">
-            <div style="height:4000px" class="hs-item set-bg" data-setbg="img/hero/hero-1.jpg">
+            <div style="height:1500px" class="hs-item set-bg" data-setbg="img/hero/hero-1.jpg">
             <div  class="container">
             
            
@@ -145,7 +145,7 @@ if ($trainee_id > 0) {
         </div> 
             
             </div>
-            <div style=" height:4000px" class="hs-item set-bg" data-setbg="img/hero/hero-2.jpg" >
+            <div style=" height:1500px" class="hs-item set-bg" data-setbg="img/hero/hero-2.jpg" >
                 <div  class="container">
                     <div class="row">
                         <div class="col-lg-12 offset-lg-12">

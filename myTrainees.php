@@ -10,9 +10,7 @@ session_start();
 <html lang="en">
 <head>
 <style>
-        <?php 
-            include 'C:\wamp64\www\omgym_plaza\css\admin-style.css'; 
-        ?>
+        
         .trainers {
             display: flex;
             flex-wrap: wrap;

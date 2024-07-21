@@ -153,17 +153,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                             <div class="specialty">
                                                 <label style="color:white">Specialty:</label><br>
                                                 <label for="muscle_building" style="color:white">Muscle Building</label><br>
-                                                <input type="checkbox" id="muscle_building1" name="muscle_building1" value="muscle_building">
+                                                <input type="checkbox" id="muscle_building1" name="muscle_building1" value="muscle_building"><br>
                                                 <label for="weight_loss" style="color:white">Weight Loss</label><br>
-                                                <input type="checkbox" id="weight_loss1" name="weight_loss1" value="weight_loss">
+                                                <input type="checkbox" id="weight_loss1" name="weight_loss1" value="weight_loss"><br>
                                                 <label for="strength" style="color:white">Strength</label><br>
-                                                <input type="checkbox" id="strength1" name="strength1" value="strength">
+                                                <input type="checkbox" id="strength1" name="strength1" value="strength"><br>
                                                 <label for="endurance" style="color:white">Endurance</label><br>
-                                                <input type="checkbox" id="endurance1" name="endurance1" value="endurance">
+                                                <input type="checkbox" id="endurance1" name="endurance1" value="endurance"><br>
                                                 <label for="flexibility" style="color:white">Flexibility</label><br>
-                                                <input type="checkbox" id="flexibility1" name="flexibility1" value="flexibility">
+                                                <input type="checkbox" id="flexibility1" name="flexibility1" value="flexibility"><br>
                                                 <label for="body_building" style="color:white">Body Building</label><br>
-                                                <input type="checkbox" id="body_building1" name="body_building1" value="body_building">
+                                                <input type="checkbox" id="body_building1" name="body_building1" value="body_building"><br>
                                             </div>
                                             <input type="submit" name="submit1" value="Submit" class="form-btn">
                                         </form>
@@ -194,17 +194,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                             <div class="specialty">
                                                 <label style="color:white">Specialty:</label><br>
                                                 <label for="muscle_building" style="color:white">Muscle Building</label><br>
-                                                <input type="checkbox" id="muscle_building" name="muscle_building2" value="muscle_building">
+                                                <input type="checkbox" id="muscle_building" name="muscle_building2" value="muscle_building"><br>
                                                 <label for="weight_loss" style="color:white">Weight Loss</label><br>
-                                                <input type="checkbox" id="weight_loss" name="weight_loss2" value="weight_loss">
+                                                <input type="checkbox" id="weight_loss" name="weight_loss2" value="weight_loss"><br>
                                                 <label for="strength" style="color:white">Strength</label><br>
-                                                <input type="checkbox" id="strength" name="strength2" value="strength">
+                                                <input type="checkbox" id="strength" name="strength2" value="strength"><br>
                                                 <label for="endurance" style="color:white">Endurance</label><br>
-                                                <input type="checkbox" id="endurance" name="endurance2" value="endurance">
+                                                <input type="checkbox" id="endurance" name="endurance2" value="endurance"><br>
                                                 <label for="flexibility" style="color:white">Flexibility</label><br>
-                                                <input type="checkbox" id="flexibility" name="flexibility2" value="flexibility">
+                                                <input type="checkbox" id="flexibility" name="flexibility2" value="flexibility"><br>
                                                 <label for="body_building" style="color:white">Body Building</label><br>
-                                                <input type="checkbox" id="body_building" name="body_building2" value="body_building">
+                                                <input type="checkbox" id="body_building" name="body_building2" value="body_building"><br>
                                             </div>
                                             <input type="submit" name="submit2" value="Submit" class="form-btn">
                                         </form>
