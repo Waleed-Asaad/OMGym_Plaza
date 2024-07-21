@@ -34,6 +34,12 @@ function change($hour, $day, $conn) {
     $row = $result->fetch_assoc();
     $trainee_id = $row['traineeId'];
 
+    
+    $sql_update = "UPDATE trainerHours SET  traineeId = ? WHERE hourId = ?";
+    $stmt_update = $conn->prepare($sql_update);
+    $stmt_update->bind_param("ii", $trainee_id, $hour);
+    $stmt_update->execute();
+
     $select = "SELECT * FROM traineeDay WHERE traineeId = ? ORDER BY dayId ASC";
     $stmt = $conn->prepare($select);
     $stmt->bind_param("i", $trainee_id);

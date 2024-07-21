@@ -40,7 +40,7 @@ if(isset($_POST['submit'])){
             $row1 = mysqli_fetch_array($result1);
             $trainer_id = $row1['trainerId'];
 
-            $days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+            $days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
             foreach ($days as $day) {
                 $sql = "INSERT INTO trainerDay (days, trainerId) VALUES ('$day', $trainer_id)";
@@ -51,18 +51,18 @@ if(isset($_POST['submit'])){
                     $day_id = $row1['dayId'];
 
                     $hours = [
-                             '7:00-8:00',
-                             '8:00-9:00',
-                             '9:00-10:00',
-                             '10:00-11:00',
-                             '11:00-12:00',
-                             '12:00-13:00',
-                             '13:00-14:00',
-                             '14:00-15:00',
-                             '15:00-16:00',
-                             '16:00-17:00',
-                             '17:00-18:00',
-                             '18:00-19:00'
+                             '07',
+                             '08',
+                             '09',
+                             '10',
+                             '11',
+                             '12',
+                             '13',
+                             '14',
+                             '15',
+                             '16',
+                             '17',
+                             '18'
                              ];
         
                      foreach ($hours as $hour) {

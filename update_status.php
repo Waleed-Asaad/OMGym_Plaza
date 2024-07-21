@@ -47,7 +47,7 @@ $result1 = mysqli_query($conn, $select1);
 $row1 = mysqli_fetch_array($result1);
 $trainee_id = $row1['traineeId'];
 
-$days = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+$days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
 foreach ($days as $day) {
     $sql = "INSERT INTO traineeDay (days, traineeId) VALUES ('$day', $trainee_id)";
@@ -58,18 +58,18 @@ foreach ($days as $day) {
         $day_id = $row1['dayId'];
 
         $hours = [
-                 '7:00-8:00',
-                 '8:00-9:00',
-                 '9:00-10:00',
-                 '10:00-11:00',
-                 '11:00-12:00',
-                 '12:00-13:00',
-                 '13:00-14:00',
-                 '14:00-15:00',
-                 '15:00-16:00',
-                 '16:00-17:00',
-                 '17:00-18:00',
-                 '18:00-19:00'
+                 '07',
+                 '08',
+                 '09',
+                 '10',
+                 '11',
+                 '12',
+                 '13',
+                 '14',
+                 '15',
+                 '16',
+                 '17',
+                 '18'
                  ];
 
          foreach ($hours as $hour) {

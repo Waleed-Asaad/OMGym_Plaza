@@ -56,6 +56,23 @@ if (isset($_GET['change'])) {
     <link rel="stylesheet" href="css/magnific-popup.css" type="text/css">
     <link rel="stylesheet" href="css/slicknav.min.css" type="text/css">
     <link rel="stylesheet" href="css/style.css" type="text/css">
+
+    <style>
+    .progress-bar {
+            width: 100%;
+            background-color: #f3f3f3;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+        .progress-bar-fill {
+            height: 20px;
+            background-color: #00FF00;
+            width: 0%;
+            transition: width 0.5s ease-in-out;
+        }
+    </style>
+
 </head>
 
 <body>
@@ -126,6 +143,7 @@ if (isset($_GET['change'])) {
             // List of attributes to check for
             $attributes = ["strength", "flexibility", "endurance", "weight_loss", "muscle_building", "body_building"];
             $mealPlans = [];
+            $total_attributes = count($attributes);
 
             $sql = "SELECT * FROM meal_plans";
             $result = mysqli_query($conn, $sql);
@@ -154,9 +172,14 @@ if (isset($_GET['change'])) {
                 foreach ($top_mealPlans as $mealPlan) {
                     if ($mealPlan['score'] > 0) {
                         $mealPlanImg = $mealPlan['mealPlan']['planImage'];
-                        echo '<div class="gs-item grid-wide set-bg" data-setbg="img/meal_plans/'.$mealPlanImg.'" style="width:750px; height:1200px; margin-top:300px;">
+                        $score = $mealPlan['score'];
+                        $percentage = number_format(($score / $total_attributes) * 100, 2);
+                        echo '<div class="gs-item grid-wide set-bg" data-setbg="img/meal_plans/'.$mealPlanImg.'" style="width:750px; height:1200px; margin-bottom:400px;">
                                 <a href="img/meal_plans/'.$mealPlanImg.'" class="thumb-icon image-popup"><i class="fa fa-picture-o"></i></a>
-                                <p style="font-size:20px; color:white">'.$mealPlan["score"].' Matches</p>';
+                                <div class="progress-bar">
+                                    <div class="progress-bar-fill" style="width:'.$percentage.'%;"></div>
+                                </div>
+                                <p style="font-size:20px; color:white;margin-left:30px">'.$percentage.'% Matches</p>';
                                foreach ($attributes as $attribute) {
                                 if ($mealPlan['mealPlan'][$attribute]==1 && $trainee_row[$attribute] == 1) {
                                     echo '<li style="font-size:25px;margin-bottom: 5px;color:white">'.ucwords(str_replace('_', ' ', $attribute)).'</li>';

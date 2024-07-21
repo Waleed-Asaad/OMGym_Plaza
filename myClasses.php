@@ -10,7 +10,7 @@ function change($hour, $day, $conn) {
     $result = $stmt->get_result();
     $row = $result->fetch_assoc();
     
-    $scheduled = ($row['scheduled'] + 2) % 3;
+    $scheduled = ($row['scheduled'] + 1) % 2;
     $sql_update = "UPDATE traineeHours SET scheduled = ? WHERE hourId = ?";
     $stmt_update = $conn->prepare($sql_update);
     $stmt_update->bind_param("ii", $scheduled, $hour);
@@ -32,6 +32,7 @@ function change($hour, $day, $conn) {
     $result = $stmt->get_result();
     $row = $result->fetch_assoc();
     $trainer_id = $row['trainerId'];
+    
 
     $select = "SELECT * FROM trainerDay WHERE trainerId = ? ORDER BY dayId ASC";
     $stmt = $conn->prepare($select);
@@ -50,7 +51,7 @@ function change($hour, $day, $conn) {
                 $hour_id = $row_hours['hourId'];
                 if ($hour_id % 12 == $hour % 12) {
                     $available = ($row['available'] + 1) % 3;
-                    $sql_update = "UPDATE trainerHours SET available = ? WHERE hourId = ?";
+                    $sql_update = "UPDATE trainerHours SET  traineeId = 0, available = ? WHERE hourId = ?";
                     $stmt_update = $conn->prepare($sql_update);
                     $stmt_update->bind_param("ii", $available, $hour_id);
                     $stmt_update->execute();
@@ -124,7 +125,7 @@ if (isset($_GET['change1']) && isset($_GET['change2'])) {
             <div class="row">
                 <div class="col-lg-6">
                     <div class="section-title">
-                        <h2>PICK CLASSES</h2>
+                        <h2>MY CLASSES</h2>
                     </div>
                 </div>
             </div>
@@ -196,11 +197,7 @@ if (isset($_GET['change1']) && isset($_GET['change2'])) {
                                                     $button_color = "#099105";
                                                     $text_color = "#e0f904";
                                                     break;
-                                                case 2:
-                                                    $button_text = "Not Scheduled";
-                                                    $button_color = "#e95b5b";
-                                                    $text_color = "#e0f904";
-                                                    break;
+                                                
                                                 case 0:
                                                     $button_text = " / ";
                                                     $button_color = "#0a0a0a";
@@ -214,11 +211,6 @@ if (isset($_GET['change1']) && isset($_GET['change2'])) {
                                                 </td>";
                                             }
                                             
-                                            else if($row_hours['scheduled']==2){
-                                                echo "<td style='padding: 0; ' class='ts-meta'>
-                                                <button style='padding: 0 ; width: 100%; background: $button_color; color: $text_color'>$button_text</button>
-                                                </td>";
-                                            }
 
                                             else{
                                                 echo "<td style='padding: 0; ' class='ts-meta'>

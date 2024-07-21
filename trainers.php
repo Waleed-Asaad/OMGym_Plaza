@@ -3,9 +3,8 @@ include "connection.php";
 session_start();
 
 if (isset($_POST['submit'])) {
-    echo "<h1>before</h1>";
-    $rating_star = $_POST['star-rating-0'];
-    echo "<h1>after</h1>";
+    $rating_star = $_POST['star-rating'];
+    $trainer_id = $_POST['trainer-id'];
     $email = $_SESSION['userEmail'];
     $select = "SELECT * FROM user WHERE userEmail = '$email'";
     $result = mysqli_query($conn, $select);
@@ -13,19 +12,21 @@ if (isset($_POST['submit'])) {
         $row = mysqli_fetch_array($result);
         $user_id = $row['userId'];
 
-        $sql = "SELECT t.raiting_sum, t.raiting_counter, t.trainerId FROM trainee tr JOIN trainer t ON tr.trainerId = t.trainerId WHERE tr.userId = '$user_id'";
+        $sql = "SELECT raiting_sum, raiting_counter FROM trainer WHERE trainerId = '$trainer_id'";
         $result = mysqli_query($conn, $sql);
         if ($result) {
             $row = mysqli_fetch_array($result);
-            $trainerId = $row['trainerId'];
+            echo '<h1>$row["raiting_sum"]</h1>';
+            echo '<h1>$rating_star</h1>';
             $raitingSum = $row['raiting_sum'] + $rating_star;
+            echo '<h1>$raitingSum</h1>';
             $raitingCounter = $row['raiting_counter'] + 1;
             $rating = $raitingSum / $raitingCounter;
 
             $sql = "UPDATE trainer SET rating = ?, raiting_sum = ?, raiting_counter = ? WHERE trainerId = ?";
             $stmt = $conn->prepare($sql);
             if ($stmt) {
-                $stmt->bind_param("diii", $rating, $raitingSum, $raitingCounter, $trainerId);
+                $stmt->bind_param("diii", $rating, $raitingSum, $raitingCounter, $trainer_id);
                 if ($stmt->execute()) {
                     echo "Record updated successfully";
                 } else {
@@ -78,7 +79,6 @@ function change($trainerId, $conn) {
 if (isset($_GET['change'])) {
     change(intval($_GET['change']), $conn);
 }
-
 ?>
 <!DOCTYPE html>
 <html lang="zxx">
@@ -106,7 +106,7 @@ if (isset($_GET['change'])) {
     <link rel="stylesheet" href="css/style.css" type="text/css">
 
     <style>
-        .star-rating {
+        .star-rating1 {
             position: relative;
             display: inline-flex;
             flex-direction: row-reverse;
@@ -143,6 +143,35 @@ if (isset($_GET['change'])) {
             outline-offset: 1px;
             outline: #4f46e5 solid 2px;
         }
+
+        .star-rating {
+            display: flex;
+            flex-direction: row-reverse;
+            font-size: 1.5rem;
+            justify-content: center;
+            padding: 0.3rem;
+        }
+        .star-rating span {
+            cursor: default;
+            color: grey;
+            padding: 0 0.1rem;
+        }
+        .star-rating .checked {
+            color: gold;
+        }
+        .progress-bar {
+            width: 100%;
+            background-color: #f3f3f3;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+        .progress-bar-fill {
+            height: 20px;
+            background-color: #00FF00;
+            width: 0%;
+            transition: width 0.5s ease-in-out;
+        }
     </style>
 </head>
 
@@ -153,9 +182,9 @@ if (isset($_GET['change'])) {
     <section style="height:1000px" class="breadcrumb-section set-bg" data-setbg="img/breadcrumb-bg.jpg">
         <div class="container">
             <div class="row">
-                <div  class="col-lg-12 text-center">
+                <div class="col-lg-12 text-center">
                     <div class="breadcrumb-text">
-                        <h2 >MY TRAINER</h2>
+                        <h2 style="margin-right:130px">MY TRAINER</h2>
                         <div class="gallery" style="align-items: center;">
                             <div class="grid-sizer"></div>
                             <?php
@@ -165,67 +194,43 @@ if (isset($_GET['change'])) {
                                 $row = mysqli_fetch_array($result);
                                 $user_id = $row['userId'];
 
-                                $sql = "SELECT t.trainerImg, t.trainerName FROM trainee tr JOIN trainer t ON tr.trainerId = t.trainerId WHERE tr.userId = '$user_id'";
+                                $sql = "SELECT t.trainerImg, t.trainerName, t.rating, t.trainerId FROM trainee tr JOIN trainer t ON tr.trainerId = t.trainerId WHERE tr.userId = '$user_id'";
                                 $result = mysqli_query($conn, $sql);
                                 $row = mysqli_fetch_array($result);
                                 $trainerImg = $row['trainerImg'];
                                 $trainerName = $row['trainerName'];
+                                $trainerRating = number_format($row['rating'], 2);
 
                                 if ($trainerImg) {
-                                    echo '<div style="width:300px; margin-left:auto; margin-right:auto;" class="gs-item grid-wide set-bg" data-setbg="img/team/'.$trainerImg.'">
+                                    echo '<div style="width:300px; margin-left:350px; margin-right:auto;" class="gs-item grid-wide set-bg" data-setbg="img/team/'.$trainerImg.'">
                                             <a href="img/team/'.$trainerImg.'" class="thumb-icon image-popup"><i class="fa fa-picture-o"></i></a>
                                             <p style="font-size:20px; color:white;">'.$trainerName.'</p>
-                                            <div class="star-rating">
-                                                <form action="" method="post" enctype="multipart/form-data">
-                                                    <input type="radio" class="star-input" id="sr-0-5" name="star-rating-0" value="5" />
-                                                    <label for="sr-0-5" class="star-label">★</label>
-                                                    <input type="radio" class="star-input" id="sr-0-4" name="star-rating-0" value="4" />
-                                                    <label for="sr-0-4" class="star-label">★</label>
-                                                    <input type="radio" class="star-input" id="sr-0-3" name="star-rating-0" value="3" />
-                                                    <label for="sr-0-3" class="star-label">★</label>
-                                                    <input type="radio" class="star-input" id="sr-0-2" name="star-rating-0" value="2" />
-                                                    <label for="sr-0-2" class="star-label">★</label>
-                                                    <input type="radio" class="star-input" id="sr-0-1" name="star-rating-0" value="1" />
-                                                    <label for="sr-0-1" class="star-label">★</label>
-                                                    <input type="submit" style="background: #f36105; color: white;" name="submit" value="Submit" class="form-btn">
-                                                </form>
-                                            </div>
+                                            <p style="font-size:20px; color:white;">Rating: '.$trainerRating.'</p>
+                                            <div class="star-rating">';
+                                                for ($i = 1; $i <= 5; $i++) {
+                                                    $checked = ($i <= round($trainerRating)) ? "checked" : "";
+                                                    echo '<span class="fa fa-star '.$checked.'"></span>';
+                                                }
+                                    echo '  </div >
+                                            <form style="margin-top:10px" action="" method="post" enctype="multipart/form-data">
+                                                <input type="hidden" name="trainer-id" value="'.$row['trainerId'].'">
+                                                <input type="radio" class="star-input" id="sr-'.$row['trainerId'].'-5" name="star-rating" value="5" />
+                                                <label for="sr-'.$row['trainerId'].'-5" class="star-label">★</label>
+                                                <input type="radio" class="star-input" id="sr-'.$row['trainerId'].'-4" name="star-rating" value="4" />
+                                                <label for="sr-'.$row['trainerId'].'-4" class="star-label">★</label>
+                                                <input type="radio" class="star-input" id="sr-'.$row['trainerId'].'-3" name="star-rating" value="3" />
+                                                <label for="sr-'.$row['trainerId'].'-3" class="star-label">★</label>
+                                                <input type="radio" class="star-input" id="sr-'.$row['trainerId'].'-2" name="star-rating" value="2" />
+                                                <label for="sr-'.$row['trainerId'].'-2" class="star-label">★</label>
+                                                <input type="radio" class="star-input" id="sr-'.$row['trainerId'].'-1" name="star-rating" value="1" />
+                                                <label for="sr-'.$row['trainerId'].'-1" class="star-label">★</label>
+                                                <input type="submit" style="background: #f36105; color: white;" name="submit" value="Submit" class="form-btn">
+                                            </form>
                                         </div>';
                                 } else {
                                     echo '<h2>YOU DID NOT PICK A TRAINER YET</h2>';
                                 }
                             ?>
-                            <script>
-                                for (const starRating of document.getElementsByClassName("star-rating")) {
-                                    starRating.addEventListener("keydown", (e) => {
-                                        let action;
-                                        if (e.key === "ArrowRight" || e.key === "ArrowDown") {
-                                            action = "next";
-                                        } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
-                                            action = "previous";
-                                        } else {
-                                            return;
-                                        }
-
-                                        e.preventDefault();
-
-                                        const inputs = Array.from(starRating.querySelectorAll("input"));
-
-                                        for (let i = 0; i < inputs.length; i++) {
-                                            if (document.activeElement === inputs[i]) {
-                                                // focus the next/previous element, since we have reversed the order of the elements we need to subtract on next and add on previous
-                                                let focusToIndex = action === "next" ? i - 1 : i + 1;
-                                                if (focusToIndex < 0) focusToIndex = inputs.length - 1;
-                                                if (focusToIndex >= inputs.length) focusToIndex = 0;
-
-                                                inputs[focusToIndex].focus();
-                                                inputs[focusToIndex].checked = true;
-                                                break;
-                                            }
-                                        }
-                                    });
-                                }
-                            </script>
                         </div>
                     </div>
                 </div>
@@ -249,9 +254,9 @@ if (isset($_GET['change'])) {
                 $result = mysqli_query($conn, $sql);
                 $trainee_row = mysqli_fetch_array($result);
                 
-
                 // List of attributes to check for
                 $attributes = ["strength", "flexibility", "endurance", "weight_loss", "muscle_building", "body_building"];
+                $total_attributes = count($attributes);
 
                 $trainers = [];
 
@@ -260,58 +265,57 @@ if (isset($_GET['change'])) {
                 while ($row = mysqli_fetch_assoc($result)) {
                     $score = 0;
                     foreach ($attributes as $attribute) {
-                        
-                             if ($row[$attribute] == 1 && $trainee_row[$attribute] == 1) {
-                                $score++;
-                            }
-                        
-                            
+                        if ($row[$attribute] == 1 && $trainee_row[$attribute] == 1) {
+                            $score++;
+                        }
                     }
                     if ($score > 0) {
                         $trainers[] = ['trainer' => $row, 'score' => $score];
                     }
-                    
                 }
+
                 if (!empty($trainers)){
                     // Sort trainers by score in descending order
-                usort($trainers, function($a, $b) {
-                    return $b['score'] - $a['score'];
-                });
+                    usort($trainers, function($a, $b) {
+                        return $b['score'] - $a['score'];
+                    });
 
-                // Get the top 4 trainers
-                $top_trainers = array_slice($trainers, 0, 4);
+                    // Get the top 4 trainers
+                    $top_trainers = array_slice($trainers, 0, 4);
 
-                // Display the top 4 trainers
-                foreach ($top_trainers as $trainer) {
-                    
-                         $trainerImg = $trainer['trainer']['trainerImg'];
-                         $muscle_building = $trainer['trainer']['muscle_building'];
-                         $weight_loss = $trainer['trainer']['weight_loss'];
-                         $strength = $trainer['trainer']['strength'];
-                         $endurance = $trainer['trainer']['endurance'];
-                         $body_building = $trainer['trainer']['body_building'];
-                         $flexibility = $trainer['trainer']['flexibility'];
+                    // Display the top 4 trainers
+                    foreach ($top_trainers as $trainer) {
+                        $trainerImg = $trainer['trainer']['trainerImg'];
+                        $trainerName = $trainer['trainer']['trainerName'];
+                        $score = $trainer['score'];
+                        $percentage = number_format(($score / $total_attributes) * 100, 2);
 
-                    echo '<div style="width:300px;" class="gs-item grid-wide set-bg" data-setbg="img/team/'.$trainerImg.'">
-                            <a href="img/team/'.$trainerImg.'" class="thumb-icon image-popup"><i class="fa fa-picture-o"></i></a>
-                            <p style="font-size:20px; color:white;">'.$trainer["trainer"]["trainerName"].'</p>
-                            <p style="font-size:20px; color:white;">'.$trainer["score"].' Matches</p>';
-                            foreach ($attributes as $attribute) {
-                                if ($trainer['trainer'][$attribute]==1 && $trainee_row[$attribute] == 1) {
-                                    echo '<li style="font-size:25px;margin-bottom: 5px;color:white">'.ucwords(str_replace('_', ' ', $attribute)).'</li>';
-                                }
+                        echo '<div style="width:300px;" class="gs-item grid-wide set-bg" data-setbg="img/team/'.$trainerImg.'">
+                                <a href="img/team/'.$trainerImg.'" class="thumb-icon image-popup"><i class="fa fa-picture-o"></i></a>
+                                <p style="font-size:20px; color:white;margin-left:100px">'.$trainerName.'</p>
+                                <div class="progress-bar">
+                                    <div class="progress-bar-fill" style="width:'.$percentage.'%;"></div>
+                                </div>
+                                <p style="font-size:20px; color:white;margin-left:30px">'.$percentage.'% Matches</p>
+                                <div style="margin-left:-100px" class="star-rating">';
+                                    for ($i = 5; $i >= 1; $i--) {
+                                        $checked = ($i <= round($trainer['trainer']['rating'])) ? "checked" : "";
+                                        echo '<span  class="fa fa-star '.$checked.'"></span>';
+                                    }
+                        echo '  </div>';
+                        foreach ($attributes as $attribute) {
+                            if ($trainer['trainer'][$attribute]==1 && $trainee_row[$attribute] == 1) {
+                                echo '<li style="font-size:25px;margin-bottom: 5px;color:white">'.ucwords(str_replace('_', ' ', $attribute)).'</li>';
                             }
-                                    echo '
-                            <button style="padding: 0; width: 100%; background: #f36105; color: white;" onclick="pickTrainer('.$trainer["trainer"]["trainerId"].');">Pick This Trainer</button>
-                          </div>';
-                    
-                   
+                        }
+
+                              echo '
+                              <button style="padding: 0; width: 100%; background: #f36105; color: white" onclick="pickTrainer('.$trainer['trainer']['trainerId'].');">Pick This Trainer</button>
+                              </div>';
+                    }
+                } else {
+                    echo '<h1 style="margin-left:700px; color:white">NO MATCH</h1>';
                 }
-                }
-                else{
-                    echo '<h1 style="margin-left:700px; color:white" >NO MATCH</h1>';
-                }
-                
             ?>
         </div>
     </div>

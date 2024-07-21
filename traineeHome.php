@@ -196,17 +196,17 @@ if (isset($_POST['submit'])) {
                                             <div class="specialty">
                                                 <label style="color:white">Specialty:</label><br>
                                                 <label for="muscle_building" style="color:white">Muscle Building</label><br>
-                                                <input type="checkbox" id="muscle_building" name="muscle_building" value="1">
+                                                <input type="checkbox" id="muscle_building" name="muscle_building" value="1"><br>
                                                 <label for="weight_loss" style="color:white">Weight Loss</label><br>
-                                                <input type="checkbox" id="weight_loss" name="weight_loss" value="1">
+                                                <input type="checkbox" id="weight_loss" name="weight_loss" value="1"><br>
                                                 <label for="strength" style="color:white">Strength</label><br>
-                                                <input type="checkbox" id="strength" name="strength" value="1">
+                                                <input type="checkbox" id="strength" name="strength" value="1"><br>
                                                 <label for="endurance" style="color:white">Endurance</label><br>
-                                                <input type="checkbox" id="endurance" name="endurance" value="1">
+                                                <input type="checkbox" id="endurance" name="endurance" value="1"><br>
                                                 <label for="flexibility" style="color:white">Flexibility</label><br>
-                                                <input type="checkbox" id="flexibility" name="flexibility" value="1">
+                                                <input type="checkbox" id="flexibility" name="flexibility" value="1"><br>
                                                 <label for="body_building" style="color:white">Body Building</label><br>
-                                                <input type="checkbox" id="body_building" name="body_building" value="1">
+                                                <input type="checkbox" id="body_building" name="body_building" value="1"><br>
                                             </div>
                                             <input type="file" name="image" accept="image/png, image/jpg, image/jpeg" required>
                                             <input type="submit" name="submit" value="Submit" class="form-btn">
