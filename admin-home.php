@@ -177,7 +177,7 @@ $current_year = date("Y");
                 y: {
                     beginAtZero: true,
                     ticks: {
-                        stepSize: 1
+                        stepSize: 2
                     }
                 }
             }
