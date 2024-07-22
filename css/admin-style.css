@@ -444,3 +444,20 @@ img {
    width: 80%;
    height: 400px;
 }
+
+.membership-by-month{
+   text-align: center;
+   margin: 20px;
+}
+
+.membership-by-month h2{
+   margin-bottom: 20px;
+}
+
+.membership-by-month canvas{
+   display: block;
+   margin: 0 auto;
+   max-width: 800px;
+   width: 80%;
+   height: 400px;
+}
