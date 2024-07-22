@@ -22,17 +22,17 @@ $last_order_query = "
     JOIN tborder o ON po.orderId = o.orderId
     JOIN products p ON po.productId = p.productId
     WHERE po.userId = '$userId'
-    ORDER BY o.dateOfPurchase DESC
-    LIMIT 3";
+    ORDER BY o.dateOfPurchase DESC";
 $last_order_result = mysqli_query($conn, $last_order_query);
 $last_order_products = [];
 $last_order_categories = [];
 
-if (mysqli_num_rows($last_order_result) > 0) {
+if ($last_order_result && mysqli_num_rows($last_order_result) > 0) {
     while ($row = mysqli_fetch_assoc($last_order_result)) {
         $last_order_products[] = $row['productId'];
         $last_order_categories[] = $row['category'];
     }
+    mysqli_free_result($last_order_result);
 }
 
 $recommended_products = [];
@@ -46,14 +46,16 @@ if (count($last_order_products) > 0) {
         WHERE category NOT IN ('" . implode("','", $last_order_categories) . "')
         AND productId NOT IN (" . implode(",", $last_order_products) . ")
         GROUP BY category
+        ORDER BY RAND()
         LIMIT 3";
     $recommended_products_result = mysqli_query($conn, $recommended_products_query);
 
-    if (mysqli_num_rows($recommended_products_result) > 0) {
+    if ($recommended_products_result && mysqli_num_rows($recommended_products_result) > 0) {
         while ($product_row = mysqli_fetch_assoc($recommended_products_result)) {
             $recommended_products[] = $product_row;
             $recommended_categories[] = $product_row['category'];
         }
+        mysqli_free_result($recommended_products_result);
     }
 }
 
@@ -70,41 +72,67 @@ if (count($recommended_products) < 3) {
         LIMIT $remaining_count";
     $random_products_result = mysqli_query($conn, $random_products_query);
 
-    while ($product_row = mysqli_fetch_assoc($random_products_result)) {
-        $recommended_products[] = $product_row;
-        $recommended_categories[] = $product_row['category'];
+    if ($random_products_result && mysqli_num_rows($random_products_result) > 0) {
+        while ($product_row = mysqli_fetch_assoc($random_products_result)) {
+            $recommended_products[] = $product_row;
+            $recommended_categories[] = $product_row['category'];
+        }
+        mysqli_free_result($random_products_result);
+    }
+}
+
+// אם לא מצאנו שלושה מוצרים, נוסיף מוצרים מכל קטגוריה
+if (count($recommended_products) < 3) {
+    $remaining_count = 3 - count($recommended_products);
+    $all_categories_products_query = "
+        SELECT *
+        FROM products
+        WHERE category NOT IN ('" . implode("','", $recommended_categories) . "')
+        GROUP BY category
+        ORDER BY RAND()
+        LIMIT $remaining_count";
+    $all_categories_products_result = mysqli_query($conn, $all_categories_products_query);
+
+    if ($all_categories_products_result && mysqli_num_rows($all_categories_products_result) > 0) {
+        while ($product_row = mysqli_fetch_assoc($all_categories_products_result)) {
+            $recommended_products[] = $product_row;
+        }
+        mysqli_free_result($all_categories_products_result);
     }
 }
 
 if (isset($_GET['productId'])) {
     $productId = $_GET['productId'];
     $userEmail = $_SESSION['userEmail'];
-    $user_id = "SELECT userId FROM user WHERE userEmail = '$userEmail'";
-    $existingQuery = "SELECT * FROM cart WHERE userId = '$userId' AND productId = '$productId'";
-    $existingResult = mysqli_query($conn, $existingQuery);
-    $user_result = mysqli_query($conn, $user_id);
+    $user_id_query = "SELECT userId FROM user WHERE userEmail = '$userEmail'";
+    $user_result = mysqli_query($conn, $user_id_query);
     $user = mysqli_fetch_assoc($user_result);
     $userId = $user['userId'];
-    if ($existingResult->num_rows > 0) {
+    $existingQuery = "SELECT * FROM cart WHERE userId = '$userId' AND productId = '$productId'";
+    $existingResult = mysqli_query($conn, $existingQuery);
+
+    if ($existingResult && mysqli_num_rows($existingResult) > 0) {
         echo "This product is already in the cart.";
     } else {
         $productQuery = "SELECT * FROM products WHERE productId = '$productId'";
         $productResult = mysqli_query($conn, $productQuery);
 
-        if ($productResult->num_rows > 0) {
-            $item = $productResult->fetch_assoc();
+        if ($productResult && mysqli_num_rows($productResult) > 0) {
+            $item = mysqli_fetch_assoc($productResult);
             $productName = $item['productName'];
             $image = $item['image'];
             $price = $item['price'];
             $quantity = 1;
-            $productId = $item['productId'];
 
             $insertQuery = "INSERT INTO cart (userId, productId, productName, image, quantity, price) VALUES ('$userId', '$productId', '$productName', '$image', '$quantity', '$price')";
             mysqli_query($conn, $insertQuery);
 
             header('location: cart.php');
         }
+        mysqli_free_result($productResult);
     }
+    mysqli_free_result($existingResult);
+    mysqli_free_result($user_result);
 }
 ?>
 <!DOCTYPE html>
@@ -196,23 +224,19 @@ if (isset($_GET['productId'])) {
         <h3 style="color: #ffffff;">Recommended for You</h3>
             <div class="row justify-content-center">
                 <?php
-                if (count($recommended_products) > 0) {
-                    foreach ($recommended_products as $product) { ?>
-                        <div class="col-lg-4 col-md-8">
-                            <div class="ps-item">
-                                <h2 style="color:beige"><?php echo $product["productName"]; ?></h2>
-                                <?php echo "<img class='product-image' src ='img/products/".$product['image']."'>";?>
-                                <div class="pi-price">
-                                    <h2><?php echo "$" . $product["price"]; ?></h2>
-                                    <span><?php echo $product["description"]; ?></span>
-                                </div>
-                                <button class="primary-btn pricing-btn"><a href="store.php?productId=<?php echo $product["productId"]; ?>">Add to Cart</a></button>
+                foreach ($recommended_products as $product) { ?>
+                    <div class="col-lg-4 col-md-8">
+                        <div class="ps-item">
+                            <h2 style="color:beige"><?php echo $product["productName"]; ?></h2>
+                            <?php echo "<img class='product-image' src ='img/products/".$product['image']."'>";?>
+                            <div class="pi-price">
+                                <h2><?php echo "$" . $product["price"]; ?></h2>
+                                <span><?php echo $product["description"]; ?></span>
                             </div>
+                            <button class="primary-btn pricing-btn"><a href="store.php?productId=<?php echo $product["productId"]; ?>">Add to Cart</a></button>
                         </div>
-                    <?php }
-                } else {
-                    echo "<p>No recommended products found.</p>";
-                } ?>
+                    </div>
+                <?php } ?>
             </div>
         </div>
     </section>
@@ -224,7 +248,7 @@ if (isset($_GET['productId'])) {
         <h3 style="color: #ec5606; padding: 20px;">* All Products *</h3>
             <div class="row justify-content-center">
                 <?php
-                if ($result->num_rows > 0) {
+                if ($result && mysqli_num_rows($result) > 0) {
                     while ($row = mysqli_fetch_assoc($result)) { ?>
                         <div class="col-lg-4 col-md-8">
                             <div class="ps-item">
@@ -238,6 +262,7 @@ if (isset($_GET['productId'])) {
                             </div>
                         </div>
                     <?php }
+                    mysqli_free_result($result);
                 } else {
                     echo "<p>No products found.</p>";
                 } ?>
