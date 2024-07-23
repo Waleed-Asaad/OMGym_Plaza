@@ -68,7 +68,7 @@ if(isset($_POST['submit'])){
     <!-- Hero Section Begin -->
     <section class="hero-section">
         <div class="hs-slider owl-carousel">
-            <div style="height:1500px" class="hs-item set-bg" data-setbg="img/hero/hero-1.jpg">
+            <div style="height:2000px" class="hs-item set-bg" data-setbg="img/hero/hero-1.jpg">
             <div  class="container">
             
            
@@ -145,12 +145,12 @@ if ($trainee_id > 0) {
         </div> 
             
             </div>
-            <div style=" height:1500px" class="hs-item set-bg" data-setbg="img/hero/hero-2.jpg" >
+            <div style=" height:2000px" class="hs-item set-bg" data-setbg="img/hero/hero-2.jpg" >
                 <div  class="container">
                     <div class="row">
                         <div class="col-lg-12 offset-lg-12">
                             <div class="hi-text">
-                            <div class="container"  ">
+                            <div class="container"  >
                 <div class="form-container" style="width:1100px;padding:5px 5px 5px 5px" >
                     <form action="" style="width:1100px; " method="post">
                          <h1 style="font-size:35px;margin-bottom: 0;">Insert <?php echo $row['traineeName'] ?> Measurements </h1>
