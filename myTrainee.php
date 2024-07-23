@@ -68,7 +68,7 @@ if(isset($_POST['submit'])){
     <!-- Hero Section Begin -->
     <section class="hero-section">
         <div class="hs-slider owl-carousel">
-            <div style="height:2000px" class="hs-item set-bg" data-setbg="img/hero/hero-1.jpg">
+            <div style="height:4500px" class="hs-item set-bg" data-setbg="img/hero/hero-1.jpg">
             <div  class="container">
             
            
@@ -86,6 +86,12 @@ if ($trainee_id > 0) {
         $row = mysqli_fetch_assoc($result);
         $meal_id = $row['meal_planId'];
         $training_id = $row['training_planId'];
+        $muscle_building = $row['muscle_building'];
+        $weight_loss = $row['weight_loss'];
+        $strength = $row['strength'];
+        $endurance = $row['endurance'];
+        $body_building = $row['body_building'];
+        $flexibility = $row['flexibility'];
     }
 }
 
@@ -98,8 +104,34 @@ if ($trainee_id > 0) {
     <li style="font-size:25px;margin-bottom: 5px">Age: <?php echo isset($row['age']) ? $row['age'] : 'N/A'; ?></li>
     <li style="font-size:25px;margin-bottom: 5px">Gender: <?php echo isset($row['gender']) ? $row['gender'] : 'N/A'; ?></li>
     <li style="font-size:25px;margin-bottom: 5px">Activity: <?php echo isset($row['activity']) ? $row['activity'] : 'N/A'; ?></li>
-    <li style="font-size:25px;margin-bottom: 5px">Goal: <?php echo isset($row['goal']) ? $row['goal'] : 'N/A'; ?></li>
-
+    <div class="specialty">
+                                    <li style="font-size:25px;margin-bottom: 5px">goal:</li>
+                                    <?php
+                                    if ($muscle_building) {
+                                        echo '<li style="font-size:25px;margin-bottom: 5px">Muscle Building</li>';
+                                    }
+                                    if ($weight_loss) {
+                                        echo '<li style="font-size:25px;margin-bottom: 5px">Weight Loss</li>';
+                                        
+                                    }
+                                    if ($strength) {
+                                        echo '<li style="font-size:25px;margin-bottom: 5px">Strength</li>';
+                                        
+                                    }
+                                    if ($endurance) {
+                                        echo '<li style="font-size:25px;margin-bottom: 5px">Endurance</li>';
+                                        
+                                    }
+                                    if ($body_building) {
+                                        echo '<li style="font-size:25px;margin-bottom: 5px">Bodybuilding</li>';
+                                        
+                                    }
+                                    if ($flexibility) {
+                                        echo '<li style="font-size:25px;margin-bottom: 5px">Flexibility</li>';
+                                        
+                                    }
+                                    ?>
+                                    </div>
     <?php
     if ($meal_id > 0) {
         $sql1 = "SELECT * FROM meal_plans WHERE meal_planId = '$meal_id'";
@@ -110,7 +142,7 @@ if ($trainee_id > 0) {
         }
 
         if (isset($mealPlanImg)) {
-            echo "<li style='font-size:25px;margin-bottom: 5px'>Meal plan: <br> <img src='img/meal_plans/$mealPlanImg' alt='Meal Plan Image'></li>";
+            echo "<li style='font-size:25px;margin-bottom: 5px;color:#f36105'>Meal plan: <br> <img src='img/meal_plans/$mealPlanImg' alt='Meal Plan Image'></li>";
         } else {
             echo "<li style='font-size:25px;margin-bottom: 5px'>Meal plan: <br> There's no meal plan yet</li>";
         }
@@ -129,7 +161,7 @@ if ($trainee_id > 0) {
         }
 
         if (isset($trainingPlanImg)) {
-            echo "<li style='font-size:25px;margin-bottom: 5px'>Training plan: <br> <img src='img/training_plans/$trainingPlanImg' alt='Training Plan Image'></li>";
+            echo "<li style='font-size:25px;margin-bottom: 5px;color:#f36105'>Training plan: <br> <img src='img/training_plans/$trainingPlanImg' alt='Training Plan Image'></li>";
         } else {
             echo "<li style='font-size:25px;margin-bottom: 5px'>Training plan: <br> There's no training plan yet</li>";
         }
@@ -145,7 +177,7 @@ if ($trainee_id > 0) {
         </div> 
             
             </div>
-            <div style=" height:2000px" class="hs-item set-bg" data-setbg="img/hero/hero-2.jpg" >
+            <div style=" height:4500px" class="hs-item set-bg" data-setbg="img/hero/hero-2.jpg" >
                 <div  class="container">
                     <div class="row">
                         <div class="col-lg-12 offset-lg-12">
