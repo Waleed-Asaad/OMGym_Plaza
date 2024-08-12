@@ -63,8 +63,14 @@ if(!isset($_SESSION['adminName'])){
                         $remainingDays = $currentDate > $endingDate ? 0 : $currentDate->diff($endingDate)->days;
                         
                         echo "
-                        <div class='card'>
-                            <img src='img/trainees/$traineeImg' alt='$traineeName'>
+                        <div class='card'>";
+                        if($traineeImg){
+                            echo " <img src='img/trainees/$traineeImg' alt='$traineeName'>";
+                        }
+                        else{
+                            echo " <div style='height:470px;width:370px; text-align:center; align-content:center'><b>NO PICTURE</b></div>";
+                        }
+                        echo"
                             <h3>$traineeName</h3>
                             <h5>Subscription Date: $subscriptionDate</h5>
                             <h5>Days Remaining: $remainingDays</h5>
