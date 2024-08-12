@@ -5,10 +5,6 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-$sql = "SELECT * FROM products";
-$result = mysqli_query($conn, $sql);
-
-// המלצות על מוצרים דומים
 $userEmail = $_SESSION['userEmail'];
 $user_query = "SELECT userId FROM user WHERE userEmail = '$userEmail'";
 $user_result = mysqli_query($conn, $user_query);
@@ -36,70 +32,40 @@ if ($last_order_result && mysqli_num_rows($last_order_result) > 0) {
 }
 
 $recommended_products = [];
-$recommended_categories = [];
 
-if (count($last_order_products) > 0) {
-    // אם הייתה קנייה אחרונה, מוצרים שלא נרכשו מקטגוריות שונות
-    $recommended_products_query = "
+// הגדרת סדר הקטגוריות הרצוי
+$category_order = ["Protein Powder", "Nutritional Supplements", "Protein Bars"];
+
+foreach ($category_order as $category) {
+    $product_query = "
         SELECT *
         FROM products
-        WHERE category NOT IN ('" . implode("','", $last_order_categories) . "')
-        AND productId NOT IN (" . implode(",", $last_order_products) . ")
-        GROUP BY category
+        WHERE category = '$category'
+        AND productId NOT IN (" . (count($last_order_products) > 0 ? implode(",", $last_order_products) : "0") . ")
         ORDER BY RAND()
-        LIMIT 3";
-    $recommended_products_result = mysqli_query($conn, $recommended_products_query);
+        LIMIT 1";
+    $product_result = mysqli_query($conn, $product_query);
 
-    if ($recommended_products_result && mysqli_num_rows($recommended_products_result) > 0) {
-        while ($product_row = mysqli_fetch_assoc($recommended_products_result)) {
-            $recommended_products[] = $product_row;
-            $recommended_categories[] = $product_row['category'];
+    if ($product_result && mysqli_num_rows($product_result) > 0) {
+        $recommended_products[] = mysqli_fetch_assoc($product_result);
+    } else {
+        // אם לא נמצאו מוצרים שלא נרכשו, נבחר מוצר אחר מהקטגוריה
+        $fallback_query = "
+            SELECT *
+            FROM products
+            WHERE category = '$category'
+            ORDER BY RAND()
+            LIMIT 1";
+        $fallback_result = mysqli_query($conn, $fallback_query);
+        if ($fallback_result && mysqli_num_rows($fallback_result) > 0) {
+            $recommended_products[] = mysqli_fetch_assoc($fallback_result);
         }
-        mysqli_free_result($recommended_products_result);
     }
 }
 
-// אם לא מצאנו שלושה מוצרים מקטגוריות שונות, נוסיף מוצרים רנדומליים מקטגוריות שונות
-if (count($recommended_products) < 3) {
-    $remaining_count = 3 - count($recommended_products);
-    $random_products_query = "
-        SELECT *
-        FROM products
-        WHERE category NOT IN ('" . implode("','", $recommended_categories) . "')
-        AND productId NOT IN (" . implode(",", $last_order_products) . ")
-        GROUP BY category
-        ORDER BY RAND()
-        LIMIT $remaining_count";
-    $random_products_result = mysqli_query($conn, $random_products_query);
-
-    if ($random_products_result && mysqli_num_rows($random_products_result) > 0) {
-        while ($product_row = mysqli_fetch_assoc($random_products_result)) {
-            $recommended_products[] = $product_row;
-            $recommended_categories[] = $product_row['category'];
-        }
-        mysqli_free_result($random_products_result);
-    }
-}
-
-// אם לא מצאנו שלושה מוצרים, נוסיף מוצרים מכל קטגוריה
-if (count($recommended_products) < 3) {
-    $remaining_count = 3 - count($recommended_products);
-    $all_categories_products_query = "
-        SELECT *
-        FROM products
-        WHERE category NOT IN ('" . implode("','", $recommended_categories) . "')
-        GROUP BY category
-        ORDER BY RAND()
-        LIMIT $remaining_count";
-    $all_categories_products_result = mysqli_query($conn, $all_categories_products_query);
-
-    if ($all_categories_products_result && mysqli_num_rows($all_categories_products_result) > 0) {
-        while ($product_row = mysqli_fetch_assoc($all_categories_products_result)) {
-            $recommended_products[] = $product_row;
-        }
-        mysqli_free_result($all_categories_products_result);
-    }
-}
+// שאילתה לכל המוצרים להצגה בחנות
+$sql = "SELECT * FROM products";
+$result = mysqli_query($conn, $sql);
 
 if (isset($_GET['productId'])) {
     $productId = $_GET['productId'];

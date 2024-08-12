@@ -138,12 +138,6 @@ session_start()
     <?php include 'show-gallery.php';?>
     <!-- Gallery Section End -->
 
-    <!-- Team Section Begin -->
-    <?php
-        include 'team-section.php';
-    ?>
-    <!-- Team Section End -->
-
     <!-- Get In Touch Section Begin -->
     <?php 
         include 'getInTouch.php';
