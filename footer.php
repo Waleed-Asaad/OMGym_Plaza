@@ -22,7 +22,6 @@
                         <h4>Support</h4>
                         <ul>
                             <li><a href="user-login.php">Login</a></li>
-                            <li><a href="subscription.php">Subscribe</a></li>
                             <li><a href="contact.php">Contact</a></li>
                         </ul>
                     </div>
