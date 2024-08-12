@@ -14,7 +14,12 @@
         <nav class="canvas-menu mobile-menu">
             <ul>
                 <li><a href="./traineeHome.php">Trainee Home</a></li>
-                <li><a href="./store.php">Store</a></li>
+                <li><a href="#">Store</a>
+                    <ul class="dropdown">
+                        <li><a href="./store.php">Store</a></li>
+                        <li><a href="./history.php">History</a></li>
+                    </ul>
+                </li>
                 <li><a href="./cart.php">Cart <i class="fas fa-shopping-cart"></i></a></li>
                 <li><a href="./trainers.php">Trainers</a></li>
                 <li><a href="./mealPlans.php">Meal Plans</a></li>
