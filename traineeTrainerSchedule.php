@@ -114,9 +114,8 @@ if (isset($_GET['change1']) && isset($_GET['change2'])) {
                     <div class="breadcrumb-text">
                         <h2>Timetable</h2>
                         <div class="bt-option">
-                            <a href="./index.html">Home</a>
-                            <a href="#">Pages</a>
-                            <span>Services</span>
+                            <a href="#">Home</a>
+                            <span>Trainer Schedule</span>
                         </div>
                     </div>
                 </div>

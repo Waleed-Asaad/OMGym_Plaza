@@ -109,8 +109,7 @@ if (isset($_GET['change1']) && isset($_GET['change2'])) {
                         <h2>Timetable</h2>
                         <div class="bt-option">
                             <a href="./index.html">Home</a>
-                            <a href="#">Pages</a>
-                            <span>Services</span>
+                            <span>My Classes</span>
                         </div>
                     </div>
                 </div>

@@ -162,8 +162,7 @@ function cancelTraining($hour, $day, $conn) {
                     <h2>Timetable</h2>
                     <div class="bt-option">
                         <a href="./index.html">Home</a>
-                        <a href="#">Pages</a>
-                        <span>Services</span>
+                        <span>My Schedule</span>
                     </div>
                 </div>
             </div>
