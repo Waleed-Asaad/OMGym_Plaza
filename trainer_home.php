@@ -17,6 +17,20 @@ if (isset($_POST['submit'])) {
     $user_id = $row['userId'];
     $image = $_FILES['image']['name'];
 
+    $sql = "UPDATE user SET userName = ? WHERE userId = ?";
+    $stmt = $conn->prepare($sql);
+    if ($stmt) {
+        $stmt->bind_param("si", $name, $user_id);
+    if ($stmt->execute()) {
+        echo "Record updated successfully";
+    } else {
+        echo "Error updating record: " . $stmt->error;
+    }
+        $stmt->close();
+    } else {
+        echo "Error preparing statement: " . $conn->error;
+    }
+
     $sql = "UPDATE trainer SET trainerImg = ?, trainerName = ?, muscle_building = ?, weight_loss = ?, strength = ?, flexibility = ?, endurance = ?, body_building = ? WHERE userId = ?";
     $stmt = $conn->prepare($sql);
     if ($stmt) {
