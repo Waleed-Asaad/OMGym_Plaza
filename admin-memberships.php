@@ -2,15 +2,14 @@
 include 'connection.php';
 session_start();
 
-if (!isset($_SESSION['adminName'])) {
+if(!isset($_SESSION['adminUsername'])){
     header('location:admin-login.php');
-    exit;
-}
+ }
 
 if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
-
+//עדכון המנוי
 if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['update_membership'])) {
     $id = $_POST['id'];
     $name = $_POST['name'];

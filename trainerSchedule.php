@@ -2,6 +2,7 @@
 session_start();
 include 'connection.php';
 
+// פונקציה שמשנה את הזמינות של שעה מסוימת לפי התאריך והשעה הנוכחיים
 function change($hour, $day, $conn) {
     $sql = "SELECT * FROM trainerHours WHERE hourId = ?";
     $stmt = $conn->prepare($sql);
@@ -12,18 +13,21 @@ function change($hour, $day, $conn) {
     $trainee_id = $row['traineeId'];
     $availableTrainer = $row['available'];
 
-    date_default_timezone_set('Asia/Jerusalem');
+    date_default_timezone_set('Asia/Jerusalem'); // קובע את אזור הזמן לישראל
     $current_hour = intval(date('H'));
-    $current_day = date('w') + 1;
-    $trainer_hour = intval($row['hours']);
-    
+    $current_day = date('w') + 1; // מקבל את היום הנוכחי (0 ליום ראשון, 6 לשבת) ומוסיף 1 כדי להתאים את הימים
 
+    $trainer_hour = intval($row['hours']); // השעה המתוכננת של המאמן
+
+    // בודק את מצב הזמינות הנוכחי ומעדכן בהתאם
     if ($row['available'] == 0) {
-        $availableTrainer = 1;
+        $availableTrainer = 1; // אם המאמן אינו זמין, הופך אותו לזמין
     } else if ($row['available'] == 1) {
-        $availableTrainer = 0;
+        $availableTrainer = 0; // אם המאמן זמין, הופך אותו ללא זמין
     } else {
-        if (!(($trainer_hour - $current_hour >= 0 && $trainer_hour - $current_hour <= 2) && ($day %7 ) == $current_day)) {
+        // בודק האם ניתן לבטל את האימון לפי הזמן שנותר
+        if (!(($trainer_hour - $current_hour >= 0 && $trainer_hour - $current_hour <= 2) && ($day % 7) == $current_day)) {
+            // מציג הודעת אישור על ביטול האימון
             echo "<script type='text/javascript'>
                 if (confirm('Are you sure you want to cancel the training?')) {
                     window.location.href = 'trainerSchedule.php?cancel1=" . $hour . "&cancel2=" . $day . "';
@@ -31,40 +35,47 @@ function change($hour, $day, $conn) {
                     window.location.href = 'trainerSchedule.php';
                 }
             </script>";
-            return; // Exit the function to prevent further execution
+            return; // עוצר את הפונקציה אם המשתמש מאשר את הביטול
         } else {
+            // אם לא ניתן לבטל את האימון, מציג הודעה
             echo "<script type='text/javascript'>
                 alert('You can\'t cancel the training');
                 window.location.href = 'trainerSchedule.php';
             </script>";
-            return; // Exit the function to prevent further execution
+            return; // עוצר את הפונקציה אם הביטול לא אפשרי
         }
     }
 
+    // מעדכן את הזמינות של המאמן בבסיס הנתונים
     $sql_update = "UPDATE trainerHours SET available = ? WHERE hourId = ?";
     $stmt_update = $conn->prepare($sql_update);
     $stmt_update->bind_param("ii", $availableTrainer, $hour);
     $stmt_update->execute();
-    header("Location: trainerSchedule.php");
+    header("Location: trainerSchedule.php"); // מפנה את המשתמש לעמוד לוח הזמנים של המאמן לאחר העדכון
     exit;
 }
 
+// בודק אם יש בקשה לשינוי מצב זמינות ומפעיל את הפונקציה change בהתאם
 if (isset($_GET['change1']) && isset($_GET['change2'])) {
     change(intval($_GET['change1']), intval($_GET['change2']), $conn);
 }
+
+// בודק אם יש בקשה לביטול אימון ומפעיל את הפונקציה cancelTraining בהתאם
 if (isset($_GET['cancel1']) && isset($_GET['cancel2'])) {
     cancelTraining(intval($_GET['cancel1']), intval($_GET['cancel2']), $conn);
 }
 
+// פונקציה לביטול אימון מסוים
 function cancelTraining($hour, $day, $conn) {
-    $sql = "SELECT * FROM trainerHours WHERE hourId = ?";
+    $sql = "SELECT * FROM trainerHours WHERE hourId = ?"; // שאילתא לבחירת השעה המתאימה לפי ה-ID שלה
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("i", $hour);
     $stmt->execute();
     $result = $stmt->get_result();
     $row = $result->fetch_assoc();
-    $trainee_id = $row['traineeId'];
+    $trainee_id = $row['traineeId']; // מקבל את ה-ID של המתאמן אם יש כזה
 
+    // בודק אם יש יום תואם בלוח הזמנים של המתאמן
     $select = "SELECT * FROM traineeDay WHERE traineeId = ? ORDER BY dayId ASC";
     $stmt = $conn->prepare($select);
     $stmt->bind_param("i", $trainee_id);
@@ -72,7 +83,7 @@ function cancelTraining($hour, $day, $conn) {
     $result = $stmt->get_result();
     while ($row = $result->fetch_assoc()) {
         $day_id = $row['dayId'];
-        if ($day_id % 7 == $day % 7) {
+        if ($day_id % 7 == $day % 7) { // משווה את היום שנבחר ליום בלוח הזמנים
             $sql = "SELECT * FROM traineeHours WHERE dayId = ? ORDER BY hourId ASC";
             $stmt_hours = $conn->prepare($sql);
             $stmt_hours->bind_param("i", $day_id);
@@ -80,12 +91,14 @@ function cancelTraining($hour, $day, $conn) {
             $result_hours = $stmt_hours->get_result();
             while ($row_hours = $result_hours->fetch_assoc()) {
                 $hour_id = $row_hours['hourId'];
-                if ($hour_id % 12 == $hour % 12) {
+                if ($hour_id % 12 == $hour % 12) { // משווה את השעה שנבחרה לשעה בלוח הזמנים
+                    // מבטל את האימון בלוח הזמנים של המתאמן
                     $sql_update = "UPDATE traineeHours SET scheduled = 0 WHERE hourId = ?";
                     $stmt_update = $conn->prepare($sql_update);
                     $stmt_update->bind_param("i", $hour_id);
                     $stmt_update->execute();
 
+                    // מסיר את המתאמן מהשעה בלוח הזמנים של המאמן
                     $sql_update = "UPDATE trainerHours SET traineeId = 0 WHERE hourId = ?";
                     $stmt_update = $conn->prepare($sql_update);
                     $stmt_update->bind_param("i", $hour);
@@ -95,6 +108,7 @@ function cancelTraining($hour, $day, $conn) {
         }
     }
 
+    // מעדכן את מספר הביטולים של המאמן בבסיס הנתונים
     $user_email = $_SESSION['userEmail'];
     $select = "SELECT * FROM user WHERE userEmail = ?";
     $stmt = $conn->prepare($select);
@@ -117,12 +131,11 @@ function cancelTraining($hour, $day, $conn) {
     $stmt_update1->bind_param("ii", $cancel, $row['trainerId']);
     $stmt_update1->execute();
 
+    // מעדכן את השעה בלוח הזמנים של המאמן כלא זמינה
     $sql_update2 = "UPDATE trainerHours SET available = 0 WHERE hourId = ?";
     $stmt_update2 = $conn->prepare($sql_update2);
     $stmt_update2->bind_param("i", $hour);
     $stmt_update2->execute();
-    // header("Location: trainerSchedule.php");
-    // exit;
 }
 ?>
 
@@ -204,6 +217,7 @@ function cancelTraining($hour, $day, $conn) {
                         </thead>
                         <tbody>
                             <?php
+                            // שולף את פרטי המשתמש לפי המייל מהסשן
                             $user_email = $_SESSION['userEmail'];
                             $select = "SELECT * FROM user WHERE userEmail = ?";
                             $stmt = $conn->prepare($select);
@@ -213,6 +227,7 @@ function cancelTraining($hour, $day, $conn) {
                             $row = $result->fetch_assoc();
                             $user_id = $row['userId'];
 
+                            // שולף את פרטי המאמן לפי ה-userId של המשתמש
                             $select = "SELECT * FROM trainer WHERE userId = ?";
                             $stmt = $conn->prepare($select);
                             $stmt->bind_param("i", $user_id);
@@ -221,6 +236,7 @@ function cancelTraining($hour, $day, $conn) {
                             $row = $result->fetch_assoc();
                             $trainer_id = $row['trainerId'];
 
+                            // שולף את לוח הזמנים של המאמן לפי ה-trainerId ומסדר לפי ימים
                             $select = "SELECT * FROM trainerDay WHERE trainerId = ? ORDER BY dayId ASC";
                             $stmt = $conn->prepare($select);
                             $stmt->bind_param("i", $trainer_id);
@@ -230,6 +246,8 @@ function cancelTraining($hour, $day, $conn) {
                                 $day_id = $row['dayId'];
                                 $day = $row['days'];
                                 echo "<tr><td style='padding: 0' class='class-time'>$day</td>";
+
+                                // שולף את שעות העבודה של המאמן לפי היום
                                 $sql = "SELECT * FROM trainerHours WHERE dayId = ? ORDER BY hourId ASC";
                                 $stmt_hours = $conn->prepare($sql);
                                 $stmt_hours->bind_param("i", $day_id);
@@ -239,6 +257,9 @@ function cancelTraining($hour, $day, $conn) {
                                     $hour_id = $row_hours['hourId'];
                                     $button_text = "";
                                     $button_color = "";
+                                    $text_color = "";
+
+                                    // קובע את הטקסט והצבע של הכפתור בהתאם לזמינות השעה
                                     switch ($row_hours['available']) {
                                         case 0:
                                             $button_text = " / ";
@@ -257,6 +278,7 @@ function cancelTraining($hour, $day, $conn) {
                                             break;
                                     }
 
+                                    // מציג את הכפתור בשעה המתאימה בטבלה
                                     echo "<td style='padding: 0; ' class='ts-meta'>
                                         <button style='padding: 0 ; width: 100%; background: $button_color; color: $text_color' onclick='changeStatus($hour_id, $day_id);'>$button_text</button>
                                         </td>";
@@ -288,6 +310,7 @@ function cancelTraining($hour, $day, $conn) {
 <script src="js/main.js"></script>
 
 <script>
+    // פונקציה לשינוי מצב הזמינות של שעה מסוימת על ידי שליחה ל-URL המתאים
     function changeStatus(hour, day) {
         window.location.href = "trainerSchedule.php?change1=" + hour + "&change2=" + day;
     }

@@ -16,7 +16,6 @@ session_start();
             flex-wrap: wrap;
             justify-content: center;
             gap: 20px;
-            /* margin-top:400px; */
         }
         .card img {
             width: 100%;

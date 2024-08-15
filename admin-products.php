@@ -3,13 +3,13 @@
 include 'connection.php';
 session_start();
 
-if(!isset($_SESSION['adminName'])){
-   header('location:admin-login.php');
-}
+if(!isset($_SESSION['adminUsername'])){
+    header('location:admin-login.php');
+ }
 
 $sql = "SELECT * FROM products";
 $result = mysqli_query($conn, $sql);
-
+//מחיקת מוצר
 if (isset($_POST['delete'])) {
     $productId = $_POST['delete'];
 
@@ -17,7 +17,7 @@ if (isset($_POST['delete'])) {
     mysqli_query($conn, $deleteSql);
 	header("Location: admin-home.php");
 }
-
+//לעבור לדף עדכון מוצר
 if (isset($_POST['edit'])) {
     $productId = $_POST['edit'];
     header("Location: admin-edit.php?productId=$productId");

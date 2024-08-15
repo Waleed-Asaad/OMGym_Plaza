@@ -80,7 +80,6 @@ if (isset($_GET['change'])) {
     include 'traineeMenu.php';
 ?>
 
-    <!-- Breadcrumb Section Begin -->
     <?php
                             $email = $_SESSION['userEmail'];
                             $select = "SELECT * FROM user WHERE userEmail = '$email'";
