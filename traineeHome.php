@@ -19,6 +19,7 @@ if (isset($_POST['submit'])) {
     $row = mysqli_fetch_array($result);
     $user_id = $row['userId'];
     $image = $_FILES['image']['name'];
+    echo "<h1 style='color:white'>$image</h1>";
 
     $sql = "UPDATE trainee SET traineeImg = ?, height = ?, age = ?, gender = ?, activity = ?, muscle_building = ?, weight_loss = ?, strength = ?, flexibility = ?, endurance = ?, body_building = ? WHERE userId = ?";
     $stmt = $conn->prepare($sql);
@@ -62,6 +63,31 @@ if (isset($_POST['submit'])) {
     <link rel="stylesheet" href="css/magnific-popup.css" type="text/css">
     <link rel="stylesheet" href="css/slicknav.min.css" type="text/css">
     <link rel="stylesheet" href="css/style.css" type="text/css">
+
+    <style>
+        .file-upload {
+            display: none;
+        }
+
+        .file-upload-label {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #f36105;
+            color: white;
+            font-size: 14px;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        .file-upload-label:hover {
+            background-color: #f33505;
+        }
+
+        .file-name {
+            margin-left: 10px;
+            font-style: italic;
+        }
+    </style>
 </head>
 
 <body>
@@ -208,7 +234,11 @@ if (isset($_POST['submit'])) {
                                                 <label for="body_building" style="color:white">Body Building</label><br>
                                                 <input type="checkbox" id="body_building" name="body_building" value="1"><br>
                                             </div>
-                                            <input type="file" name="image" accept="image/png, image/jpg, image/jpeg" required>
+                                            <p>Add profile file:</p>
+                                            
+                                            <label class="file-upload-label" for="file-upload">Upload Image</label>
+                                            <input type="file" name="image" id="file-upload" class="file-upload" accept="image/png, image/jpg, image/jpeg">
+                                            <span class="file-name">No file chosen</span>
                                             <input type="submit" name="submit" value="Submit" class="form-btn">
                                         ';
                                         ?>
@@ -286,5 +316,24 @@ if (isset($_POST['submit'])) {
     <script src="js/jquery.slicknav.js"></script>
     <script src="js/owl.carousel.min.js"></script>
     <script src="js/main.js"></script>
+
+    <script>
+        console.log("JavaScript is running");
+
+        const fileUpload = document.getElementById('file-upload');
+        const fileName = document.querySelector('.file-name');
+
+        
+        console.log("File selected: " + fileUpload.files[0].name);
+        
+
+        fileUpload.addEventListener('change', function() {
+            if (fileUpload.files.length > 0) {
+                fileName.textContent = fileUpload.files[0].name;
+            } else {
+                fileName.textContent = "No file chosen";
+            }
+        });
+    </script>
 </body>
 </html>
