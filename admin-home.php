@@ -2,8 +2,8 @@
 include 'connection.php';
 session_start();
 
-if(!isset($_SESSION['adminName'])){
-   header('location:admin-home.php');
+if(!isset($_SESSION['adminUsername'])){
+   header('location:admin-login.php');
 }
 
 $selected_year = isset($_GET['year']) ? intval($_GET['year']) : date("Y");

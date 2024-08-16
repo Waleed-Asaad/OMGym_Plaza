@@ -1,12 +1,51 @@
-    <!-- Page Preloder -->
-    <!-- <div id="preloder">
-        <div class="loader"></div>
-    </div> -->
-    <head>
+<?php
+include 'connection.php';
+
+// הנח שהמייל שמור ב-$_SESSION['userEmail']
+$email = $_SESSION['userEmail'];
+
+// שליפת userId לפי המייל
+$sql = "SELECT userId FROM user WHERE userEmail = ?";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("s", $email);
+$stmt->execute();
+$result = $stmt->get_result();
+$row = $result->fetch_assoc();
+$userId = $row['userId'];
+
+// פונקציה לספירת ההודעות שלא נקראו
+function getUnreadMessagesCount($userId, $conn) {
+    $sql = "SELECT COUNT(*) as unreadCount FROM messages WHERE userId = ? AND readed = 0";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("i", $userId);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $row = $result->fetch_assoc();
+    return $row['unreadCount'];
+}
+
+// ספירת ההודעות שלא נקראו
+$unreadCount = getUnreadMessagesCount($userId, $conn);
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    </head>
+    <style>
+        .badge {
+            background-color: red;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 50%;
+            font-size: 12px;
+            vertical-align: top;
+            margin-left: 5px;
+        }
+    </style>
+</head>
 
+<body>
     <!-- Offcanvas Menu Section Begin -->
     <div class="offcanvas-menu-overlay"></div>
     <div class="offcanvas-menu-wrapper">
@@ -27,6 +66,11 @@
                 </li>
                 <li><a href="./subscription.php">Subscription</a></li>
                 <li><a href="./cart.php">Cart <i class="fas fa-shopping-cart"></i></a></li>
+                <li><a href="./messages.php">Messages <i class="fas fa-envelope"></i>
+                    <?php if ($unreadCount > 0) { ?>
+                        <span class="badge"><?php echo $unreadCount; ?></span>
+                    <?php } ?>
+                </a></li>
                 <li><a href="./logout.php">Logout <i class="fas fa-sign-out-alt"></i></a></li>  
             </ul>
         </nav>
@@ -50,8 +94,12 @@
                             <li><a href="./store.php">Store</a></li>
                             <li><a href="./subscription.php">Subscription</a></li>
                             <li><a href="./cart.php">Cart <i class="fas fa-shopping-cart"></i></a></li>
+                            <li><a href="./messages.php">Messages <i class="fas fa-envelope"></i>
+                                <?php if ($unreadCount > 0) { ?>
+                                    <span class="badge"><?php echo $unreadCount; ?></span>
+                                <?php } ?>
+                            </a></li>
                             <li><a href="./logout.php">Logout <i class="fas fa-sign-out-alt"></i></a></li>
-                            
                         </ul>
                     </nav>
                 </div>
@@ -62,3 +110,5 @@
             </div>
         </div>
     </header>
+</body>
+</html>

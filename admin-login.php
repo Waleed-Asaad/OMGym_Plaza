@@ -14,7 +14,7 @@ if(isset($_POST['submit'])){
  
        $row = mysqli_fetch_array($result);
         $_SESSION['adminId'] = $row['adminId'];
-        $_SESSION['adminName'] = $row['adminName'];
+        $_SESSION['adminUsername'] = $row['adminUsername'];
        echo '<script type="text/javascript">
          window.location = "admin-home.php";
        </script>';
