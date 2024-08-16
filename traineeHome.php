@@ -278,7 +278,7 @@ if (isset($_POST['submit'])) {
         const fileName = document.querySelector('.file-name');
 
         
-        console.log("File selected: " + fileUpload.files[0].name);
+        
         
 
         fileUpload.addEventListener('change', function() {
