@@ -234,15 +234,12 @@ if (isset($_POST['submit'])) {
                                                 <label for="body_building" style="color:white">Body Building</label><br>
                                                 <input type="checkbox" id="body_building" name="body_building" value="1"><br>
                                             </div>
-                                            <p>Add profile file:</p>
-                                            
-                                            <label class="file-upload-label" for="file-upload">Upload Image</label>
-                                            <input type="file" name="image" id="file-upload" class="file-upload" accept="image/png, image/jpg, image/jpeg">
-                                            <span class="file-name">No file chosen</span>
+                                            <p style="color: #f36105;">Add profile file:</p>
+                                            <input type="file" name="image" style="background: #f36105; color: white;" required>
                                             <input type="submit" name="submit" value="Submit" class="form-btn">
                                         ';
                                         ?>
-                                            </form>
+                                        </form>
                                     </div>
                                 </div>
                             </div>
@@ -271,23 +268,6 @@ if (isset($_POST['submit'])) {
     <script src="js/owl.carousel.min.js"></script>
     <script src="js/main.js"></script>
 
-    <script>
-        console.log("JavaScript is running");
-
-        const fileUpload = document.getElementById('file-upload');
-        const fileName = document.querySelector('.file-name');
-
-        
-        console.log("File selected: " + fileUpload.files[0].name);
-        
-
-        fileUpload.addEventListener('change', function() {
-            if (fileUpload.files.length > 0) {
-                fileName.textContent = fileUpload.files[0].name;
-            } else {
-                fileName.textContent = "No file chosen";
-            }
-        });
-    </script>
+    
 </body>
 </html>
