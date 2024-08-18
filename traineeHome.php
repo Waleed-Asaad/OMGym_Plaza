@@ -234,7 +234,7 @@ if (isset($_POST['submit'])) {
                                                 <label for="body_building" style="color:white">Body Building</label><br>
                                                 <input type="checkbox" id="body_building" name="body_building" value="1"><br>
                                             </div>
-                                            <p style="color: #f36105;">Add profile file:</p>
+                                            <p style="color: #f36105;">Add Profile Photo:</p>
                                             <input type="file" name="image" style="background: #f36105; color: white;" required>
                                             <input type="submit" name="submit" value="Submit" class="form-btn">
                                         ';
