@@ -215,12 +215,37 @@ if (isset($_POST['submit'])) {
                                 $gender_placeholder = isset($gender) ? $gender : 'Enter your gender';
                                 $activity_placeholder = isset($activity) ? $activity : 'Enter your activity';
                                 echo '
-                                            <input type="number" name="height" required placeholder="'.$height_placeholder.'">
-                                            <input type="number" name="age" required placeholder="'.$age_placeholder.'">
-                                            <input type="text" name="gender" required placeholder="'.$gender_placeholder.'">
-                                            <input type="text" name="activity" required placeholder="'.$activity_placeholder.'">
-                                            <div class="specialty">
-                                                <label style="color:white">Specialty:</label><br>
+                                            <div style="display: inline-flex;width:550px">
+                                                <p style="color: #f36105; width:100px">Add Weight:</p>
+                                                <input type="number" name="height" required placeholder="'.$height_placeholder.'">
+                                            </div>
+                                            <div style="display: inline-flex;width:550px; margin-left:20px">
+                                                <p style="color: #f36105;">Add Age:</p>
+                                                <input type="number" name="age" required placeholder="'.$age_placeholder.'">
+                                            </div>
+                                            <div style="display: inline-flex">
+                                                <p style="color: #f36105;">Add Gender:</p>
+                                                <input type="radio" id="male" name="gender" value="male">
+                                                <label style="color:white; margin:25px 10px 0 0" for="male">Male</label>
+                                                <input type="radio" id="female" name="gender" value="female">
+                                                <label style="color:white; margin:25px 10px 0 0" for="female">Female</label>
+                                            </div><br>
+                                            <div style="display: inline-flex">
+                                                <p style="color: #f36105;">Add Activity:</p>
+                                                <input type="radio" id="low" name="activity" value="Low">
+                                                <label style="color:white; margin:25px 10px 0 0" for="low">Low</label>
+                                                <input type="radio" id="medium" name="activity" value="medium">
+                                                <label style="color:white; margin:25px 10px 0 0" for="medium">Medium</label>
+                                                <input type="radio" id="high" name="activity" value="high">
+                                                <label style="color:white; margin:25px 10px 0 0" for="high">High</label>
+                                            </div>
+                                            <div style="display: inline-flex;width:550px">
+                                                <p style="color: #f36105;">Add Weight:</p>
+                                                <input type="text" name="activity" required placeholder="'.$activity_placeholder.'">
+                                            </div>
+                                               
+                                                <div class="specialty">
+                                                <label style="color:#f36105">Specialty:</label><br>
                                                 <label for="muscle_building" style="color:white">Muscle Building</label><br>
                                                 <input type="checkbox" id="muscle_building" name="muscle_building" value="1"><br>
                                                 <label for="weight_loss" style="color:white">Weight Loss</label><br>
