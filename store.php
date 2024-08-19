@@ -65,7 +65,7 @@ foreach ($category_order as $category) {
 
 // שאילתה לכל המוצרים להצגה בחנות
 $sql = "SELECT * FROM products";
-$result = mysqli_query($conn, $sql);
+$product_result = mysqli_query($conn, $sql);
 
 if (isset($_GET['productId'])) {
     $productId = $_GET['productId'];
@@ -214,8 +214,8 @@ if (isset($_GET['productId'])) {
         <h3 style="color: #ec5606; padding: 20px;">* All Products *</h3>
             <div class="row justify-content-center">
                 <?php
-                if ($result && mysqli_num_rows($result) > 0) {
-                    while ($row = mysqli_fetch_assoc($result)) { ?>
+                if ($product_result && mysqli_num_rows($product_result) > 0) {
+                    while ($row = mysqli_fetch_assoc($product_result)) { ?>
                         <div class="col-lg-4 col-md-8">
                             <div class="ps-item">
                                 <h2 style="color:beige"><?php echo $row["productName"]; ?></h2>
@@ -228,7 +228,7 @@ if (isset($_GET['productId'])) {
                             </div>
                         </div>
                     <?php }
-                    mysqli_free_result($result);
+                    mysqli_free_result($product_result);
                 } else {
                     echo "<p>No products found.</p>";
                 } ?>
