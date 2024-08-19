@@ -268,23 +268,6 @@ if (isset($_POST['submit'])) {
     <script src="js/owl.carousel.min.js"></script>
     <script src="js/main.js"></script>
 
-    <script>
-        console.log("JavaScript is running");
-
-        const fileUpload = document.getElementById('file-upload');
-        const fileName = document.querySelector('.file-name');
-
-        
-        console.log("File selected: " + fileUpload.files[0].name);
-        
-
-        fileUpload.addEventListener('change', function() {
-            if (fileUpload.files.length > 0) {
-                fileName.textContent = fileUpload.files[0].name;
-            } else {
-                fileName.textContent = "No file chosen";
-            }
-        });
-    </script>
+    
 </body>
 </html>
