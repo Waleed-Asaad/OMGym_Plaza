@@ -239,10 +239,6 @@ if (isset($_POST['submit'])) {
                                                 <input type="radio" id="high" name="activity" value="high">
                                                 <label style="color:white; margin:25px 10px 0 0" for="high">High</label>
                                             </div>
-                                            <div style="display: inline-flex;width:550px">
-                                                <p style="color: #f36105;">Add Weight:</p>
-                                                <input type="text" name="activity" required placeholder="'.$activity_placeholder.'">
-                                            </div>
                                                
                                                 <div class="specialty">
                                                 <label style="color:#f36105">Specialty:</label><br>
