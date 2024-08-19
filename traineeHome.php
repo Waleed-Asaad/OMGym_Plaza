@@ -216,7 +216,7 @@ if (isset($_POST['submit'])) {
                                 $activity_placeholder = isset($activity) ? $activity : 'Enter your activity';
                                 echo '
                                             <div style="display: inline-flex;width:550px">
-                                                <p style="color: #f36105; width:100px">Add Weight:</p>
+                                                <p style="color: #f36105; width:100px">Add Height:</p>
                                                 <input type="number" name="height" required placeholder="'.$height_placeholder.'">
                                             </div>
                                             <div style="display: inline-flex;width:550px; margin-left:20px">
@@ -256,7 +256,7 @@ if (isset($_POST['submit'])) {
                                                 <input type="checkbox" id="body_building" name="body_building" value="1"><br>
                                             </div>
                                             <p style="color: #f36105;">Add Profile Photo:</p>
-                                            <input type="file" name="image" style="background: #f36105; color: white;" required>
+                                            <input type="file" name="image" style="background: #f36105; color: white;">
                                             <input type="submit" name="submit" value="Submit" class="form-btn">
                                         ';
                                         ?>
