@@ -29,7 +29,7 @@ $userId = $row['userId'];
 
 // Fetch purchase history
 $history_query = "
-    SELECT o.orderId, o.dateOfPurchase, o.total_price, p.productName, p.price, po.quantity
+    SELECT o.orderId, o.dateOfPurchase, o.total_price, p.productName, p.price, po.quantity, p.image
     FROM tborder o
     JOIN productinorder po ON o.orderId = po.orderId
     JOIN products p ON po.productId = p.productId
@@ -63,11 +63,19 @@ $history_result = mysqli_query($conn, $history_query);
     <link rel="stylesheet" href="css/slicknav.min.css" type="text/css">
     <link rel="stylesheet" href="css/style.css" type="text/css">
     <style>
+        .history-table{
+            width: 950px;
+        }
         td, th, h4 {
             color:white;
         }
         .tr-class{
             background: #f36100;
+        }
+        .product-image {
+            width: 80px;
+            height: 60px;
+            object-fit: cover;
         }
     </style>
 </head>
@@ -116,7 +124,7 @@ $history_result = mysqli_query($conn, $history_query);
                             while ($row = mysqli_fetch_assoc($history_result)) {
                                 if ($current_order_id != $row['orderId']) {
                                     if ($current_order_id != null) {
-                                        echo '</tbody></table></div></div>';
+                                        echo '<tbody><table><div><div>';
                                     }
                                     $current_order_id = $row['orderId'];
                                     echo '<div class="order-item">
@@ -124,6 +132,7 @@ $history_result = mysqli_query($conn, $history_query);
                                         <table class="table table-bordered">
                                             <thead>
                                                 <tr class="tr-class">
+                                                    <th>Product Image</th>
                                                     <th>Product Name</th>
                                                     <th>Quantity</th>
                                                     <th>Price</th>
@@ -132,12 +141,16 @@ $history_result = mysqli_query($conn, $history_query);
                                             <tbody>';
                                 }
                                 echo '<tr>
+                                    <td style="width: 150px;"><img class="product-image" src="img/products/' . $row['image'] . '" alt="' . $row['productName'] . '"></td>
                                     <td>' . $row['productName'] . '</td>
-                                    <td>' . $row['quantity'] . '</td>
-                                    <td>$' . $row['price'] . '</td>
-                                </tr>';
+                                    <td style="width: 60px;">' . $row['quantity'] . '</td>
+                                    <td  style="width: 60px;">$' . $row['price'] . '</td>
+                                    </tr>';
                             }
-                            echo '</tbody></table></div></div>';
+                            echo '</tbody>
+                                    </table>
+                                </div>
+                            </div>';
                             ?>
                         </div>
                     </div>
