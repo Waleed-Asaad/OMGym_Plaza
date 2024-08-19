@@ -1,9 +1,54 @@
+<?php 
+include "connection.php";
+
+// Retrieve the email from the session
+$email = $_SESSION['userEmail'];
+
+// Fetch the userId based on the user email
+$sql = "SELECT userId FROM user WHERE userEmail = ?";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("s", $email);
+$stmt->execute();
+$result = $stmt->get_result();
+$row = $result->fetch_assoc();
+$userId = $row['userId'];
+
+// Count unread messages for the user (which is a trainer)
+function getUnreadMessagesCount($userId, $conn) {
+    $sql = "SELECT COUNT(*) as unreadCount FROM messages WHERE userId = ? AND readed = 0";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("i", $userId);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $row = $result->fetch_assoc();
+    return $row['unreadCount'];
+}
+
+// Get the number of unread messages
+$unreadCount = getUnreadMessagesCount($userId, $conn);
+?>
+
+<!DOCTYPE html>
+<html lang="en">
 <head>
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        .badge {
+            background-color: red;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 50%;
+            font-size: 12px;
+            vertical-align: top;
+            margin-left: 5px;
+        }
+    </style>
 </head>
-<!-- Offcanvas Menu Section Begin -->
-<div class="offcanvas-menu-overlay"></div>
+
+<body>
+    <!-- Offcanvas Menu Section Begin -->
+    <div class="offcanvas-menu-overlay"></div>
     <div class="offcanvas-menu-wrapper">
         <div class="canvas-close">
             <i class="fa fa-close"></i>
@@ -19,6 +64,11 @@
                 <li><a href="./trainerSchedule.php">My Schedule</a></li>
                 <li><a href="./myTrainees.php">My Trainees</a></li>
                 <li><a href="./addPlans.php">Add Plans</a></li>
+                <li><a href="./messages.php">Messages <i class="fas fa-envelope"></i>
+                    <?php if ($unreadCount > 0) { ?>
+                        <span class="badge"><?php echo $unreadCount; ?></span>
+                    <?php } ?>
+                </a></li>
                 <li><a href="./logout.php">Logout <i class="fas fa-sign-out-alt"></i></a></li>  
             </ul>
         </nav>
@@ -44,15 +94,26 @@
                             <li><a href="./trainerSchedule.php">My Schedule</a></li>
                             <li><a href="./myTrainees.php">My Trainees</a></li>
                             <li><a href="./addPlans.php">Add Plans</a></li>
+                            <li><a href="./messages.php">Messages <i class="fas fa-envelope"></i>
+                                <?php if ($unreadCount > 0) { ?>
+                                    <span class="badge"><?php echo $unreadCount; ?></span>
+                                <?php } ?>
+                            </a></li>
                             <li><a href="./logout.php">Logout <i class="fas fa-sign-out-alt"></i></a></li>
-                            
                         </ul>
                     </nav>
                 </div>
-                
             </div>
             <div class="canvas-open">
                 <i class="fa fa-bars"></i>
             </div>
         </div>
     </header>
+
+    <!-- JavaScript for Popup -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        // Similar to user implementation, you can add the popup functionality here.
+    </script>
+</body>
+</html>
