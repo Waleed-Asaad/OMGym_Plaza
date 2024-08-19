@@ -60,7 +60,8 @@ $unreadCount = getUnreadMessagesCount($userId, $conn);
                 <li><a href="./user-home.php">User Home</a></li>
                 <li><a href="#">Store</a>
                     <ul class="dropdown">
-                        <li><a href="./store.php">Store</a></li>
+                        <li><a href="./store.php">Our Store</a></li>
+                        <li><a href="./orders.php">Orders</a></li>
                         <li><a href="./history.php">History</a></li>
                     </ul>
                 </li>
@@ -91,7 +92,13 @@ $unreadCount = getUnreadMessagesCount($userId, $conn);
                     <nav class="nav-menu">
                         <ul>
                             <li><a href="./user-home.php">User Home</a></li>
-                            <li><a href="./store.php">Store</a></li>
+                            <li><a href="#">Store</a>
+                                <ul class="dropdown">
+                                    <li><a href="./store.php">Our Store</a></li>
+                                    <li><a href="./orders.php">Orders</a></li>
+                                    <li><a href="./history.php">History</a></li>
+                                </ul>
+                            </li>
                             <li><a href="./subscription.php">Subscription</a></li>
                             <li><a href="./cart.php">Cart <i class="fas fa-shopping-cart"></i></a></li>
                             <li><a href="./messages.php">Messages <i class="fas fa-envelope"></i>
