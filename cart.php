@@ -75,6 +75,7 @@ if (isset($_POST['checkout'])) {
             }
     
             mysqli_query($conn, "DELETE FROM cart WHERE userId = '$user_id'");
+            header('location:orders.php');
         }
     }
     
