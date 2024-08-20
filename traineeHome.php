@@ -3,10 +3,12 @@ include "connection.php";
 session_start();
 if (isset($_POST['submit'])) {
     $target = "img/trainees/" . basename($_FILES['image']['name']);
+    $weight = $_POST['weight'];
     $height = $_POST['height'];
     $age = $_POST['age'];
     $gender = mysqli_real_escape_string($conn, $_POST['gender']);
     $activity = mysqli_real_escape_string($conn, $_POST['activity']);
+    $numberOfTrainings = $_POST['numberOfTrainings'];
     $muscle_building = isset($_POST['muscle_building']) ? 1 : 0;
     $weight_loss = isset($_POST['weight_loss']) ? 1 : 0;
     $strength = isset($_POST['strength']) ? 1 : 0;
@@ -21,10 +23,10 @@ if (isset($_POST['submit'])) {
     $image = $_FILES['image']['name'];
     echo "<h1 style='color:white'>$image</h1>";
 
-    $sql = "UPDATE trainee SET traineeImg = ?, height = ?, age = ?, gender = ?, activity = ?, muscle_building = ?, weight_loss = ?, strength = ?, flexibility = ?, endurance = ?, body_building = ? WHERE userId = ?";
+    $sql = "UPDATE trainee SET traineeImg = ?, weight = ?, height = ?, age = ?, gender = ?, activity = ?, numberOfTrainings = ?, muscle_building = ?, weight_loss = ?, strength = ?, flexibility = ?, endurance = ?, body_building = ? WHERE userId = ?";
     $stmt = $conn->prepare($sql);
     if ($stmt) {
-        $stmt->bind_param("siissiiiiiii", $image, $height, $age, $gender, $activity, $muscle_building, $weight_loss, $strength, $flexibility, $endurance, $body_building, $user_id);
+        $stmt->bind_param("siiissiiiiiiii", $image, $weight, $height, $age, $gender, $activity, $numberOfTrainings, $muscle_building, $weight_loss, $strength, $flexibility, $endurance, $body_building, $user_id);
         if ($stmt->execute()) {
             move_uploaded_file($_FILES['image']['tmp_name'], $target);
             echo "Record updated successfully";
@@ -134,15 +136,18 @@ if (isset($_POST['submit'])) {
                                 $endurance = $row['endurance'];
                                 $body_building = $row['body_building'];
                                 $flexibility = $row['flexibility'];
+                                $weight = $row['weight'];
                                 $height = $row['height'];
                                 $age = $row['age'];
                                 $gender = $row['gender'];
                                 $activity = $row['activity'];
+                                $numberOfTrainings = $row['numberOfTrainings'];
                                 $startingMembership = $row['startingMembership'];
                                 $traineeImg = $row['traineeImg'];
                                 echo '
                                 <ul>
                                     
+                                    <li style="font-size:25px;margin-bottom: 5px">Weight: ' . htmlspecialchars($weight) . '</li>
                                     <li style="font-size:25px;margin-bottom: 5px">Height: ' . htmlspecialchars($height) . '</li>
                                     <li style="font-size:25px;margin-bottom: 5px">Age: ' . htmlspecialchars($age) . '</li>
                                     <li style="font-size:25px;margin-bottom: 5px">Gender: ' . htmlspecialchars($gender) . '</li>
@@ -173,6 +178,7 @@ if (isset($_POST['submit'])) {
                                         
                                     }
                                     echo '</div>
+                                    <li style="font-size:25px;margin-bottom: 5px">Number Of Trainings: ' . htmlspecialchars($numberOfTrainings) . '</li>
                                     <li style="font-size:25px;margin-bottom: 20px">Starting Membership: ' . htmlspecialchars($startingMembership) . '</li>
                                     <li style="font-size:35px;margin-bottom: 5px;color:orange"><b>Slide To The Side To Update</b></li>
                                 </ul>';
@@ -210,11 +216,18 @@ if (isset($_POST['submit'])) {
                                 $age = $row['age'];
                                 $gender = $row['gender'];
                                 $activity = $row['activity'];
+                                $numberOfTrainings = $row['numberOfTrainings'];
+                                $weight_placeholder = isset($weight) ? $weight : 'Enter your weight';
                                 $height_placeholder = isset($height) ? $height : 'Enter your height';
                                 $age_placeholder = isset($age) ? $age : 'Enter your age';
                                 $gender_placeholder = isset($gender) ? $gender : 'Enter your gender';
                                 $activity_placeholder = isset($activity) ? $activity : 'Enter your activity';
+                                $numberOfTrainings_placeholder = isset($numberOfTrainings) ? $numberOfTrainings : 'Enter your number of trainings';
                                 echo '
+                                            <div style="display: inline-flex;width:550px">
+                                                <p style="color: #f36105; width:100px">Add Weight:</p>
+                                                <input type="number" name="weight" required placeholder="'.$weight_placeholder.'">
+                                            </div>
                                             <div style="display: inline-flex;width:550px">
                                                 <p style="color: #f36105; width:100px">Add Height:</p>
                                                 <input type="number" name="height" required placeholder="'.$height_placeholder.'">
@@ -232,15 +245,22 @@ if (isset($_POST['submit'])) {
                                             </div><br>
                                             <div style="display: inline-flex">
                                                 <p style="color: #f36105;">Add Activity:</p>
-                                                <input type="radio" id="low" name="activity" value="Low">
+                                                <input type="radio" id="low" name="activity" value="low">
                                                 <label style="color:white; margin:25px 10px 0 0" for="low">Low</label>
                                                 <input type="radio" id="medium" name="activity" value="medium">
                                                 <label style="color:white; margin:25px 10px 0 0" for="medium">Medium</label>
                                                 <input type="radio" id="high" name="activity" value="high">
                                                 <label style="color:white; margin:25px 10px 0 0" for="high">High</label>
                                             </div>
-                                               
-                                                <div class="specialty">
+                                            
+                                            <div id="training-container" style="display:none; width:550px; margin-left:20px;">
+                                                <p style="color: #f36105;">Add Number of Trainings:</p>
+                                                <input type="number" id="numberOfTrainings" name="numberOfTrainings" required placeholder="'.$numberOfTrainings_placeholder.'">
+                                            </div>
+                                                
+
+                                              
+                                            <div class="specialty">
                                                 <label style="color:#f36105">Specialty:</label><br>
                                                 <label for="muscle_building" style="color:white">Muscle Building</label><br>
                                                 <input type="checkbox" id="muscle_building" name="muscle_building" value="1"><br>
@@ -279,6 +299,32 @@ if (isset($_POST['submit'])) {
     <?php include 'footer.php'; ?>
     <!-- Footer Section End -->
 
+    <script>
+    const activityRadios = document.querySelectorAll('input[name="activity"]');
+    const trainingContainer = document.getElementById('training-container');
+    const numberOfTrainings = document.getElementById('numberOfTrainings');
+
+    activityRadios.forEach(radio => {
+        radio.addEventListener('change', function() {
+            if (this.value === 'low') {
+                trainingContainer.style.display = 'inline-flex';
+                numberOfTrainings.min = 2;
+                numberOfTrainings.max = 4;
+            } else if (this.value === 'medium') {
+                trainingContainer.style.display = 'inline-flex';
+                numberOfTrainings.min = 3;
+                numberOfTrainings.max = 5;
+            } else if (this.value === 'high') {
+                trainingContainer.style.display = 'inline-flex';
+                numberOfTrainings.min = 4;
+                numberOfTrainings.max = 6;
+            } else {
+                trainingContainer.style.display = 'none';
+            }
+        });
+    });
+</script>
+
     <!-- Js Plugins -->
     <script src="js/jquery-3.3.1.min.js"></script>
     <script src="js/bootstrap.min.js"></script>
@@ -289,6 +335,7 @@ if (isset($_POST['submit'])) {
     <script src="js/owl.carousel.min.js"></script>
     <script src="js/main.js"></script>
 
+    
     
 </body>
 </html>
