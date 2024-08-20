@@ -33,9 +33,10 @@ $history_query = "
     FROM tborder o
     JOIN productinorder po ON o.orderId = po.orderId
     JOIN products p ON po.productId = p.productId
-    WHERE po.userId = '$userId'
+    WHERE po.userId = '$userId' AND o.status = 'completed'
     ORDER BY o.dateOfPurchase DESC";
 $history_result = mysqli_query($conn, $history_query);
+
 ?>
 
 <!DOCTYPE html>

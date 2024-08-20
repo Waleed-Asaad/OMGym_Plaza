@@ -60,22 +60,24 @@ if (isset($_POST['checkout'])) {
     }
 
     if ($purchase_succeeded) {
-        $sql = "INSERT INTO tborder (total_price) VALUES ('$grand_total')";
+        // הכנסת ההזמנה החדשה עם סטטוס "ממתין לאישור"
+        $sql = "INSERT INTO tborder (total_price, status) VALUES ('$grand_total', 'pending approval')";
         if (mysqli_query($conn, $sql)) {
             $order_id = mysqli_insert_id($conn);
-
+    
             $cart_query = mysqli_query($conn, "SELECT * FROM cart WHERE userId = '$user_id'");
             while ($cart_row = mysqli_fetch_assoc($cart_query)) {
                 $product_id = $cart_row['productId'];
                 $quantity = $cart_row['quantity'];
-
+    
                 $productinorder_sql = "INSERT INTO productinorder (orderId, productId, quantity, userId) VALUES ('$order_id', '$product_id', '$quantity', '$user_id')";
                 mysqli_query($conn, $productinorder_sql);
             }
-
+    
             mysqli_query($conn, "DELETE FROM cart WHERE userId = '$user_id'");
         }
     }
+    
 }
 ?>
 <!DOCTYPE html>
@@ -202,7 +204,7 @@ if (isset($message)) {
 </table>
 <form method="post" action="">
     <p><a class="ContinueBtn" href="store.php">Continue Shopping </a></p><br>
-    <button type="submit" name="checkout" class="formBtn2">Buy</button>
+    <button type="submit" name="checkout" class="formBtn2">Order Now</button>
 </form>
 
 </section>
