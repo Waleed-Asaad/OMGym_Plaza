@@ -3,21 +3,33 @@ include 'connection.php';
 session_start();
 
 $user_email = $_SESSION['userEmail'];
-// שליפת userId לפי המייל
-$sql = "SELECT userId, status FROM user WHERE userEmail = ?";
+
+// שליפת userId ושם המשתמש לפי המייל
+$sql = "SELECT userId, status, userName FROM user WHERE userEmail = ?";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("s", $user_email);
 $stmt->execute();
 $result = $stmt->get_result();
 $user_row = $result->fetch_assoc();
 $user_id = $user_row['userId'];
+$user_name = $user_row['userName'];
 
-// עדכון סטטוס להזמנה שהושלמה
+// עדכון סטטוס להזמנה שהושלמה ושליחת הודעה למנהל
 if (isset($_POST['complete_order'])) {
     $order_id = $_POST['order_id'];
+    
+    // עדכון סטטוס ההזמנה
     $update_status_sql = "UPDATE tborder SET status = 'completed' WHERE orderId = ?";
     $stmt = $conn->prepare($update_status_sql);
     $stmt->bind_param("i", $order_id);
+    $stmt->execute();
+    
+    // שליחת הודעה למנהל
+    $message_content = "Order number: $order_id has been delivered to the user: $user_name.";
+    $admin_id = 1; // assuming the adminId is 1, you can adjust this if needed
+    $insert_message_sql = "INSERT INTO admin_messages (content, adminId) VALUES (?, ?)";
+    $stmt = $conn->prepare($insert_message_sql);
+    $stmt->bind_param("si", $message_content, $admin_id);
     $stmt->execute();
 }
 
@@ -50,6 +62,9 @@ $history_result = $stmt->get_result();
     <link href="https://fonts.googleapis.com/css?family=Muli:300,400,500,600,700,800,900&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Oswald:300,400,500,600,700&display=swap" rel="stylesheet">
 
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
     <!-- Css Styles -->
     <link rel="stylesheet" href="css/bootstrap.min.css" type="text/css">
     <link rel="stylesheet" href="css/font-awesome.min.css" type="text/css">
@@ -62,9 +77,12 @@ $history_result = $stmt->get_result();
     <style>
         .history-table{
             width: 950px;
+            margin: 0 auto;
         }
         td, th, h4 {
             color:white;
+            text-align: center;
+            vertical-align: middle;
         }
         .tr-class{
             background: #f36100;
@@ -75,8 +93,7 @@ $history_result = $stmt->get_result();
             object-fit: cover;
         }
         .status-icon {
-            width: 30px;
-            height: 30px;
+            font-size: 24px;
         }
         .complete-btn {
             background-color: #28a745;
@@ -88,6 +105,19 @@ $history_result = $stmt->get_result();
         }
         .complete-btn:hover {
             background-color: #218838;
+        }
+
+        .product-image {
+            width: 80px;
+            height: 60px;
+            object-fit: cover;
+            display: block;
+            margin-left: auto;
+            margin-right: auto; /* ממרכז את התמונה אופקית */
+        }
+
+        .order-item h4 {
+            text-align: center; /* ממרכז את הכותרת */
         }
     </style>
 </head>
@@ -140,7 +170,7 @@ $history_result = $stmt->get_result();
                                     }
                                     $current_order_id = $row['orderId'];
                                     echo '<div class="order-item">
-                                        <h4> Date: ' . $row['dateOfPurchase'] . ' | Total Price: $' . $row['total_price'] . '</h4>
+                                        <h4> Order Number: ' . $row['orderId'] . '  |  Date: ' . $row['dateOfPurchase'] . '  |  Total Price: $' . $row['total_price'] . ' | Status: ' . $row['status'] . '</h4>
                                         <table class="table table-bordered">
                                             <thead>
                                                 <tr class="tr-class">
@@ -157,19 +187,16 @@ $history_result = $stmt->get_result();
                                 $status_icon = "";
                                 switch ($row['status']) {
                                     case "pending approval":
-                                        $status_icon = "img/icons/pending.png";
+                                        $status_icon = '<i class="fas fa-clock status-icon"></i>';
                                         break;
                                     case "approved":
-                                        $status_icon = "img/icons/approved.png";
+                                        $status_icon = '<i class="fas fa-check-circle status-icon"></i>';
                                         break;
                                     case "shipped":
-                                        $status_icon = "img/icons/shipped.png";
-                                        break;
-                                    case "in transit":
-                                        $status_icon = "img/icons/in_transit.png";
+                                        $status_icon = '<i class="fas fa-shipping-fast status-icon"></i>';
                                         break;
                                     default:
-                                        $status_icon = "img/icons/unknown.png";
+                                        $status_icon = '<i class="fas fa-question-circle status-icon"></i>';
                                         break;
                                 }
                                 echo '<tr>
@@ -177,7 +204,7 @@ $history_result = $stmt->get_result();
                                     <td>' . $row['productName'] . '</td>
                                     <td style="width: 60px;">' . $row['quantity'] . '</td>
                                     <td  style="width: 60px;">$' . $row['price'] . '</td>
-                                    <td style="width: 100px;"><img class="status-icon" src="' . $status_icon . '" alt="' . $row['status'] . '"></td>
+                                    <td style="width: 100px;">' . $status_icon . '</td>
                                     <td>
                                         <form method="post" action="">
                                             <input type="hidden" name="order_id" value="' . $row['orderId'] . '">

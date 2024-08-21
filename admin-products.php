@@ -69,7 +69,7 @@ if (isset($_POST['edit'])) {
                 <p>Price: $<?php echo $row["price"]; ?></p>
                 <p>Quantity: <?php echo $row["quantity"]; ?></p>
                 <?php if ($row["quantity"] > 0 && $row["quantity"] < 5) { ?>
-                    <div class="warning">The Quantity is Running Out !</div>
+                    <div class="warning">The Stock is about to RUN OUT !</div>
                 <?php } elseif ($row["quantity"] == 0) { ?>
                     <div class="out-of-stock">Out Of Stock !</div>
                 <?php } ?>
