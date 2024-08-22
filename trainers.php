@@ -55,19 +55,39 @@ function change($trainerId, $conn) {
         $row = mysqli_fetch_array($result);
         $user_id = $row['userId'];
 
-        $sql = "UPDATE trainee SET trainerId = ? WHERE userId = ?";
-        $stmt = $conn->prepare($sql);
-        if ($stmt) {
-            $stmt->bind_param("ii", $trainerId, $user_id);
-            if ($stmt->execute()) {
-                echo "Record updated successfully";
-            } else {
-                echo "Error updating record: " . $stmt->error;
-            }
-            $stmt->close();
-        } else {
-            echo "Error preparing statement: " . $conn->error;
-        }
+        $sql = "SELECT * FROM trainee WHERE userId = '$user_id'";
+        $result = mysqli_query($conn, $sql);
+        $row = mysqli_fetch_array($result);
+        $traineeId = $row['traineeId'];
+        $traineeName = $row['traineeName'];
+
+        $sql = "SELECT * FROM trainee WHERE trainerId = '$trainerId'";
+        $result = mysqli_query($conn, $sql);
+        $row = mysqli_fetch_array($result);
+        
+        $trainerName = $row['trainerName'];
+
+        $insert = "INSERT INTO messages (content, readed, userId, traineeId, trainerId) VALUES('{$traineeName} asks you to accept him as trainee', 0, NULL, '$trainerId', NULL)";
+        mysqli_query($conn, $insert);
+        
+        $insert = "INSERT INTO messages (content, readed, userId, traineeId, trainerId) 
+        VALUES (?, 0, 0, 0, ?)";
+        $message = "{$traineeName} asks you to accept him as trainee";
+        $stmt = $conn->prepare($insert);
+        $stmt->bind_param("si", $message, $trainerId);
+        $stmt->execute();
+
+        
+        
+        $insert = "INSERT INTO messages (content, readed, userId, traineeId, trainerId) 
+        VALUES (?, 0, 0, ?, 0)";
+        $message = "The demand has sent to {$trainerName}";
+        $stmt = $conn->prepare($insert);
+        $stmt->bind_param("si", $message, $traineeId);
+        $stmt->execute();
+
+        $insert = "INSERT INTO demands ( trainerId, traineeId, status) VALUES('$trainerId', '$traineeId', 'wait')";
+        mysqli_query($conn, $insert);
     } else {
         echo "Error selecting user: " . mysqli_error($conn);
     }
@@ -256,7 +276,7 @@ if (isset($_GET['change'])) {
                 
                 // List of attributes to check for
                 $attributes = ["strength", "flexibility", "endurance", "weight_loss", "muscle_building", "body_building"];
-                $total_attributes = count($attributes);
+                
 
                 $trainers = [];
 
@@ -264,13 +284,24 @@ if (isset($_GET['change'])) {
                 $result = mysqli_query($conn, $sql);
                 while ($row = mysqli_fetch_assoc($result)) {
                     $score = 0;
+                    $total_attributes = 0;
                     foreach ($attributes as $attribute) {
+                        if($row[$attribute] == 1)
+                            $total_attributes++;
+
                         if ($row[$attribute] == 1 && $trainee_row[$attribute] == 1) {
                             $score++;
                         }
                     }
-                    if ($score > 0) {
-                        $trainers[] = ['trainer' => $row, 'score' => $score];
+
+                    $trainerId = $row['trainerId'];
+                    $traineeId = $trainee_row['traineeId'];
+
+                    $sql = "SELECT * FROM demands WHERE trainerId = '$trainerId' AND traineeId = '$traineeId'";
+                    $result = mysqli_query($conn, $select);
+                    $demandRow = mysqli_fetch_array($result);
+                    if ($score > 0 && $row['numOfTrainees'] < 5 && $demandRow['status'] != 'accepted' && $demandRow['status'] != 'wait') {
+                        $trainers[] = ['trainer' => $row, 'score' => $score, 'total_attributes' => $total_attributes, 'numOfTrainees' => $row['numOfTrainees']];
                     }
                 }
 
@@ -288,10 +319,13 @@ if (isset($_GET['change'])) {
                         $trainerImg = $trainer['trainer']['trainerImg'];
                         $trainerName = $trainer['trainer']['trainerName'];
                         $score = $trainer['score'];
+                        $total_attributes = $trainer['total_attributes'];
+                        
                         $percentage = number_format(($score / $total_attributes) * 100, 2);
 
                         echo '<div style="width:300px;" class="gs-item grid-wide set-bg" data-setbg="img/team/'.$trainerImg.'">
                                 <a href="img/team/'.$trainerImg.'" class="thumb-icon image-popup"><i class="fa fa-picture-o"></i></a>
+                                
                                 <p style="font-size:20px; color:white;margin-left:100px">'.$trainerName.'</p>
                                 <div class="progress-bar">
                                     <div class="progress-bar-fill" style="width:'.$percentage.'%;"></div>
@@ -310,7 +344,8 @@ if (isset($_GET['change'])) {
                         }
 
                               echo '
-                              <button style="padding: 0; width: 100%; background: #f36105; color: white" onclick="pickTrainer('.$trainer['trainer']['trainerId'].');">Pick This Trainer</button>
+                              <p style="font-size:25px; color:white;margin-left:40px">Trainees: '.$trainer["numOfTrainees"].'</p>
+                              <button style="padding: 0; width: 100%; background: #f36105; color: white" onclick="pickTrainer('.$trainer['trainer']['trainerId'].');">Send a Request</button>
                               </div>';
                     }
                 } else {

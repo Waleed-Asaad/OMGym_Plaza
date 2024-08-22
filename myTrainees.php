@@ -75,7 +75,7 @@ session_start();
                 
                 
 
-                if ($result) {
+                if ($result->num_rows > 0) {
                     while($row = mysqli_fetch_assoc($result)) {
                         
                         $trainee_id = $row['traineeId'];
@@ -93,7 +93,7 @@ session_start();
                         ";
                     }
                 } else {
-                  echo "<p>No trainers found.</p>";
+                  echo "<p>No trainees found.</p>";
                 }?>
                 
                 </div>

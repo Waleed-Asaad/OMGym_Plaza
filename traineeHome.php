@@ -21,12 +21,13 @@ if (isset($_POST['submit'])) {
     $row = mysqli_fetch_array($result);
     $user_id = $row['userId'];
     $image = $_FILES['image']['name'];
-    echo "<h1 style='color:white'>$image</h1>";
+    $bmi = round($weight / (($height / 100) ** 2), 1);
+    
 
-    $sql = "UPDATE trainee SET traineeImg = ?, weight = ?, height = ?, age = ?, gender = ?, activity = ?, numberOfTrainings = ?, muscle_building = ?, weight_loss = ?, strength = ?, flexibility = ?, endurance = ?, body_building = ? WHERE userId = ?";
+    $sql = "UPDATE trainee SET traineeImg = ?, weight = ?, height = ?, age = ?, gender = ?, activity = ?, numberOfTrainings = ?, muscle_building = ?, weight_loss = ?, strength = ?, flexibility = ?, endurance = ?, body_building = ?, bmi = ? WHERE userId = ?";
     $stmt = $conn->prepare($sql);
     if ($stmt) {
-        $stmt->bind_param("siiissiiiiiiii", $image, $weight, $height, $age, $gender, $activity, $numberOfTrainings, $muscle_building, $weight_loss, $strength, $flexibility, $endurance, $body_building, $user_id);
+        $stmt->bind_param("siiissiiiiiiidi", $image, $weight, $height, $age, $gender, $activity, $numberOfTrainings, $muscle_building, $weight_loss, $strength, $flexibility, $endurance, $body_building, $bmi, $user_id);
         if ($stmt->execute()) {
             move_uploaded_file($_FILES['image']['tmp_name'], $target);
             echo "Record updated successfully";
@@ -130,6 +131,7 @@ if (isset($_POST['submit'])) {
                                 $select = "SELECT * FROM trainee WHERE userId = '$user_id'";
                                 $result = mysqli_query($conn, $select);
                                 $row = mysqli_fetch_array($result);
+                                $name = $row['traineeName'];
                                 $muscle_building = $row['muscle_building'];
                                 $weight_loss = $row['weight_loss'];
                                 $strength = $row['strength'];
@@ -138,6 +140,7 @@ if (isset($_POST['submit'])) {
                                 $flexibility = $row['flexibility'];
                                 $weight = $row['weight'];
                                 $height = $row['height'];
+                                $bmi = $row['bmi'];
                                 $age = $row['age'];
                                 $gender = $row['gender'];
                                 $activity = $row['activity'];
@@ -145,10 +148,12 @@ if (isset($_POST['submit'])) {
                                 $startingMembership = $row['startingMembership'];
                                 $traineeImg = $row['traineeImg'];
                                 echo '
+                                <h2 style="color: #f36105;">'.$name.'</h2>
                                 <ul>
                                     
                                     <li style="font-size:25px;margin-bottom: 5px">Weight: ' . htmlspecialchars($weight) . '</li>
                                     <li style="font-size:25px;margin-bottom: 5px">Height: ' . htmlspecialchars($height) . '</li>
+                                    <li style="font-size:25px;margin-bottom: 5px">bmi: ' . htmlspecialchars($bmi) . '</li>
                                     <li style="font-size:25px;margin-bottom: 5px">Age: ' . htmlspecialchars($age) . '</li>
                                     <li style="font-size:25px;margin-bottom: 5px">Gender: ' . htmlspecialchars($gender) . '</li>
                                     <li style="font-size:25px;margin-bottom: 5px">Activity: ' . htmlspecialchars($activity) . '</li>
@@ -310,18 +315,34 @@ if (isset($_POST['submit'])) {
                 trainingContainer.style.display = 'inline-flex';
                 numberOfTrainings.min = 2;
                 numberOfTrainings.max = 4;
+                numberOfTrainings.value = '';
+                numberOfTrainings.placeholder="2-4";
             } else if (this.value === 'medium') {
                 trainingContainer.style.display = 'inline-flex';
                 numberOfTrainings.min = 3;
                 numberOfTrainings.max = 5;
+                numberOfTrainings.value = '';
+                numberOfTrainings.placeholder="3-5";
             } else if (this.value === 'high') {
                 trainingContainer.style.display = 'inline-flex';
                 numberOfTrainings.min = 4;
                 numberOfTrainings.max = 6;
+                numberOfTrainings.value = '';
+                numberOfTrainings.placeholder="4-6";
             } else {
                 trainingContainer.style.display = 'none';
             }
         });
+    });
+
+    numberOfTrainings.addEventListener('input', function() {
+        const value = parseInt(this.value);
+
+        if (value < this.min) {
+            this.value = this.min;
+        } else if (value > this.max) {
+            this.value = this.max;
+        }
     });
 </script>
 

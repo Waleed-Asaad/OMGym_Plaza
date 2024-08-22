@@ -13,11 +13,19 @@ $result = $stmt->get_result();
 $row = $result->fetch_assoc();
 $userId = $row['userId'];
 
+$sql = "SELECT trainerId FROM trainer WHERE userId = ?";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("i", $userId);
+$stmt->execute();
+$result = $stmt->get_result();
+$row = $result->fetch_assoc();
+$trainerId = $row['trainerId'];
+
 // Count unread messages for the user (which is a trainer)
-function getUnreadMessagesCount($userId, $conn) {
-    $sql = "SELECT COUNT(*) as unreadCount FROM messages WHERE userId = ? AND readed = 0";
+function getUnreadMessagesCount($trainerId, $conn) {
+    $sql = "SELECT COUNT(*) as unreadCount FROM messages WHERE trainerId = ? AND readed = 0";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("i", $userId);
+    $stmt->bind_param("i", $trainerId);
     $stmt->execute();
     $result = $stmt->get_result();
     $row = $result->fetch_assoc();
@@ -25,7 +33,7 @@ function getUnreadMessagesCount($userId, $conn) {
 }
 
 // Get the number of unread messages
-$unreadCount = getUnreadMessagesCount($userId, $conn);
+$unreadCount = getUnreadMessagesCount($trainerId, $conn);
 ?>
 
 <!DOCTYPE html>
@@ -68,6 +76,7 @@ $unreadCount = getUnreadMessagesCount($userId, $conn);
                     </ul>
                 </li>
                 <li><a href="./trainerSchedule.php">My Schedule</a></li>
+                <li><a href="./demands.php">My Demands</a></li>
                 <li><a href="./myTrainees.php">My Trainees</a></li>
                 <li><a href="./addPlans.php">Add Plans</a></li>
                 <li><a href="./messages.php">Messages <i class="fas fa-envelope"></i>
@@ -104,6 +113,7 @@ $unreadCount = getUnreadMessagesCount($userId, $conn);
                                 </ul>
                             </li>
                             <li><a href="./trainerSchedule.php">My Schedule</a></li>
+                            <li><a href="./demands.php">My Demands</a></li>
                             <li><a href="./myTrainees.php">My Trainees</a></li>
                             <li><a href="./addPlans.php">Add Plans</a></li>
                             <li><a href="./messages.php">Messages <i class="fas fa-envelope"></i>

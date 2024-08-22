@@ -14,18 +14,69 @@ $result = $stmt->get_result();
 $row = $result->fetch_assoc();
 $user_id = $row['userId'];
 
-// שליפת ההודעות של המשתמש מהמסד נתונים
-$sql = "SELECT * FROM messages WHERE userId = ? ORDER BY messageId DESC";
-$stmt = $conn->prepare($sql);
-$stmt->bind_param("i", $user_id);
-$stmt->execute();
-$result = $stmt->get_result();
+$select = " SELECT * FROM user WHERE userEmail = '$user_email'  ";
+    $result1 = mysqli_query($conn, $select); 
+    $row1 = mysqli_fetch_array($result1);
+    if($row1['status']=="trainee"){
 
-$messages = [];
+        $sql = "SELECT traineeId FROM trainee WHERE userId = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("s", $user_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $row = $result->fetch_assoc();
+        $traineeId = $row['traineeId'];
 
-while($message = $result->fetch_assoc()) {
-    $messages[] = $message; // Store each message in an array
-}
+        $sql = "SELECT * FROM messages WHERE traineeId = ? ORDER BY messageId DESC";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("i", $traineeId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        $messages = [];
+
+        while($message = $result->fetch_assoc()) {
+            $messages[] = $message; // Store each message in an array
+        }
+    }
+    else if($row1['status']=="trainer"){
+        // שליפת ההודעות של המשתמש מהמסד נתונים
+
+        $sql = "SELECT trainerId FROM trainer WHERE userId = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("s", $user_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $row = $result->fetch_assoc();
+        $trainerId = $row['trainerId'];
+
+        $sql = "SELECT * FROM messages WHERE trainerId = ? ORDER BY messageId DESC";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("i", $trainerId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        $messages = [];
+
+        while($message = $result->fetch_assoc()) {
+            $messages[] = $message; // Store each message in an array
+        }
+    }
+    else{
+        $sql = "SELECT * FROM messages WHERE userId = ? ORDER BY messageId DESC";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("i", $user_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        $messages = [];
+
+        while($message = $result->fetch_assoc()) {
+            $messages[] = $message; // Store each message in an array
+        } 
+    }
+
+
 
 ?>
 <!DOCTYPE html>
