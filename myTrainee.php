@@ -4,32 +4,75 @@ session_start();
 
 
 if(isset($_POST['submit'])){
-    
+    // Retrieve form data
     $weight = $_POST['weight'];
     $hand = $_POST['hand'];
     $leg = $_POST['leg'];
     $abdominal = $_POST['abdominal'];
     $chest = $_POST['chest'];
     
+    // Ensure trainee_id is provided
     $trainee_id = isset($_GET['trainee_id']) ? intval($_GET['trainee_id']) : 0;
 
-    $sql = "INSERT INTO measurements (weight,hand,leg,abdominal,chest,traineeId) VALUES (?,?,?,?,?,?)";
-    $stmt = $conn->prepare($sql);
-    if ($stmt) {
-        $stmt->bind_param("iiiiii", $weight, $hand, $leg, $abdominal, $chest, $trainee_id);
-        if($stmt->execute()){
-            echo "Record updated successfully";
+    if ($trainee_id > 0) {
+        // Fetch trainee details to calculate BMI
+        $select = "SELECT height FROM trainee WHERE traineeId = ?";
+        $stmt = $conn->prepare($select);
+        if ($stmt) {
+            $stmt->bind_param("i", $trainee_id);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            if ($result->num_rows > 0) {
+                $row = $result->fetch_assoc();
+                $height = $row['height'];
+                
+                // Calculate BMI
+                $bmi = round($weight / (($height / 100) ** 2), 1);
+
+                // Update trainee's weight and BMI
+                $update_sql = "UPDATE trainee SET weight = ?, bmi = ? WHERE traineeId = ?";
+                $update_stmt = $conn->prepare($update_sql);
+                if ($update_stmt) {
+                    $update_stmt->bind_param("idi", $weight, $bmi, $trainee_id);
+                    if ($update_stmt->execute()) {
+                        echo "Trainee record updated successfully";
+                    } else {
+                        echo "Error updating trainee record: " . $update_stmt->error;
+                    }
+                    $update_stmt->close();
+                } else {
+                    echo "Error preparing update statement: " . $conn->error;
+                }
+
+                // Insert measurements
+                $insert_sql = "INSERT INTO measurements (weight, hand, leg, abdominal, chest, traineeId) VALUES (?, ?, ?, ?, ?, ?)";
+                $insert_stmt = $conn->prepare($insert_sql);
+                if ($insert_stmt) {
+                    $insert_stmt->bind_param("iiiiii", $weight, $hand, $leg, $abdominal, $chest, $trainee_id);
+                    if($insert_stmt->execute()){
+                        echo "Measurements record inserted successfully";
+                    } else {
+                        echo "Error inserting measurements record: " . $insert_stmt->error;
+                    }
+                    $insert_stmt->close();
+                } else {
+                    echo "Error preparing insert statement: " . $conn->error;
+                }
+
+            } else {
+                echo "No trainee found with the given ID.";
+            }
+            $stmt->close();
         } else {
-            echo "Error updating record: " . $stmt->error;
+            echo "Error preparing select statement: " . $conn->error;
         }
-        $stmt->close();
+
     } else {
-        echo "Error preparing statement: " . $conn->error;
+        echo "Invalid trainee ID.";
     }
 
-    $trainee_id = isset($_GET['trainee_id']) ? intval($_GET['trainee_id']) : 0;
-
-    header("Location:myTrainee.php?trainee_id=$trainee_id");
+    // Redirect back to the trainee's page
+    header("Location: myTrainee.php?trainee_id=$trainee_id");
     exit;
 }
 
@@ -68,7 +111,7 @@ if(isset($_POST['submit'])){
     <!-- Hero Section Begin -->
     <section class="hero-section">
         <div class="hs-slider owl-carousel">
-            <div style="height:4500px" class="hs-item set-bg" data-setbg="img/hero/hero-1.jpg">
+            <div style="height:3000px" class="hs-item set-bg" data-setbg="img/hero/hero-1.jpg">
             <div  class="container">
             
            
@@ -100,12 +143,14 @@ if ($trainee_id > 0) {
 <h3 style="font-size:40px"><?php echo isset($row['traineeName']) ? $row['traineeName'] : 'No name found'; ?> Personal Details</h3>
 
 <ul>
-    <li style="font-size:25px;margin-bottom: 5px">Height: <?php echo isset($row['height']) ? $row['height'] : 'N/A'; ?></li>
-    <li style="font-size:25px;margin-bottom: 5px">Age: <?php echo isset($row['age']) ? $row['age'] : 'N/A'; ?></li>
-    <li style="font-size:25px;margin-bottom: 5px">Gender: <?php echo isset($row['gender']) ? $row['gender'] : 'N/A'; ?></li>
-    <li style="font-size:25px;margin-bottom: 5px">Activity: <?php echo isset($row['activity']) ? $row['activity'] : 'N/A'; ?></li>
+    <li style="font-size:25px;margin-bottom: 5px"><span style="color: #f36105">Weight:</span> <?php echo isset($row['weight']) ? $row['weight'] : 'N/A'; ?></li>
+    <li style="font-size:25px;margin-bottom: 5px"><span style="color: #f36105">Height:</span> <?php echo isset($row['height']) ? $row['height'] : 'N/A'; ?></li>
+    <li style="font-size:25px;margin-bottom: 5px"><span style="color: #f36105">BMI:</span> <?php echo isset($row['bmi']) ? $row['bmi'] : 'N/A'; ?></li>
+    <li style="font-size:25px;margin-bottom: 5px"><span style="color: #f36105">Age:</span> <?php echo isset($row['age']) ? $row['age'] : 'N/A'; ?></li>
+    <li style="font-size:25px;margin-bottom: 5px"><span style="color: #f36105">Gender:</span> <?php echo isset($row['gender']) ? $row['gender'] : 'N/A'; ?></li>
+    <li style="font-size:25px;margin-bottom: 5px"><span style="color: #f36105">Activity:</span> <?php echo isset($row['activity']) ? $row['activity'] : 'N/A'; ?></li>
     <div class="specialty">
-                                    <li style="font-size:25px;margin-bottom: 5px">goal:</li>
+                                    <li style="font-size:35px;margin-bottom: 5px;color: #f36105">goal:</li>
                                     <?php
                                     if ($muscle_building) {
                                         echo '<li style="font-size:25px;margin-bottom: 5px">Muscle Building</li>';
@@ -142,7 +187,7 @@ if ($trainee_id > 0) {
         }
 
         if (isset($mealPlanImg)) {
-            echo "<li style='font-size:25px;margin-bottom: 5px;color:#f36105'>Meal plan: <br> <img src='img/meal_plans/$mealPlanImg' alt='Meal Plan Image'></li>";
+            echo "<li style='font-size:45px;margin-bottom: 5px;color:#f36105'>Meal plan: <br> <img style='margin-top: 20px' src='img/meal_plans/$mealPlanImg' alt='Meal Plan Image'></li>";
         } else {
             echo "<li style='font-size:25px;margin-bottom: 5px'>Meal plan: <br> There's no meal plan yet</li>";
         }
@@ -151,24 +196,7 @@ if ($trainee_id > 0) {
     }
     ?>
 
-    <?php
-    if ($training_id > 0) {
-        $sql2 = "SELECT * FROM training_plan WHERE training_planId = '$training_id'";
-        $result2 = mysqli_query($conn, $sql2);
-        if ($result2) {
-            $row2 = mysqli_fetch_assoc($result2);
-            $trainingPlanImg = $row2['planImage'];
-        }
-
-        if (isset($trainingPlanImg)) {
-            echo "<li style='font-size:25px;margin-bottom: 5px;color:#f36105'>Training plan: <br> <img src='img/training_plans/$trainingPlanImg' alt='Training Plan Image'></li>";
-        } else {
-            echo "<li style='font-size:25px;margin-bottom: 5px'>Training plan: <br> There's no training plan yet</li>";
-        }
-    } else {
-        echo "<li style='font-size:25px;margin-bottom: 5px'>Training plan: <br> There's no training plan yet</li>";
-    }
-    ?>
+    
 </ul>
                     
                 </div>
@@ -177,7 +205,7 @@ if ($trainee_id > 0) {
         </div> 
             
             </div>
-            <div style=" height:4500px" class="hs-item set-bg" data-setbg="img/hero/hero-2.jpg" >
+            <div style=" height:3000px" class="hs-item set-bg" data-setbg="img/hero/hero-2.jpg" >
                 <div  class="container">
                     <div class="row">
                         <div class="col-lg-12 offset-lg-12">

@@ -281,7 +281,9 @@ if (isset($_GET['change'])) {
 
                 $sql = "SELECT * FROM trainer";
                 $result = mysqli_query($conn, $sql);
+                
                 while ($row = mysqli_fetch_assoc($result)) {
+                    
                     $score = 0;
                     $total_attributes = 0;
                     foreach ($attributes as $attribute) {
@@ -292,13 +294,14 @@ if (isset($_GET['change'])) {
                             $score++;
                         }
                     }
-
+                    
+                    
                     $trainerId = $row['trainerId'];
                     $traineeId = $trainee_row['traineeId'];
 
                     $sql = "SELECT * FROM demands WHERE trainerId = '$trainerId' AND traineeId = '$traineeId'";
-                    $result = mysqli_query($conn, $sql);
-                    $demandRow = mysqli_fetch_array($result);
+                    $demandResult = mysqli_query($conn, $sql);
+                    $demandRow = mysqli_fetch_array($demandResult);
                     $status = $demandRow['status'];
                     if ($score > 0 && $row['numOfTrainees'] < 5 && $demandRow['status'] != 'accepted' && $demandRow['status'] != 'wait') {
                         $trainers[] = ['trainer' => $row, 'score' => $score, 'total_attributes' => $total_attributes, 'numOfTrainees' => $row['numOfTrainees']];
@@ -314,6 +317,9 @@ if (isset($_GET['change'])) {
                     // Get the top 4 trainers
                     $top_trainers = array_slice($trainers, 0, 4);
 
+                    
+                    
+
                     // Display the top 4 trainers
                     foreach ($top_trainers as $trainer) {
                         $trainerImg = $trainer['trainer']['trainerImg'];
@@ -325,6 +331,7 @@ if (isset($_GET['change'])) {
 
                         echo '<div style="width:300px;" class="gs-item grid-wide set-bg" data-setbg="img/team/'.$trainerImg.'">
                                 <a href="img/team/'.$trainerImg.'" class="thumb-icon image-popup"><i class="fa fa-picture-o"></i></a>
+                                
                                 <p style="font-size:20px; color:white;margin-left:100px">'.$status.'</p>
                                 <p style="font-size:20px; color:white;margin-left:100px">'.$trainerName.'</p>
                                 <div class="progress-bar">

@@ -255,6 +255,7 @@ function cancelTraining($hour, $day, $conn) {
                                 $result_hours = $stmt_hours->get_result();
                                 while ($row_hours = $result_hours->fetch_assoc()) {
                                     $hour_id = $row_hours['hourId'];
+                                    $traineeId = $row_hours['traineeId'];
                                     $button_text = "";
                                     $button_color = "";
                                     $text_color = "";
@@ -272,7 +273,11 @@ function cancelTraining($hour, $day, $conn) {
                                             $text_color = "#e0f904";
                                             break;
                                         case 2:
-                                            $button_text = "Booked";
+                                            $sql = "SELECT * FROM trainee WHERE traineeId = '$traineeId'";
+                                            $traineeResult = mysqli_query($conn, $sql);
+                                            $traineeRow = mysqli_fetch_assoc($traineeResult);
+                                            $traineeName = $traineeRow['traineeName'];
+                                            $button_text = $traineeName;
                                             $button_color = "#e95b5b";
                                             $text_color = "#e0f904";
                                             break;

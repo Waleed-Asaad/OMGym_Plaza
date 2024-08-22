@@ -84,9 +84,14 @@ session_start();
                         
                         echo "
                             <a href='myTrainee.php?trainee_id=$trainee_id' >
-                            <div class='card'>
-                            <img src='img/trainees/$trainee_img' alt='$trainee_name'>
-                            <h3>$trainee_name</h3>
+                            <div class='card'>";
+                            if($trainee_img){
+                                echo "<img src='img/trainees/$trainee_img' alt='$trainee_name'>";
+                            }
+                            else{
+                                echo " <div style='height:450px;width:370px; text-align:center; align-content:center'><b>NO PICTURE</b></div>";
+                            }
+                            echo "<h3>$trainee_name</h3>
                             
                             </div>
                             </a>

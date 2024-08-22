@@ -23,24 +23,39 @@ function change1($traineeId, $conn) {
             $row = $result->fetch_assoc();
             $trainerId = $row['trainerId'];
             $trainerName = $row['trainerName'];
+            $numOfTrainees = $row['numOfTrainees'];
 
-            $sql = "UPDATE trainee SET trainerId = ? WHERE traineeId = ?";
-            $stmt = $conn->prepare($sql);
-            if ($stmt) {
-                $stmt->bind_param("ii", $trainerId, $traineeId);
-                $stmt->execute();
-
-                $sql = "UPDATE demands SET status = 'accepted' WHERE traineeId = ?";
+            if ($numOfTrainers < 5) {
+                $sql = "UPDATE trainee SET trainerId = ? WHERE traineeId = ?";
                 $stmt = $conn->prepare($sql);
-                $stmt->bind_param("i", $traineeId);
-                $stmt->execute();
+                if ($stmt) {
+                    $stmt->bind_param("ii", $trainerId, $traineeId);
+                    $stmt->execute();
 
-                $insert = "INSERT INTO messages (content, readed, userId, traineeId, trainerId) 
-                           VALUES (?, 0, 0, ?, 0)";
-                $message = "$trainerName has accepted you as a trainee";
-                $stmt = $conn->prepare($insert);
-                $stmt->bind_param("si", $message, $traineeId);
-                $stmt->execute();
+                    $numOfTrainees += 1;
+
+                    $sql = "UPDATE trainer SET numOfTrainees = ? WHERE trainerId = ?";
+                    $stmt = $conn->prepare($sql);
+                    $stmt->bind_param("ii", $numOfTrainees, $trainerId);
+                    $stmt->execute();
+
+                    $sql = "UPDATE demands SET status = 'accepted' WHERE traineeId = ?";
+                    $stmt = $conn->prepare($sql);
+                    $stmt->bind_param("i", $traineeId);
+                    $stmt->execute();
+
+                    $insert = "INSERT INTO messages (content, readed, userId, traineeId, trainerId) 
+                               VALUES (?, 0, 0, ?, 0)";
+                    $message = "$trainerName has accepted you as a trainee";
+                    $stmt = $conn->prepare($insert);
+                    $stmt->bind_param("si", $message, $traineeId);
+                    $stmt->execute();
+                }
+            } else {
+                echo "<script type='text/javascript'>
+                    alert('You have reached the maximum number of 5 trainees.');
+                    window.location.href = 'demands.php';
+                </script>";
             }
         }
     }
@@ -79,7 +94,7 @@ function change2($traineeId, $conn) {
 
             $insert = "INSERT INTO messages (content, readed, userId, traineeId, trainerId) 
                        VALUES (?, 0, 0, ?, 0)";
-            $message = "Sorry, you have not been accepted. Please try to pick another trainer";
+            $message = "Sorry, you have not been accepted. Please try to pick another trainer.";
             $stmt = $conn->prepare($insert);
             $stmt->bind_param("si", $message, $traineeId);
             $stmt->execute();
@@ -93,6 +108,7 @@ if (isset($_GET['change2'])) {
     change2(intval($_GET['change2']), $conn);
 }
 ?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -158,23 +174,14 @@ if (isset($_GET['change2'])) {
                             $row = $result->fetch_assoc();
                             $trainer_id = $row['trainerId'];
 
-                            $sql = "SELECT * FROM demands WHERE trainerId = ?";
+                            $sql = "SELECT * FROM demands WHERE trainerId = ? AND status = 'wait'";
                             $stmt = $conn->prepare($sql);
                             $stmt->bind_param("i", $trainer_id);
                             $stmt->execute();
                             $result = $stmt->get_result();
-                            $count = 0;
 
-                            while ($row = $result->fetch_assoc()) {
-                                if($row['status'] == 'wait'){
-                                $count++;
-                                }
-                            }
-
-                            if ($count > 0) {
+                            if ($result->num_rows > 0) {
                                 while ($row = $result->fetch_assoc()) {
-                                    
-                                    $count++;
                                     $trainee_id = $row['traineeId'];
                                     $sql = "SELECT * FROM trainee WHERE traineeId = ?";
                                     $stmt = $conn->prepare($sql);
@@ -188,9 +195,15 @@ if (isset($_GET['change2'])) {
                                     echo "
                                         <div class='card'>
                                         <a href='myTrainee.php?trainee_id=$trainee_id'>
-                                            <div class='card'>
-                                                <img src='img/trainees/$trainee_img' alt='$trainee_name'>
-                                                <h3>$trainee_name</h3>
+                                            <div class='card'>";
+                                                if($trainee_img){
+                                                    echo "<img src='img/trainees/$trainee_img' alt='$trainee_name'>";
+                                                }
+                                                else{
+                                                    echo " <div style='height:450px;width:370px; text-align:center; align-content:center'><b>NO PICTURE</b></div>";
+                                                }
+                                                
+                                                echo "<h3>$trainee_name</h3>
                                                 
                                             </div>
                                         </a>
@@ -198,8 +211,6 @@ if (isset($_GET['change2'])) {
                                         <button style='padding: 0; width: 100%; background: #f36105; color: white' onclick='refuseTrainee(".$trainee_id.")'>REFUSE</button>
                                         </div>
                                         ";
-                                    
-                                    
                                 }
                             } else {
                                 echo "<h1 style='color: #f36105;'>No demands found.</h1>";

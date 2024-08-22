@@ -151,14 +151,14 @@ if (isset($_POST['submit'])) {
                                 <h2 style="color: #f36105;">'.$name.'</h2>
                                 <ul>
                                     
-                                    <li style="font-size:25px;margin-bottom: 5px">Weight: ' . htmlspecialchars($weight) . '</li>
-                                    <li style="font-size:25px;margin-bottom: 5px">Height: ' . htmlspecialchars($height) . '</li>
-                                    <li style="font-size:25px;margin-bottom: 5px">bmi: ' . htmlspecialchars($bmi) . '</li>
-                                    <li style="font-size:25px;margin-bottom: 5px">Age: ' . htmlspecialchars($age) . '</li>
-                                    <li style="font-size:25px;margin-bottom: 5px">Gender: ' . htmlspecialchars($gender) . '</li>
-                                    <li style="font-size:25px;margin-bottom: 5px">Activity: ' . htmlspecialchars($activity) . '</li>
+                                    <li style="font-size:25px;margin-bottom: 5px"><span style="color: #f36105">Weight:</span> ' . htmlspecialchars($weight) . '</li>
+                                    <li style="font-size:25px;margin-bottom: 5px"><span style="color: #f36105">Height:</span> ' . htmlspecialchars($height) . '</li>
+                                    <li style="font-size:25px;margin-bottom: 5px"><span style="color: #f36105">bmi:</span> ' . htmlspecialchars($bmi) . '</li>
+                                    <li style="font-size:25px;margin-bottom: 5px"><span style="color: #f36105">Age:</span> ' . htmlspecialchars($age) . '</li>
+                                    <li style="font-size:25px;margin-bottom: 5px"><span style="color: #f36105">Gender:</span> ' . htmlspecialchars($gender) . '</li>
+                                    <li style="font-size:25px;margin-bottom: 5px"><span style="color: #f36105">Activity:</span> ' . htmlspecialchars($activity) . '</li>
                                     <div class="specialty">
-                                    <li style="font-size:25px;margin-bottom: 5px">goal:</li>';
+                                    <li style="font-size:35px;margin-bottom: 5px;color: #f36105">goal:</li>';
                                     if ($muscle_building) {
                                         echo '<li style="font-size:25px;margin-bottom: 5px">Muscle Building</li>';
                                     }
@@ -183,8 +183,8 @@ if (isset($_POST['submit'])) {
                                         
                                     }
                                     echo '</div>
-                                    <li style="font-size:25px;margin-bottom: 5px">Number Of Trainings: ' . htmlspecialchars($numberOfTrainings) . '</li>
-                                    <li style="font-size:25px;margin-bottom: 20px">Starting Membership: ' . htmlspecialchars($startingMembership) . '</li>
+                                    <li style="font-size:25px;margin-bottom: 5px"><span style="color: #f36105">Number Of Trainings:</span> ' . htmlspecialchars($numberOfTrainings) . '</li>
+                                    <li style="font-size:25px;margin-bottom: 20px"><span style="color: #f36105">Starting Membership:</span> ' . htmlspecialchars($startingMembership) . '</li>
                                     <li style="font-size:35px;margin-bottom: 5px;color:orange"><b>Slide To The Side To Update</b></li>
                                 </ul>';
                             ?>
