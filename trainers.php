@@ -298,8 +298,9 @@ if (isset($_GET['change'])) {
                     $traineeId = $trainee_row['traineeId'];
 
                     $sql = "SELECT * FROM demands WHERE trainerId = '$trainerId' AND traineeId = '$traineeId'";
-                    $result = mysqli_query($conn, $select);
+                    $result = mysqli_query($conn, $sql);
                     $demandRow = mysqli_fetch_array($result);
+                    $status = $demandRow['status'];
                     if ($score > 0 && $row['numOfTrainees'] < 5 && $demandRow['status'] != 'accepted' && $demandRow['status'] != 'wait') {
                         $trainers[] = ['trainer' => $row, 'score' => $score, 'total_attributes' => $total_attributes, 'numOfTrainees' => $row['numOfTrainees']];
                     }
@@ -325,7 +326,7 @@ if (isset($_GET['change'])) {
 
                         echo '<div style="width:300px;" class="gs-item grid-wide set-bg" data-setbg="img/team/'.$trainerImg.'">
                                 <a href="img/team/'.$trainerImg.'" class="thumb-icon image-popup"><i class="fa fa-picture-o"></i></a>
-                                
+                                <p style="font-size:20px; color:white;margin-left:100px">'.$status.'</p>
                                 <p style="font-size:20px; color:white;margin-left:100px">'.$trainerName.'</p>
                                 <div class="progress-bar">
                                     <div class="progress-bar-fill" style="width:'.$percentage.'%;"></div>
