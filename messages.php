@@ -2,86 +2,110 @@
 include "connection.php";
 session_start();
 
-// בדיקת אימייל המשתמש מ-SESSION
+// Fetch user details based on session email
 $user_email = $_SESSION['userEmail'];
-
-// שליפת userId לפי המייל
-$sql = "SELECT userId FROM user WHERE userEmail = ?";
+$sql = "SELECT userId, status, userName FROM user WHERE userEmail = ?";
 $stmt = $conn->prepare($sql);
 $stmt->bind_param("s", $user_email);
 $stmt->execute();
 $result = $stmt->get_result();
-$row = $result->fetch_assoc();
-$user_id = $row['userId'];
+$user = $result->fetch_assoc();
+$user_id = $user['userId'];
+$user_status = $user['status'];
+$user_name = $user['userName'];
 
-$select = " SELECT * FROM user WHERE userEmail = '$user_email'  ";
-    $result1 = mysqli_query($conn, $select); 
-    $row1 = mysqli_fetch_array($result1);
-    if($row1['status']=="trainee"){
+// Fetch messages based on user status
+if ($user_status == "trainee") {
+    $sql = "SELECT traineeId, trainerId FROM trainee WHERE userId = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("i", $user_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $trainee = $result->fetch_assoc();
+    $traineeId = $trainee['traineeId'];
+    $trainerId = $trainee['trainerId'];
 
-        $sql = "SELECT traineeId FROM trainee WHERE userId = ?";
+    $sql = "SELECT * FROM messages WHERE traineeId = ? ORDER BY messageId DESC";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("i", $traineeId);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $messages = $result->fetch_all(MYSQLI_ASSOC);
+
+} elseif ($user_status == "trainer") {
+    $sql = "SELECT trainerId FROM trainer WHERE userId = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("i", $user_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $trainer = $result->fetch_assoc();
+    $trainerId = $trainer['trainerId'];
+
+    $sql = "SELECT * FROM messages WHERE trainerId = ? ORDER BY messageId DESC";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("i", $trainerId);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $messages = $result->fetch_all(MYSQLI_ASSOC);
+
+    // Fetch the list of trainees associated with the trainer
+    $sql = "SELECT traineeId, traineeName FROM trainee WHERE trainerId = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("i", $trainerId);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $trainees = $result->fetch_all(MYSQLI_ASSOC);
+
+} else {
+    $sql = "SELECT * FROM messages WHERE userId = ? ORDER BY messageId DESC";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("i", $user_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $messages = $result->fetch_all(MYSQLI_ASSOC);
+}
+
+// Handle message sending
+if (isset($_POST['sendMessage'])) {
+    $recipientType = $_POST['recipientType'];
+    $messageContent = $_POST['messageContent'];
+    $messageContent = "{$user_name}: $messageContent";
+
+    if ($recipientType == 'trainer' && $user_status == 'trainee') {
+        // Send message from trainee to trainer
+        $sql = "INSERT INTO messages (content, readed, userId, traineeId, trainerId) VALUES (?, 0, 0, 0, ?)";
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param("s", $user_id);
+        $stmt->bind_param("si", $messageContent, $trainerId);
         $stmt->execute();
-        $result = $stmt->get_result();
-        $row = $result->fetch_assoc();
-        $traineeId = $row['traineeId'];
 
-        $sql = "SELECT * FROM messages WHERE traineeId = ? ORDER BY messageId DESC";
+    } elseif ($recipientType == 'trainee' && $user_status == 'trainer') {
+        // Send message from trainer to a specific trainee
+        
+        $recipientId = $_POST['recipientId'];
+        $sql = "INSERT INTO messages (content, readed, userId, traineeId, trainerId) VALUES (?, 0, 0, ?, 0)";
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param("i", $traineeId);
+        $stmt->bind_param("si", $messageContent, $recipientId);
         $stmt->execute();
-        $result = $stmt->get_result();
 
-        $messages = [];
+    } elseif ($recipientType == 'admin') {
+        // Send message from user/trainee/trainer to admin
+        $sql = "SELECT adminId FROM admin LIMIT 1";  // Assuming there's at least one admin
+        $result = $conn->query($sql);
+        $admin = $result->fetch_assoc();
+        $adminId = $admin['adminId'];
 
-        while($message = $result->fetch_assoc()) {
-            $messages[] = $message; // Store each message in an array
-        }
+        
+        $sql = "INSERT INTO admin_messages (content, readed, adminId) VALUES (?, 0, ?)";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("si", $messageContent, $adminId);
+        $stmt->execute();
     }
-    else if($row1['status']=="trainer"){
-        // שליפת ההודעות של המשתמש מהמסד נתונים
-
-        $sql = "SELECT trainerId FROM trainer WHERE userId = ?";
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param("s", $user_id);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        $row = $result->fetch_assoc();
-        $trainerId = $row['trainerId'];
-
-        $sql = "SELECT * FROM messages WHERE trainerId = ? ORDER BY messageId DESC";
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param("i", $trainerId);
-        $stmt->execute();
-        $result = $stmt->get_result();
-
-        $messages = [];
-
-        while($message = $result->fetch_assoc()) {
-            $messages[] = $message; // Store each message in an array
-        }
-    }
-    else{
-        $sql = "SELECT * FROM messages WHERE userId = ? ORDER BY messageId DESC";
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param("i", $user_id);
-        $stmt->execute();
-        $result = $stmt->get_result();
-
-        $messages = [];
-
-        while($message = $result->fetch_assoc()) {
-            $messages[] = $message; // Store each message in an array
-        } 
-    }
-
-
+}
 
 ?>
+
 <!DOCTYPE html>
 <html lang="zxx">
-
 <head>
     <meta charset="UTF-8">
     <meta name="description" content="Gym Template">
@@ -105,35 +129,31 @@ $select = " SELECT * FROM user WHERE userEmail = '$user_email'  ";
     <link rel="stylesheet" href="css/style.css" type="text/css">
 
     <style>
-        /* עיצוב בסיסי לטבלה */
         .table thead th {
             color: white;
             background-color: #343a40;
         }
 
         .table tbody tr.unread {
-            background-color: #f8d7da; /* רקע אדום בהיר להודעות שלא נקראו */
+            background-color: #f8d7da;
         }
 
         .table tbody tr.read {
-            background-color: #fff; /* רקע לבן להודעות שנקראו */
+            background-color: #fff;
         }
 
         .table tbody tr:hover {
-            background-color: #e9ecef; /* רקע אפור בהיר כאשר מרחפים */
+            background-color: #e9ecef;
         }
     </style>
 </head>
 
 <body>
 <?php
-    $select = " SELECT * FROM user WHERE userEmail = '$user_email'  ";
-    $result1 = mysqli_query($conn, $select); 
-    $row1 = mysqli_fetch_array($result1);
-    if($row1['status']=="trainee"){
+    if($user_status == "trainee"){
         include 'traineeMenu.php';
     }
-    else if($row1['status']=="user"){
+    elseif($user_status == "user"){
         include 'userMenu.php';
     }
     else{
@@ -141,99 +161,138 @@ $select = " SELECT * FROM user WHERE userEmail = '$user_email'  ";
     }
 ?>
 
-    <!-- Breadcrumb Section Begin -->
-    <section class="breadcrumb-section set-bg" data-setbg="img/breadcrumb-bg.jpg">
-        <div class="container">
-            <div class="row">
-                <div class="col-lg-12 text-center">
-                    <div class="breadcrumb-text">
-                        <h2>Your Messages</h2>
-                        <div class="bt-option">
-                            <a href="./index.html">Home</a>
-                            <span>Messages</span>
-                        </div>
+<!-- Breadcrumb Section Begin -->
+<section class="breadcrumb-section set-bg" data-setbg="img/breadcrumb-bg.jpg">
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-12 text-center">
+                <div class="breadcrumb-text">
+                    <h2>Your Messages</h2>
+                    <div class="bt-option">
+                        <a href="./index.html">Home</a>
+                        <span>Messages</span>
                     </div>
                 </div>
             </div>
         </div>
-    </section>
-    <!-- Breadcrumb Section End -->
+    </div>
+</section>
+<!-- Breadcrumb Section End -->
 
-    <!-- Messages Section Begin -->
-    <section class="pricing-section spad">
-        <div class="container">
-            <table class="table table-bordered">
-                <thead>
-                    <tr>
-                        <th>Content</th>
-                        <th>Status</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php 
-                    if (count($messages) > 0) {
-                        foreach ($messages as $message) { 
-                            $rowClass = $message['readed'] == 0 ? 'unread' : 'read';
-                            ?>
-                            <tr class="<?php echo $rowClass; ?>" onclick="markAsRead(<?php echo $message['messageId']; ?>)" style="cursor:pointer;">
-                                <td><?php echo htmlspecialchars($message['content']); ?></td>
-                                <td><?php echo $message['readed'] == 0 ? 'Unread' : 'Read'; ?></td>
-                            </tr>
-                        <?php }
-                    } else { ?>
-                        <tr>
-                            <td colspan="3" class="text-center">No messages found</td>
+<!-- Messages Section Begin -->
+<section class="pricing-section spad">
+    <div class="container">
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Content</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php 
+                if (count($messages) > 0) {
+                    foreach ($messages as $message) { 
+                        $rowClass = $message['readed'] == 0 ? 'unread' : 'read';
+                        ?>
+                        <tr class="<?php echo $rowClass; ?>" onclick="markAsRead(<?php echo $message['messageId']; ?>)" style="cursor:pointer;">
+                            <td><?php echo htmlspecialchars($message['content']); ?></td>
+                            <td><?php echo $message['readed'] == 0 ? 'Unread' : 'Read'; ?></td>
                         </tr>
-                    <?php } ?>
-                </tbody>
-            </table>
-        </div>
-    </section>
+                    <?php }
+                } else { ?>
+                    <tr>
+                        <td colspan="2" class="text-center">No messages found</td>
+                    </tr>
+                <?php } ?>
+            </tbody>
+        </table>
+    </div>
+</section>
 
-    <?php
-    $select = " SELECT * FROM user WHERE userEmail = '$user_email'  ";
-    $result1 = mysqli_query($conn, $select); 
-    $row1 = mysqli_fetch_array($result1);
-    if($row1['status']=="trainee"){
-        
-    }
-    else if($row1['status']=="user"){
-        include 'userMenu.php';
-    }
-    else{
-        include 'trainer_menu.php';
-    }
+<!-- Message Sending Section Begin -->
+<section class="pricing-section spad">
+    <div class="container">
+        <form action="" method="post" style="width:800px;">
+            <h1 style="font-size:35px;margin-bottom: 0; color: #f36105;">Send Message</h1>
+
+            <?php if ($user_status == "trainer"): ?>
+                <!-- Trainer can choose between sending to a trainee or admin -->
+                <label for="recipientType" style="color:#f36105">Send to:</label>
+                <select id="recipientType" name="recipientType" onchange="toggleTraineeDropdown(this.value)" required>
+                    <option value="trainee">Trainee</option>
+                    <option value="admin">Admin</option>
+                </select>
+
+                <div id="traineeDropdown" style="display:block;">
+                    <label for="recipientId" style="color:#f36105">Select Trainee:</label>
+                    <select id="recipientId" name="recipientId" required>
+                        <?php foreach ($trainees as $trainee): ?>
+                            <option value="<?php echo $trainee['traineeId']; ?>"><?php echo $trainee['traineeName']; ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+
+            <?php elseif ($user_status == "trainee"): ?>
+                <!-- Trainee can choose between sending to their trainer or admin -->
+                <label for="recipientType" style="color:#f36105">Send to:</label>
+                <select id="recipientType" name="recipientType" required>
+                    <option value="trainer">Trainer</option>
+                    <option value="admin">Admin</option>
+                </select>
+
+            <?php else: ?>
+                <!-- User can send to admin -->
+                <label for="recipientTypeAdmin" style="color:#f36105">Send to Maneger:</label>
+                <input type="hidden" id="recipientTypeAdmin" name="recipientType" value="admin">
+
+            <?php endif; ?>
+
+            <br>
+            <label for="messageContent" style="color:#f36105">Message:</label>
+            <textarea id="messageContent" name="messageContent" style="width:100%;" required></textarea>
+
+            <input type="submit" name="sendMessage" value="Send" style="background-color: #f36105;" class="form-btn">
+        </form>
+    </div>
+</section>
+<!-- Message Sending Section End -->
+
+<!-- Get In Touch Section Begin -->
+<?php 
+    include 'getInTouch.php';
 ?>
-    <!-- Messages Section End -->
+<!-- Get In Touch Section End -->
 
-    <!-- Get In Touch Section Begin -->
-    <?php 
-        include 'getInTouch.php';
-    ?>
-    <!-- Get In Touch Section End -->
+<!-- Js Plugins -->
+<script src="js/jquery-3.3.1.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script src="js/jquery.magnific-popup.min.js"></script>
+<script src="js/masonry.pkgd.min.js"></script>
+<script src="js/jquery.barfiller.js"></script>
+<script src="js/jquery.slicknav.js"></script>
+<script src="js/owl.carousel.min.js"></script>
+<script src="js/main.js"></script>
+<script>
+    function markAsRead(messageId) {
+        $.ajax({
+            url: 'markAsRead.php',
+            type: 'POST',
+            data: { messageId: messageId },
+            success: function(response) {
+                location.reload();
+            }
+        });
+    }
 
-    <!-- Js Plugins -->
-    <script src="js/jquery-3.3.1.min.js"></script>
-    <script src="js/bootstrap.min.js"></script>
-    <script src="js/jquery.magnific-popup.min.js"></script>
-    <script src="js/masonry.pkgd.min.js"></script>
-    <script src="js/jquery.barfiller.js"></script>
-    <script src="js/jquery.slicknav.js"></script>
-    <script src="js/owl.carousel.min.js"></script>
-    <script src="js/main.js"></script>
-    <script>
-        // פונקציה לסימון הודעה כנקראה
-        function markAsRead(messageId) {
-            $.ajax({
-                url: 'markAsRead.php',
-                type: 'POST',
-                data: { messageId: messageId },
-                success: function(response) {
-                    location.reload(); // רענון הדף לאחר שינוי
-                }
-            });
+    function toggleTraineeDropdown(value) {
+        if (value === 'trainee') {
+            document.getElementById('traineeDropdown').style.display = 'block';
+        } else {
+            document.getElementById('traineeDropdown').style.display = 'none';
         }
-    </script>
+    }
+</script>
 
 </body>
 
