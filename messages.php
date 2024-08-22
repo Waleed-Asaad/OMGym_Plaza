@@ -189,6 +189,21 @@ $select = " SELECT * FROM user WHERE userEmail = '$user_email'  ";
             </table>
         </div>
     </section>
+
+    <?php
+    $select = " SELECT * FROM user WHERE userEmail = '$user_email'  ";
+    $result1 = mysqli_query($conn, $select); 
+    $row1 = mysqli_fetch_array($result1);
+    if($row1['status']=="trainee"){
+        
+    }
+    else if($row1['status']=="user"){
+        include 'userMenu.php';
+    }
+    else{
+        include 'trainer_menu.php';
+    }
+?>
     <!-- Messages Section End -->
 
     <!-- Get In Touch Section Begin -->

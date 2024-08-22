@@ -61,14 +61,13 @@ function change($trainerId, $conn) {
         $traineeId = $row['traineeId'];
         $traineeName = $row['traineeName'];
 
-        $sql = "SELECT * FROM trainee WHERE trainerId = '$trainerId'";
+        $sql = "SELECT * FROM trainer WHERE trainerId = '$trainerId'";
         $result = mysqli_query($conn, $sql);
         $row = mysqli_fetch_array($result);
         
         $trainerName = $row['trainerName'];
 
-        $insert = "INSERT INTO messages (content, readed, userId, traineeId, trainerId) VALUES('{$traineeName} asks you to accept him as trainee', 0, NULL, '$trainerId', NULL)";
-        mysqli_query($conn, $insert);
+        
         
         $insert = "INSERT INTO messages (content, readed, userId, traineeId, trainerId) 
         VALUES (?, 0, 0, 0, ?)";
