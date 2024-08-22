@@ -24,18 +24,28 @@ $unreadCount = $unreadMessagesRow['unreadCount'];
 <div class="offcanvas-menu-wrapper">
     <nav class="canvas-menu mobile-menu">
         <ul>
-            <li class ="logo">
+            <li class="logo">
                 <img src="img/logoo.png" alt="">
             </li>
             <li><a href="./admin-home.php">Home</a></li>
             <li><a href="./admin-memberships.php">Membership</a></li>
             <li><a href="./admin-gallery.php">Gallery</a></li>
-            <li><a href="./admin-products.php">Products</a></li>
-            <li><a href="./add-product.php">Add Product</a></li>
+            <li>
+                <a href="#">Products</a>
+                <ul class="dropdown">
+                    <li><a href="./admin-products.php">View Products</a></li>
+                    <li><a href="./add-product.php">Add Product</a></li>
+                </ul>
+            </li>
+            <li>
+                <a href="#">Trainers</a>
+                <ul class="dropdown">
+                    <li><a href="./trainers-edit.php">View Trainers</a></li>
+                    <li><a href="./add-trainer.php">Add Trainer</a></li>
+                </ul>
+            </li>
             <li><a href="./admin-orders.php">Store Orders</a></li>
-            <li><a href="./trainers-edit.php">Trainers</a></li>
             <li><a href="./admin-trainees.php">Trainees</a></li>
-            <li><a href="./add-trainer.php">Add Trainer</a></li>
             <li style="float:right"><a href="./logout.php">Logout</a></li>
             <li style="float:right">
                 <a href="./admin-messages.php">
@@ -58,5 +68,35 @@ $unreadCount = $unreadMessagesRow['unreadCount'];
         font-size: 12px;
         vertical-align: top;
         margin-left: 5px;
+    }
+
+    /* Dropdown styling */
+    .dropdown {
+        display: none;
+        position: absolute;
+        background-color: #f9f9f9;
+        min-width: 160px;
+        box-shadow: 0px 6px 14px 0px rgba(0,0,0,0.2);
+        z-index: 1;
+    }
+
+    .dropdown li {
+        color: black;
+        padding: 10px 14px;
+        text-decoration: none;
+        display: inline-block;
+        text-align: left;
+    }
+
+    .dropdown li a {
+        color: black;
+    }
+
+    .dropdown li:hover {
+        background-color: #f1f1f1;
+    }
+
+    li:hover .dropdown {
+        display: block;
     }
 </style>

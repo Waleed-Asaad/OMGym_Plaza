@@ -35,50 +35,42 @@ if (isset($_GET['delete_all'])) {
 
 if (isset($_POST['checkout'])) {
     $cart_query = mysqli_query($conn, "SELECT * FROM cart WHERE userId = '$user_id'");
-    $purchase_succeeded = false;
+    $purchase_possible = true;
     $grand_total = 0;
 
     while ($fetch_cart = mysqli_fetch_assoc($cart_query)) {
-        $update_id = $fetch_cart['id'];
         $update_quantity = $fetch_cart['quantity'];
-        $product_query = mysqli_query($conn, "SELECT quantity FROM products WHERE productId = (SELECT productId FROM cart WHERE id = '$update_id')");
+        $product_query = mysqli_query($conn, "SELECT quantity FROM products WHERE productId = " . $fetch_cart['productId']);
         $fetch_product = mysqli_fetch_assoc($product_query);
-        if ($fetch_product == null) {
-            $message[] = 'The ' . $fetch_cart['productName'] . ' is out of stock';
+
+        if ($update_quantity > $fetch_product['quantity']) {
+            $message[] = 'The quantity selected for ' . $fetch_cart['productName'] . ' is greater than the available quantity.';
+            $purchase_possible = false;
         } else {
-            $available_quantity = $fetch_product['quantity'];
-            if ($update_quantity > $available_quantity) {
-                $message[] = 'The quantity selected for ' . $fetch_cart['productName'] . ' is greater than the available quantity.';
-            } else {
-                mysqli_query($conn, "UPDATE cart SET quantity = '$update_quantity' WHERE id = '$update_id'");
-                $updated_quantity = $available_quantity - $update_quantity;
-                $purchase_succeeded = true;
-                mysqli_query($conn, "UPDATE products SET quantity = '$updated_quantity' WHERE productId = (SELECT productId FROM cart WHERE id = '$update_id')");
-                $grand_total += $fetch_cart['price'] * $update_quantity;
-            }
+            $grand_total += $fetch_cart['price'] * $update_quantity;
         }
     }
 
-    if ($purchase_succeeded) {
+    if ($purchase_possible) {
         // הכנסת ההזמנה החדשה עם סטטוס "ממתין לאישור"
         $sql = "INSERT INTO tborder (total_price, status) VALUES ('$grand_total', 'pending approval')";
         if (mysqli_query($conn, $sql)) {
             $order_id = mysqli_insert_id($conn);
-    
+
             $cart_query = mysqli_query($conn, "SELECT * FROM cart WHERE userId = '$user_id'");
             while ($cart_row = mysqli_fetch_assoc($cart_query)) {
                 $product_id = $cart_row['productId'];
                 $quantity = $cart_row['quantity'];
-    
+
                 $productinorder_sql = "INSERT INTO productinorder (orderId, productId, quantity, userId) VALUES ('$order_id', '$product_id', '$quantity', '$user_id')";
                 mysqli_query($conn, $productinorder_sql);
             }
-    
+
+            // לאחר הכנסת ההזמנה, ננקה את העגלה
             mysqli_query($conn, "DELETE FROM cart WHERE userId = '$user_id'");
             header('location:orders.php');
         }
     }
-    
 }
 ?>
 <!DOCTYPE html>
@@ -106,13 +98,12 @@ if (isset($_POST['checkout'])) {
     <link rel="stylesheet" href="css/style.css" type="text/css">
     <link rel="stylesheet" href="css/cart.css" type="text/css">
     <style>
-      <?php include 'C:\wamp64\www\omgym_plaza\css\cart.css'; ?>
+        <?php include 'C:\wamp64\www\omgym_plaza\css\cart.css'; ?>
     </style>
 </head>
 <body>
 
 <?php
-
 $user_email = $_SESSION['userEmail'];
 $select = " SELECT * FROM user WHERE userEmail = '$user_email'  ";
 $result = mysqli_query($conn, $select);
@@ -172,6 +163,9 @@ if (isset($message)) {
         $grand_total = 0;
         if (mysqli_num_rows($cart_query) > 0) {
             while ($fetch_cart = mysqli_fetch_assoc($cart_query)) {
+                $product_query = mysqli_query($conn, "SELECT quantity FROM products WHERE productId = " . $fetch_cart['productId']);
+                $fetch_product = mysqli_fetch_assoc($product_query);
+                $max_quantity = $fetch_product['quantity'];
     ?>
         <tr>
             <td><?php echo "<img class='product-image' src ='img/products/".$fetch_cart['image']."'>"; ?></td>
@@ -180,7 +174,7 @@ if (isset($message)) {
             <td>
                 <form action="" method="post">
                     <input type="hidden" name="cart_id" value="<?php echo $fetch_cart['id']; ?>">
-                    <input type="number" min="1" name="cart_quantity" value="<?php echo $fetch_cart['quantity']; ?>">
+                    <input type="number" min="1" max="<?php echo $max_quantity; ?>" name="cart_quantity" value="<?php echo $fetch_cart['quantity']; ?>">
                     <input type="submit" name="update_cart" value="Update" class="edit1">
                 </form>
             </td>

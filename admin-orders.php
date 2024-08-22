@@ -9,7 +9,7 @@ if (!isset($_SESSION['adminUsername'])) {
 
 // Fetch orders and related products, user information
 $sql = "
-    SELECT o.orderId, o.dateOfPurchase, o.total_price, o.status, o.statusUpdateDate, p.productName, p.price, po.quantity, p.image, u.userName, u.userAddress, u.userId
+    SELECT o.orderId, o.dateOfPurchase, o.total_price, o.status, o.statusUpdateDate, p.productName, p.price, po.quantity, p.image, u.userName, u.userAddress, u.userId, p.quantity AS productStock, p.productId
     FROM tborder o
     JOIN productinorder po ON o.orderId = po.orderId
     JOIN products p ON po.productId = p.productId
@@ -26,38 +26,73 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['orderId'])) {
     $orderId = $_POST['orderId'];
     $status = $_POST['status'];
 
-    // Update order status and status update date
-    $updateSql = "UPDATE tborder SET status = '$status', statusUpdateDate = NOW() WHERE orderId = '$orderId'";
+    if ($status == 'approved') {
+        // Check if all products have enough stock
+        $orderProductsQuery = "SELECT po.quantity, p.productName, p.quantity AS productStock, p.productId FROM productinorder po JOIN products p ON po.productId = p.productId WHERE po.orderId = '$orderId'";
+        $orderProductsResult = mysqli_query($conn, $orderProductsQuery);
+        $canApprove = true;
+        $insufficientStockProducts = [];
 
-    if (mysqli_query($conn, $updateSql)) {
-        // Add message to user
-        $userId = $_POST['userId'];
-        $messageContent = '';
-
-        // Verify the switch case conditions
-        $messagedate = date('d-m-Y H:i');
-        switch ($status) {
-            case 'approved':
-                $messageContent = "In $messagedate, Order number: $orderId has been approved.";
-                break;
-            case 'shipped':
-                $messageContent = "In $messagedate, The package from order number: $orderId is on its way to you.";
-                break;
-            case 'cancelled':
-                $messageContent = "In $messagedate, Order number: $orderId has been cancelled, products must be selected again.";
-                break;
+        while ($productRow = mysqli_fetch_assoc($orderProductsResult)) {
+            if ($productRow['quantity'] > $productRow['productStock']) {
+                $canApprove = false;
+                $insufficientStockProducts[] = $productRow['productName'];
+            }
         }
 
-        // Ensure the message is created and inserted
-        if ($messageContent != '') {
-            $insertMessageSql = "INSERT INTO messages (content, userId) VALUES ('$messageContent', '$userId')";
-            mysqli_query($conn, $insertMessageSql);
-        }
+        if ($canApprove) {
+            // Update stock quantities for each product
+            mysqli_data_seek($orderProductsResult, 0); // Reset result pointer
+            while ($productRow = mysqli_fetch_assoc($orderProductsResult)) {
+                $newStock = $productRow['productStock'] - $productRow['quantity'];
+                $productId = $productRow['productId'];
+                mysqli_query($conn, "UPDATE products SET quantity = '$newStock' WHERE productId = '$productId'");
+            }
 
-        header('location:admin-orders.php');
-        exit();
+            // Update order status and status update date
+            $updateSql = "UPDATE tborder SET status = '$status', statusUpdateDate = NOW() WHERE orderId = '$orderId'";
+            if (mysqli_query($conn, $updateSql)) {
+                // Add message to user
+                $userId = $_POST['userId'];
+                $messageContent = "In " . date('d-m-Y H:i') . ", Order number: $orderId has been approved.";
+                $insertMessageSql = "INSERT INTO messages (content, userId) VALUES ('$messageContent', '$userId')";
+                mysqli_query($conn, $insertMessageSql);
+
+                header('location:admin-orders.php');
+                exit();
+            } else {
+                echo "Error updating status: " . mysqli_error($conn);
+            }
+        } else {
+            echo "<script>alert('Cannot approve the order. Insufficient stock for: " . implode(', ', $insufficientStockProducts) . "');</script>";
+        }
     } else {
-        echo "Error updating status: " . mysqli_error($conn);
+        // Update order status and status update date for non-approved statuses
+        $updateSql = "UPDATE tborder SET status = '$status', statusUpdateDate = NOW() WHERE orderId = '$orderId'";
+        if (mysqli_query($conn, $updateSql)) {
+            // Add message to user
+            $userId = $_POST['userId'];
+            $messageContent = '';
+
+            switch ($status) {
+                case 'shipped':
+                    $messageContent = "In " . date('d-m-Y H:i') . ", The package from order number: $orderId is on its way to you.";
+                    break;
+                case 'cancelled':
+                    $messageContent = "In " . date('d-m-Y H:i') . ", Order number: $orderId has been cancelled, products must be selected again.";
+                    break;
+            }
+
+            if ($messageContent != '') {
+                $insertMessageSql = "INSERT INTO messages (content, userId) VALUES ('$messageContent', '$userId')";
+                mysqli_query($conn, $insertMessageSql);
+            }
+
+            header('location:admin-orders.php');
+            exit();
+        } else {
+            echo "Error updating status: " . mysqli_error($conn);
+        }
     }
 }
 ?>
@@ -178,9 +213,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['orderId'])) {
                             echo '<input type="hidden" name="userId" value="' . $lastRow['userId'] . '">';
                             echo '<select name="status">
                                     <option value="pending approval" ' . ($lastRow['status'] == 'pending approval' ? 'selected' : '') . '>Pending Approval</option>
-                                    <option value="approved" ' . ($lastRow['status'] == 'approved' ? 'selected' : '') . '>Approved</option>
+                                    <option value="approved" ' . ($lastRow['status'] == 'approved' ? 'selected' : '') . '>Approve</option>
                                     <option value="shipped" ' . ($lastRow['status'] == 'shipped' ? 'selected' : '') . '>Shipped</option>
-                                    <option value="cancelled" ' . ($lastRow['status'] == 'cancelled' ? 'selected' : '') . '>Cancelled</option>
+                                    <option value="cancelled" ' . ($lastRow['status'] == 'cancelled' ? 'selected' : '') . '>Cancel</option>
                                 </select>';
                             echo '<button type="submit">Update Status</button>';
                             echo '</form>';
@@ -219,9 +254,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['orderId'])) {
                     echo '<input type="hidden" name="userId" value="' . $lastRow['userId'] . '">';
                     echo '<select name="status">
                             <option value="pending approval" ' . ($lastRow['status'] == 'pending approval' ? 'selected' : '') . '>Pending Approval</option>
-                            <option value="approved" ' . ($lastRow['status'] == 'approved' ? 'selected' : '') . '>Approved</option>
+                            <option value="approved" ' . ($lastRow['status'] == 'approved' ? 'selected' : '') . '>Approve</option>
                             <option value="shipped" ' . ($lastRow['status'] == 'shipped' ? 'selected' : '') . '>Shipped</option>
-                            <option value="cancelled" ' . ($lastRow['status'] == 'cancelled' ? 'selected' : '') . '>Cancelled</option>
+                            <option value="cancelled" ' . ($lastRow['status'] == 'cancelled' ? 'selected' : '') . '>Cancel</option>
                         </select>';
                     echo '<button type="submit">Update Status</button>';
                     echo '</form>';

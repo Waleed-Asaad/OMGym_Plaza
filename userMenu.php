@@ -1,7 +1,6 @@
 <?php
 include 'connection.php';
 
-// הנח שהמייל שמור ב-$_SESSION['userEmail']
 $email = $_SESSION['userEmail'];
 
 // שליפת userId לפי המייל
@@ -14,14 +13,16 @@ $row = $result->fetch_assoc();
 $userId = $row['userId'];
 
 // פונקציה לספירת ההודעות שלא נקראו
-function getUnreadMessagesCount($userId, $conn) {
-    $sql = "SELECT COUNT(*) as unreadCount FROM messages WHERE userId = ? AND readed = 0";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("i", $userId);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $row = $result->fetch_assoc();
-    return $row['unreadCount'];
+if (!function_exists('getUnreadMessagesCount')) {
+    function getUnreadMessagesCount($userId, $conn) {
+        $sql = "SELECT COUNT(*) as unreadCount FROM messages WHERE userId = ? AND readed = 0";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("i", $userId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $row = $result->fetch_assoc();
+        return $row['unreadCount'];
+    }
 }
 
 // ספירת ההודעות שלא נקראו
