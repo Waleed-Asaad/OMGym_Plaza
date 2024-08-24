@@ -125,6 +125,41 @@ function cancelTraining($hour, $day, $conn) {
     $result = $stmt->get_result();
     $row = $result->fetch_assoc();
     $cancel = $row['cancel'] + 1;
+    $trainerName = $row['trainerName'];
+
+    $select = "SELECT * FROM trainerDay WHERE dayId = ?";
+    $stmt = $conn->prepare($select);
+    $stmt->bind_param("i", $day);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $row = $result->fetch_assoc();
+    $dayName = $row['days'];
+
+    $select = "SELECT * FROM trainerHours WHERE hourId = ?";
+    $stmt = $conn->prepare($select);
+    $stmt->bind_param("i", $hour);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $row = $result->fetch_assoc();
+    $hourName = $row['hours'];
+
+    $messageContent = "{$trainerName}: has cancel training on {$dayName} at {$hourName}:00";
+
+    $sql1 = "INSERT INTO messages (content, readed, userId, traineeId, trainerId) VALUES (?, 0, 0, ?, 0)";
+    $stmt = $conn->prepare($sql1);
+    $stmt->bind_param("si", $messageContent, $trainee_id);
+    $stmt->execute();
+
+    $sql2 = "SELECT adminId FROM admin LIMIT 1";  // Assuming there's at least one admin
+    $result = $conn->query($sql2);
+    $admin = $result->fetch_assoc();
+    $adminId = $admin['adminId'];
+
+        
+    $sql3 = "INSERT INTO admin_messages (content, readed, adminId) VALUES (?, 0, ?)";
+    $stmt = $conn->prepare($sql3);
+    $stmt->bind_param("si", $messageContent, $adminId);
+    $stmt->execute();
 
     $sql_update1 = "UPDATE trainer SET cancel = ? WHERE trainerId = ?";
     $stmt_update1 = $conn->prepare($sql_update1);
@@ -245,7 +280,7 @@ function cancelTraining($hour, $day, $conn) {
                             while ($row = $result->fetch_assoc()) {
                                 $day_id = $row['dayId'];
                                 $day = $row['days'];
-                                echo "<tr><td style='padding: 0' class='class-time'>$day</td>";
+                                echo "<tr><td style='font-size:20px; padding: 0' class='class-time'><b>$day</b></td>";
 
                                 // שולף את שעות העבודה של המאמן לפי היום
                                 $sql = "SELECT * FROM trainerHours WHERE dayId = ? ORDER BY hourId ASC";
@@ -264,7 +299,7 @@ function cancelTraining($hour, $day, $conn) {
                                     switch ($row_hours['available']) {
                                         case 0:
                                             $button_text = " / ";
-                                            $button_color = "#0a0a0a";
+                                            $button_color = "#1B1212";
                                             $text_color = "#e0f904";
                                             break;
                                         case 1:
@@ -285,7 +320,7 @@ function cancelTraining($hour, $day, $conn) {
 
                                     // מציג את הכפתור בשעה המתאימה בטבלה
                                     echo "<td style='padding: 0; ' class='ts-meta'>
-                                        <button style='padding: 0 ; width: 100%; background: $button_color; color: $text_color' onclick='changeStatus($hour_id, $day_id);'>$button_text</button>
+                                        <button style=' border-radius:10px 20px; padding: 0 ; height:52px; width: 100%; background: $button_color; color: $text_color' onclick='changeStatus($hour_id, $day_id);'>$button_text</button>
                                         </td>";
                                 }
                                 echo "</tr>";

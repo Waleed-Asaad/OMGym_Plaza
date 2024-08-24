@@ -2,7 +2,6 @@
 include "connection.php";
 session_start();
 
-
 if(isset($_POST['submit'])){
     // Retrieve form data
     $weight = $_POST['weight'];
@@ -76,7 +75,37 @@ if(isset($_POST['submit'])){
     exit;
 }
 
+// Fetch the latest 10 measurements for the graph
+$trainee_id = isset($_GET['trainee_id']) ? intval($_GET['trainee_id']) : 0;
+$sql = "SELECT DATE(date) AS date_only, weight, hand, leg, abdominal, chest FROM measurements WHERE traineeId='$trainee_id' ORDER BY weightId DESC LIMIT 10";
+$result = mysqli_query($conn, $sql);
+
+$dates = [];
+$weights = [];
+$hands = [];
+$legs = [];
+$abdominals = [];
+$chests = [];
+
+if ($result) {
+    while($row = mysqli_fetch_assoc($result)) {
+        $dates[] = $row["date_only"];
+        $weights[] = $row["weight"];
+        $hands[] = $row["hand"];
+        $legs[] = $row["leg"];
+        $abdominals[] = $row["abdominal"];
+        $chests[] = $row["chest"];
+    }
+}
+
+$dates = array_reverse($dates);
+$weights = array_reverse($weights);
+$hands = array_reverse($hands);
+$legs = array_reverse($legs);
+$abdominals = array_reverse($abdominals);
+$chests = array_reverse($chests);
 ?>
+
 <!DOCTYPE html>
 <html lang="zxx">
 
@@ -101,56 +130,60 @@ if(isset($_POST['submit'])){
     <link rel="stylesheet" href="css/magnific-popup.css" type="text/css">
     <link rel="stylesheet" href="css/slicknav.min.css" type="text/css">
     <link rel="stylesheet" href="css/style.css" type="text/css">
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        canvas {
+            background-color: white;
+        }
+    </style>
 </head>
 
 <body>
-<?php
-    include 'Trainer_menu.php';
-?>
+<?php include 'Trainer_menu.php'; ?>
 
     <!-- Hero Section Begin -->
     <section class="hero-section">
         <div class="hs-slider owl-carousel">
-            <div style="height:3000px" class="hs-item set-bg" data-setbg="img/hero/hero-1.jpg">
-            <div  class="container">
-            
-           
-            <div  class="col-lg-12 col-md-8">
-                <div class="ps-item">
-                <?php
-$trainee_id = isset($_GET['trainee_id']) ? intval($_GET['trainee_id']) : 0;
+            <div style="height:1500px" class="hs-item set-bg" data-setbg="img/hero/hero-1.jpg">
+                <div class="container">
+                    <div class="col-lg-12 col-md-8">
+                        <div class="ps-item">
+                            <?php
+                            $trainee_id = isset($_GET['trainee_id']) ? intval($_GET['trainee_id']) : 0;
 
-if ($trainee_id > 0) {
-    // Query to get the specific trainee's details
-    $sql = "SELECT * FROM trainee WHERE traineeId = '$trainee_id'";
-    $result = mysqli_query($conn, $sql);
-    
-    if ($result) {
-        $row = mysqli_fetch_assoc($result);
-        $meal_id = $row['meal_planId'];
-        $training_id = $row['training_planId'];
-        $muscle_building = $row['muscle_building'];
-        $weight_loss = $row['weight_loss'];
-        $strength = $row['strength'];
-        $endurance = $row['endurance'];
-        $body_building = $row['body_building'];
-        $flexibility = $row['flexibility'];
-    }
-}
+                            if ($trainee_id > 0) {
+                                // Query to get the specific trainee's details
+                                $sql = "SELECT * FROM trainee WHERE traineeId = '$trainee_id'";
+                                $result = mysqli_query($conn, $sql);
+                                
+                                if ($result) {
+                                    $row = mysqli_fetch_assoc($result);
+                                    $meal_id = $row['meal_planId'];
+                                    $training_id = $row['training_planId'];
+                                    $muscle_building = $row['muscle_building'];
+                                    $weight_loss = $row['weight_loss'];
+                                    $strength = $row['strength'];
+                                    $endurance = $row['endurance'];
+                                    $body_building = $row['body_building'];
+                                    $flexibility = $row['flexibility'];
+                                }
+                            }
+                            ?>
 
-?>
+                            <h3 style="font-size:40px"><?php echo isset($row['traineeName']) ? $row['traineeName'] : 'No name found'; ?> Personal Details</h3>
 
-<h3 style="font-size:40px"><?php echo isset($row['traineeName']) ? $row['traineeName'] : 'No name found'; ?> Personal Details</h3>
-
-<ul>
-    <li style="font-size:25px;margin-bottom: 5px"><span style="color: #f36105">Weight:</span> <?php echo isset($row['weight']) ? $row['weight'] : 'N/A'; ?></li>
-    <li style="font-size:25px;margin-bottom: 5px"><span style="color: #f36105">Height:</span> <?php echo isset($row['height']) ? $row['height'] : 'N/A'; ?></li>
-    <li style="font-size:25px;margin-bottom: 5px"><span style="color: #f36105">BMI:</span> <?php echo isset($row['bmi']) ? $row['bmi'] : 'N/A'; ?></li>
-    <li style="font-size:25px;margin-bottom: 5px"><span style="color: #f36105">Age:</span> <?php echo isset($row['age']) ? $row['age'] : 'N/A'; ?></li>
-    <li style="font-size:25px;margin-bottom: 5px"><span style="color: #f36105">Gender:</span> <?php echo isset($row['gender']) ? $row['gender'] : 'N/A'; ?></li>
-    <li style="font-size:25px;margin-bottom: 5px"><span style="color: #f36105">Activity:</span> <?php echo isset($row['activity']) ? $row['activity'] : 'N/A'; ?></li>
-    <div class="specialty">
-                                    <li style="font-size:35px;margin-bottom: 5px;color: #f36105">goal:</li>
+                            <ul>
+                                <li style="font-size:25px;margin-bottom: 5px"><span style="color: #f36105">Weight:</span> <?php echo isset($row['weight']) ? $row['weight'] : 'N/A'; ?></li>
+                                <li style="font-size:25px;margin-bottom: 5px"><span style="color: #f36105">Height:</span> <?php echo isset($row['height']) ? $row['height'] : 'N/A'; ?></li>
+                                <li style="font-size:25px;margin-bottom: 5px"><span style="color: #f36105">BMI:</span> <?php echo isset($row['bmi']) ? $row['bmi'] : 'N/A'; ?></li>
+                                <li style="font-size:25px;margin-bottom: 5px"><span style="color: #f36105">Age:</span> <?php echo isset($row['age']) ? $row['age'] : 'N/A'; ?></li>
+                                <li style="font-size:25px;margin-bottom: 5px"><span style="color: #f36105">Gender:</span> <?php echo isset($row['gender']) ? $row['gender'] : 'N/A'; ?></li>
+                                <li style="font-size:25px;margin-bottom: 5px"><span style="color: #f36105">Activity:</span> <?php echo isset($row['activity']) ? $row['activity'] : 'N/A'; ?></li>
+                                <div class="specialty">
+                                    <li style="font-size:35px;margin-bottom: 5px;color: #f36105;">Goal:</li>
                                     <?php
                                     if ($muscle_building) {
                                         echo '<li style="font-size:25px;margin-bottom: 5px">Muscle Building</li>';
@@ -176,168 +209,172 @@ if ($trainee_id > 0) {
                                         
                                     }
                                     ?>
-                                    </div>
-    <?php
-    if ($meal_id > 0) {
-        $sql1 = "SELECT * FROM meal_plans WHERE meal_planId = '$meal_id'";
-        $result1 = mysqli_query($conn, $sql1);
-        if ($result1) {
-            $row1 = mysqli_fetch_assoc($result1);
-            $mealPlanImg = $row1['planImage'];
-        }
+                                </div>
+                                <?php
+                                if ($meal_id > 0) {
+                                    $sql1 = "SELECT * FROM meal_plans WHERE meal_planId = '$meal_id'";
+                                    $result1 = mysqli_query($conn, $sql1);
+                                    if ($result1) {
+                                        $row1 = mysqli_fetch_assoc($result1);
+                                        $mealPlanImg = $row1['planImage'];
+                                    }
 
-        if (isset($mealPlanImg)) {
-            echo "<li style='font-size:45px;margin-bottom: 5px;color:#f36105'>Meal plan: <br> <img style='margin-top: 20px' src='img/meal_plans/$mealPlanImg' alt='Meal Plan Image'></li>";
-        } else {
-            echo "<li style='font-size:25px;margin-bottom: 5px'>Meal plan: <br> There's no meal plan yet</li>";
-        }
-    } else {
-        echo "<li style='font-size:25px;margin-bottom: 5px'>Meal plan: <br> There's no meal plan yet</li>";
-    }
-    ?>
-
-    
-</ul>
-                    
-                </div>
+                                    if (isset($mealPlanImg)) {
+                                        echo "<li style='font-size:45px;margin-bottom: 5px;color:#f36105'>Meal plan: <br> <img style='margin-top: 20px' src='img/meal_plans/$mealPlanImg' alt='Meal Plan Image'></li>";
+                                    } else {
+                                        echo "<li style='font-size:25px;margin-bottom: 5px;color: #f36105'>Meal plan: <br> There's no meal plan yet</li>";
+                                    }
+                                } else {
+                                    echo "<li style='font-size:25px;margin-bottom: 5px;color: #f36105'>Meal plan: <br> There's no meal plan yet</li>";
+                                }
+                                ?>
+                            </ul>
+                        </div>
+                    </div>
+                </div> 
             </div>
             
-        </div> 
-            
-            </div>
-            <div style=" height:3000px" class="hs-item set-bg" data-setbg="img/hero/hero-2.jpg" >
-                <div  class="container">
+            <div style="height:1500px" class="hs-item set-bg" data-setbg="img/hero/hero-2.jpg" >
+                <div class="container">
                     <div class="row">
                         <div class="col-lg-12 offset-lg-12">
                             <div class="hi-text">
-                            <div class="container"  >
-                <div class="form-container" style="width:1100px;padding:5px 5px 5px 5px" >
-                    <form action="" style="width:1100px; " method="post">
-                         <h1 style="font-size:35px;margin-bottom: 0;">Insert <?php echo $row['traineeName'] ?> Measurements </h1>
-                        <?php
-                          if(isset($err)){
-                             foreach($err as $err){
-                               echo '<span class="error-msg">'.$err.'</span>';
-                             };
-                           };
-                         ?>
-                            <input type="number" name="weight" required placeholder="enter your weight">
-                            <input type="number" name="hand" required placeholder="enter your hand">
-                             <input type="number" name="leg" required placeholder="enter your leg">
-                             <input type="number" name="abdominal" required placeholder="enter your abdominal">
-                             <input type="number" name="chest" required placeholder="enter your chest">
-                             <input type="submit" name="submit" value="Submit" class="form-btn">
-                         </form>
-                    </div>
+                                <div class="container">
+                                    <div class="form-container" style="width:1100px;padding:5px 5px 5px 5px">
+                                        <form action="" style="width:1100px;" method="post">
+                                            <h1 style="font-size:35px;margin-bottom: 0;">Insert <?php echo $row['traineeName'] ?> Measurements</h1>
+                                            <?php
+                                            if(isset($err)){
+                                                foreach($err as $err){
+                                                echo '<span class="error-msg">'.$err.'</span>';
+                                                };
+                                            };
+                                            ?>
+                                            <input type="number" name="weight" required placeholder="enter your weight">
+                                            <input type="number" name="hand" required placeholder="enter your hand">
+                                            <input type="number" name="leg" required placeholder="enter your leg">
+                                            <input type="number" name="abdominal" required placeholder="enter your abdominal">
+                                            <input type="number" name="chest" required placeholder="enter your chest">
+                                            <input type="submit" name="submit" value="Submit" class="form-btn">
+                                        </form>
+                                    </div>
 
-                           <!-- ChoseUs Section Begin -->
-    <section class="choseus-section spad">
-        <div style=" width:1500px; " class="container">
-            <div class="row">
-                <div class="col-lg-12">
-                    <div class="section-title">
-                        
-                        <h2 style="margin-right:100px" >RECENT MEASUREMENTS</h2>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div style="margin-left:50px" class="col-lg-2 col-sm-6">
-                    <div class="cs-item">
-                        <h4>WEIGHT</h4>
-                        <?php
-                        $trainee_id = isset($_GET['trainee_id']) ? intval($_GET['trainee_id']) : 0;
-                        $sql = "SELECT * FROM measurements WHERE traineeId='$trainee_id' ORDER BY weightId DESC LIMIT 5";
-                        $result = mysqli_query($conn, $sql); 
-                        
-                        if ($result) {
-                            while($row = mysqli_fetch_assoc($result)) {
-                                ?>
-                        <p style="font-size:20px;"><b><?php echo $row["weight"]; ?></b></p>'
-                        <?php
-                            }
-                        }
-                        ?>
-                    </div>
-                </div>
-                <div class="col-lg-2 col-sm-6">
-                    <div class="cs-item">
-                        <h4>HAND</h4>
-                        <?php
-                        $trainee_id = isset($_GET['trainee_id']) ? intval($_GET['trainee_id']) : 0;
-                        $sql = "SELECT * FROM measurements WHERE traineeId='$trainee_id' ORDER BY weightId DESC LIMIT 5";
-                        $result = mysqli_query($conn, $sql); 
-                        
-                        if ($result) {
-                            while($row = mysqli_fetch_assoc($result)) {
-                                ?>
-                                <p style="font-size:20px;"><b><?php echo $row["hand"]; ?></b></p>'
-                                <?php
-                            }
-                        }
-                        ?>               
-                             </div>
-                </div>
-                <div class="col-lg-2 col-sm-6">
-                    <div class="cs-item">
-                        <h4>LEG</h4>
-                        <?php
-                        $trainee_id = isset($_GET['trainee_id']) ? intval($_GET['trainee_id']) : 0;
-                        $sql = "SELECT * FROM measurements WHERE traineeId='$trainee_id' ORDER BY weightId DESC LIMIT 5";
-                        $result = mysqli_query($conn, $sql); 
-                        
-                        if ($result) {
-                            while($row = mysqli_fetch_assoc($result)) {
-                                ?>
-                                <p style="font-size:20px;" ><b><?php echo $row["leg"]; ?></b></p>'
-                                <?php
-                            }
-                        }
-                        ?>
-                    </div>
-                </div>
-                <div class="col-lg-2 col-sm-6">
-                    <div class="cs-item">
-                        <h4>ABDOMINAL</h4>
-                        <?php
-                        $trainee_id = isset($_GET['trainee_id']) ? intval($_GET['trainee_id']) : 0;
-                        $sql = "SELECT * FROM measurements WHERE traineeId='$trainee_id' ORDER BY weightId DESC LIMIT 5";
-                        $result = mysqli_query($conn, $sql); 
-                        
-                        if ($result) {
-                            while($row = mysqli_fetch_assoc($result)) {
-                                ?>
-                                <p style="font-size:20px;"><b><?php echo $row["abdominal"]; ?></b></p>'
-                                <?php
-                            }
-                        }
-                        ?>
-                    </div>
-                </div>
-                <div class="col-lg-2 col-sm-6">
-                    <div class="cs-item">
-                        <h4>CHEST</h4>
-                        <?php
-                        $trainee_id = isset($_GET['trainee_id']) ? intval($_GET['trainee_id']) : 0;
-                        $sql = "SELECT * FROM measurements WHERE traineeId='$trainee_id' ORDER BY weightId DESC LIMIT 5";
-                        $result = mysqli_query($conn, $sql); 
-                        
-                        if ($result) {
-                            while($row = mysqli_fetch_assoc($result)) {
-                                ?>
-                                <p style="font-size:20px;"><b><?php echo $row["chest"]; ?></b></p>'
-                                <?php
-                            }
-                        }
-                        ?>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-    <!-- ChoseUs Section End -->
+                                    <!-- ChoseUs Section Begin -->
+                                    <section class="choseus-section spad">
+                                        <div style="width:1500px;" class="container">
+                                            <div class="row">
+                                                <div class="col-lg-12">
+                                                    <div class="section-title">
+                                                        <h2 style="margin-right:100px;color: #f36105;">RECENT MEASUREMENTS</h2>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="row">
+                                                <div style="margin-left:10px" class="col-lg-2 col-sm-6">
+                                                    <div class="cs-item">
+                                                        <h4 style="color: #f36105;">DATE</h4>
+                                                        <?php
+                                                            // Displaying the dates
+                                                            if ($result) {
+                                                                foreach($dates as $date) {
+                                                        ?>
+                                                        <p style="font-size:20px; margin-bottom:38px"><b><?php echo $date; ?></b></p>
+                                                        <?php
+                                                                }
+                                                            }
+                                                        ?>
+                                                    </div>
+                                                </div>
+                                                <div style="margin-left:-10px" class="col-lg-2 col-sm-6">
+                                                    <div class="cs-item">
+                                                        <h4 style="color: #f36105;">WEIGHT</h4>
+                                                        <?php
+                                                            if ($result) {
+                                                                foreach($weights as $weight) {
+                                                        ?>
+                                                        <p style="font-size:20px; margin-bottom:38px"><b><?php echo $weight; ?></b></p>
+                                                        <?php
+                                                                }
+                                                            }
+                                                        ?>
+                                                    </div>
+                                                </div>
+                                                <div style="margin-left:-10px" class="col-lg-2 col-sm-6">
+                                                    <div class="cs-item">
+                                                        <h4 style="color: #f36105;">HAND</h4>
+                                                        <?php
+                                                            if ($result) {
+                                                                foreach($hands as $hand) {
+                                                        ?>
+                                                        <p style="font-size:20px; margin-bottom:38px"><b><?php echo $hand; ?></b></p>
+                                                        <?php
+                                                                }
+                                                            }
+                                                        ?>
+                                                    </div>
+                                                </div>
+                                                <div style="margin-left:-10px" class="col-lg-2 col-sm-6">
+                                                    <div class="cs-item">
+                                                        <h4 style="color: #f36105;">LEG</h4>
+                                                        <?php
+                                                            if ($result) {
+                                                                foreach($legs as $leg) {
+                                                        ?>
+                                                        <p style="font-size:20px; margin-bottom:38px"><b><?php echo $leg; ?></b></p>
+                                                        <?php
+                                                                }
+                                                            }
+                                                        ?>
+                                                    </div>
+                                                </div>
+                                                <div style="margin-left:-10px" class="col-lg-2 col-sm-6">
+                                                    <div class="cs-item">
+                                                        <h4 style="color: #f36105;">ABDOMINAL</h4>
+                                                        <?php
+                                                            if ($result) {
+                                                                foreach($abdominals as $abdominal) {
+                                                        ?>
+                                                        <p style="font-size:20px; margin-bottom:38px"><b><?php echo $abdominal; ?></b></p>
+                                                        <?php
+                                                                }
+                                                            }
+                                                        ?>
+                                                    </div>
+                                                </div>
+                                                <div style="margin-left:-10px" class="col-lg-2 col-sm-6">
+                                                    <div class="cs-item">
+                                                        <h4 style="color: #f36105;">CHEST</h4>
+                                                        <?php
+                                                            if ($result) {
+                                                                foreach($chests as $chest) {
+                                                        ?>
+                                                        <p style="font-size:20px; margin-bottom:38px"><b><?php echo $chest; ?></b></p>
+                                                        <?php
+                                                                }
+                                                            }
+                                                        ?>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                   </div> 
+                                    </section>
+                                        <!-- Graph Section -->
+                                        <section class="choseus-section spad">
+                                        <div style="width:1500px;" class="container">
+                                        <div class="row">
+                                            <div class="col-lg-12">
+                                                <div class="section-title">
+                                                    <h2 style=" color: #f36105;">PROGRESS GRAPH</h2>
+                                                </div>
+                                                <canvas id="measurementsChart" width="400" height="200"></canvas>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </section>
+                                    
 
-                </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -347,19 +384,9 @@ if ($trainee_id > 0) {
     </section>
     <!-- Hero Section End -->
 
-    
-
-    
-    
-
-    
     <!-- Footer Section Begin -->
-    <?php 
-        include 'footer.php';
-    ?>
+    <?php include 'footer.php'; ?>
     <!-- Footer Section End -->
-
-    
 
     <!-- Js Plugins -->
     <script src="js/jquery-3.3.1.min.js"></script>
@@ -371,7 +398,74 @@ if ($trainee_id > 0) {
     <script src="js/owl.carousel.min.js"></script>
     <script src="js/main.js"></script>
 
-
+    <!-- Chart.js Script to Render the Graph -->
+    <script>
+        const ctx = document.getElementById('measurementsChart').getContext('2d');
+        const measurementsChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: <?php echo json_encode($dates); ?>,
+                datasets: [
+                    {
+                        label: 'Weight',
+                        data: <?php echo json_encode($weights); ?>,
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        fill: false,
+                        tension: 0.1
+                    },
+                    {
+                        label: 'Hand',
+                        data: <?php echo json_encode($hands); ?>,
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        fill: false,
+                        tension: 0.1
+                    },
+                    {
+                        label: 'Leg',
+                        data: <?php echo json_encode($legs); ?>,
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        fill: false,
+                        tension: 0.1
+                    },
+                    {
+                        label: 'Abdominal',
+                        data: <?php echo json_encode($abdominals); ?>,
+                        borderColor: 'rgba(153, 102, 255, 1)',
+                        backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                        fill: false,
+                        tension: 0.1
+                    },
+                    {
+                        label: 'Chest',
+                        data: <?php echo json_encode($chests); ?>,
+                        borderColor: 'rgba(255, 159, 64, 1)',
+                        backgroundColor: 'rgba(255, 159, 64, 0.2)',
+                        fill: false,
+                        tension: 0.1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    title: {
+                        display: true,
+                        text: 'Trainee Measurement Progress',
+                        color: '#f36105',
+                        font: {
+                                size: 30  // Set the font size here
+                        }
+                    }
+                }
+            }
+        });
+    </script>
 
 </body>
 

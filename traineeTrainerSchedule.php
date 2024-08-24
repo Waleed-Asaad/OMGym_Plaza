@@ -2,22 +2,22 @@
 session_start();
 include 'connection.php';
 
+// Define the refValues function
+function refValues($arr) {
+    if (strnatcmp(phpversion(), '5.3') >= 0) {
+        $refs = [];
+        foreach ($arr as $key => $value) {
+            $refs[$key] = &$arr[$key];
+        }
+        return $refs;
+    }
+    return $arr;
+}
+
 function change($hour, $day, $conn) {
-    $sql = "SELECT * FROM trainerHours WHERE hourId = ?";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("i", $hour);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $row = $result->fetch_assoc();
-    
-    $available = ($row['available'] + 1) % 3;
-    $sql_update = "UPDATE trainerHours SET available = ? WHERE hourId = ?";
-    $stmt_update = $conn->prepare($sql_update);
-    $stmt_update->bind_param("ii", $available, $hour);
-    $stmt_update->execute();
-    $available = ($available + 2) % 3;
 
     $user_email = $_SESSION['userEmail'];
+    // Retrieve user and trainee details
     $select = "SELECT * FROM user WHERE userEmail = ?";
     $stmt = $conn->prepare($select);
     $stmt->bind_param("s", $user_email);
@@ -31,49 +31,193 @@ function change($hour, $day, $conn) {
     $stmt->bind_param("i", $user_id);
     $stmt->execute();
     $result = $stmt->get_result();
-    $row = $result->fetch_assoc();
-    $trainee_id = $row['traineeId'];
+    $traineeRow = $result->fetch_assoc();
+    $trainee_id = $traineeRow['traineeId'];
+    $numberOfTrainings = $traineeRow['numberOfTrainings'];
+    $actualNumberOfTrainings = $traineeRow['actualNumberOfTrainings'];
 
-    
-    $sql_update = "UPDATE trainerHours SET  traineeId = ? WHERE hourId = ?";
-    $stmt_update = $conn->prepare($sql_update);
-    $stmt_update->bind_param("ii", $trainee_id, $hour);
-    $stmt_update->execute();
+    // Check if trainee has remaining training slots
+    if($numberOfTrainings > $actualNumberOfTrainings){
+        // Retrieve trainer hour details
+        $sql = "SELECT * FROM trainerHours WHERE hourId = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("i", $hour);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $row = $result->fetch_assoc();
+        
+        $available = ($row['available'] + 1) % 3;
 
-    $select = "SELECT * FROM traineeDay WHERE traineeId = ? ORDER BY dayId ASC";
-    $stmt = $conn->prepare($select);
-    $stmt->bind_param("i", $trainee_id);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    while ($row = $result->fetch_assoc()) {
-        $day_id = $row['dayId'];
-        if ($day_id % 7 == $day % 7) {
-            $sql = "SELECT * FROM traineeHours WHERE dayId = ? ORDER BY hourId ASC";
-            $stmt_hours = $conn->prepare($sql);
-            $stmt_hours->bind_param("i", $day_id);
-            $stmt_hours->execute();
-            $result_hours = $stmt_hours->get_result();
-            while ($row_hours = $result_hours->fetch_assoc()) {
-                $hour_id = $row_hours['hourId'];
-                if ($hour_id % 12 == $hour % 12) {
-                    
-                    $sql_update = "UPDATE traineeHours SET scheduled = ? WHERE hourId = ?";
-                    $stmt_update = $conn->prepare($sql_update);
-                    $stmt_update->bind_param("ii", $available, $hour_id);
-                    $stmt_update->execute();
+        // Update the availability of the selected hour
+        $sql_update = "UPDATE trainerHours SET available = ?, traineeId = ? WHERE hourId = ?";
+        $stmt_update = $conn->prepare($sql_update);
+        $stmt_update->bind_param("iii", $available, $trainee_id, $hour);
+        $stmt_update->execute();
+
+        $available = ($available + 2) % 3;
+
+        // Increment the actual number of trainings
+        $actualNumberOfTrainings += 1;
+        $sql_update = "UPDATE trainee SET actualNumberOfTrainings = ? WHERE traineeId = ?";
+        $stmt_update = $conn->prepare($sql_update);
+        $stmt_update->bind_param("ii", $actualNumberOfTrainings, $trainee_id);
+        $stmt_update->execute();
+
+        // Retrieve the trainee's latest measurements
+        $sql_measurements = "SELECT * FROM measurements WHERE traineeId = ? ORDER BY weightId DESC LIMIT 1";
+        $stmt_measurements = $conn->prepare($sql_measurements);
+        $stmt_measurements->bind_param("i", $trainee_id);
+        $stmt_measurements->execute();
+        $result_measurements = $stmt_measurements->get_result();
+        $measurements = $result_measurements->fetch_assoc();
+
+        // Prepare criteria for matching
+        $bmi = $traineeRow['bmi'];
+        $muscle_building = $traineeRow['muscle_building'];
+        $endurance = $traineeRow['endurance'];
+        $strength = $traineeRow['strength'];
+        $body_building = $traineeRow['body_building'];
+        $weight_loss = $traineeRow['weight_loss'];
+        $flexibility = $traineeRow['flexibility'];
+
+        $abdominal = $measurements['abdominal'];
+        $hand = $measurements['hand'];
+        $chest = $measurements['chest'];
+        $leg = $measurements['leg'];
+
+        $select = "SELECT * FROM traineeDay WHERE traineeId = ? ORDER BY dayId ASC";
+        $stmt = $conn->prepare($select);
+        $stmt->bind_param("i", $trainee_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        while ($row = $result->fetch_assoc()) {
+            $day_id = $row['dayId'];
+            if ($day_id % 7 == $day % 7) {
+                $sql = "SELECT * FROM traineeHours WHERE dayId = ? ORDER BY hourId ASC";
+                $stmt_hours = $conn->prepare($sql);
+                $stmt_hours->bind_param("i", $day_id);
+                $stmt_hours->execute();
+                $result_hours = $stmt_hours->get_result();
+                while ($row_hours = $result_hours->fetch_assoc()) {
+                    $hour_id = $row_hours['hourId'];
+                    if ($hour_id % 12 == $hour % 12) {
+
+                        // Fetch the used training plan IDs
+                        $sql_used_plans = "SELECT DISTINCT training_planId FROM traineeHours WHERE hourId = ? AND training_planId IS NOT NULL";
+                        $stmt_used_plans = $conn->prepare($sql_used_plans);
+                        $stmt_used_plans->bind_param("i", $hour_id);
+                        $stmt_used_plans->execute();
+                        $result_used_plans = $stmt_used_plans->get_result();
+
+                        $used_plan_ids = [];
+                        while ($used_plan_row = $result_used_plans->fetch_assoc()) {
+                            $used_plan_ids[] = $used_plan_row['training_planId'];
+                        }
+
+                        // Construct placeholders for used plan IDs
+                        $used_plan_ids_placeholder = count($used_plan_ids) > 0 ? implode(',', array_fill(0, count($used_plan_ids), '?')) : 'NULL';
+
+                        if (count($used_plan_ids) > 0) {
+                            $sql_plan = "
+                                SELECT training_planId, 
+                                       (bmi_match * 1 + muscle_building * 1 + endurance * 1 + strength * 1 + body_building * 1 + weight_loss * 1 + flexibility * 1 + abdominal_match * 1 + hand_match * 1 + chest_match * 1 + leg_match * 1) AS score 
+                                FROM (
+                                    SELECT training_planId,
+                                           (bmi = ?) AS bmi_match,
+                                           (muscle_building = ?) AS muscle_building,
+                                           (endurance = ?) AS endurance,
+                                           (strength = ?) AS strength,
+                                           (body_building = ?) AS body_building,
+                                           (weight_loss = ?) AS weight_loss,
+                                           (flexibility = ?) AS flexibility,
+                                           (abdominal <= ?) AS abdominal_match,
+                                           (hand <= ?) AS hand_match,
+                                           (chest <= ?) AS chest_match,
+                                           (leg <= ?) AS leg_match
+                                    FROM training_plan 
+                                    WHERE training_planId NOT IN ($used_plan_ids_placeholder)
+                                ) AS matches
+                                ORDER BY score DESC 
+                                LIMIT 1";
+                        } else {
+                            $sql_plan = "
+                                SELECT training_planId, 
+                                       (bmi_match * 1 + muscle_building * 1 + endurance * 1 + strength * 1 + body_building * 1 + weight_loss * 1 + flexibility * 1 + abdominal_match * 1 + hand_match * 1 + chest_match * 1 + leg_match * 1) AS score 
+                                FROM (
+                                    SELECT training_planId,
+                                           (bmi = ?) AS bmi_match,
+                                           (muscle_building = ?) AS muscle_building,
+                                           (endurance = ?) AS endurance,
+                                           (strength = ?) AS strength,
+                                           (body_building = ?) AS body_building,
+                                           (weight_loss = ?) AS weight_loss,
+                                           (flexibility = ?) AS flexibility,
+                                           (abdominal <= ?) AS abdominal_match,
+                                           (hand <= ?) AS hand_match,
+                                           (chest <= ?) AS chest_match,
+                                           (leg <= ?) AS leg_match
+                                    FROM training_plan
+                                ) AS matches
+                                ORDER BY score DESC 
+                                LIMIT 1";
+                        }
+
+                        // Prepare the SQL statement
+                        $stmt_plan = $conn->prepare($sql_plan);
+
+                        // Check if the statement was prepared successfully
+                        if ($stmt_plan === false) {
+                            die("Prepare failed: (" . $conn->errno . ") " . $conn->error . "\nSQL: " . $sql_plan);
+                        }
+
+                        // Bind parameters dynamically
+                        if (count($used_plan_ids) > 0) {
+                            $types = "iiiiiiiiiii" . str_repeat("i", count($used_plan_ids));
+                            $params = array_merge([$types], [$bmi, $muscle_building, $endurance, $strength, $body_building, $weight_loss, $flexibility, $abdominal, $hand, $chest, $leg], $used_plan_ids);
+                            call_user_func_array([$stmt_plan, 'bind_param'], refValues($params));
+                        } else {
+                            $stmt_plan->bind_param("iiiiiiiiiii", $bmi, $muscle_building, $endurance, $strength, $body_building, $weight_loss, $flexibility, $abdominal, $hand, $chest, $leg);
+                        }
+
+                        // Execute the statement
+                        $stmt_plan->execute();
+
+                        // Get the result
+                        $result_plan = $stmt_plan->get_result();
+                        $training_plan = $result_plan->fetch_assoc();
+
+                        if (!$training_plan) {
+                            // Handle case when no suitable training plan is found
+                            echo "No new suitable training plan found.";
+                            exit;
+                        }
+
+                        $training_plan_id = $training_plan['training_planId'];
+
+                        // Mark the hour as scheduled
+                        $sql_update = "UPDATE traineeHours SET scheduled = ?, training_planId = ? WHERE hourId = ?";
+                        $stmt_update = $conn->prepare($sql_update);
+                        $stmt_update->bind_param("iii", $available, $training_plan_id, $hour_id);
+                        $stmt_update->execute();
+                    }
                 }
             }
         }
+        header("Location: traineeTrainerSchedule.php");
+        exit;
+    } else {
+        echo "<script type='text/javascript'>
+                alert('You have reached the maximum number of trainings.');
+                window.location.href = 'traineeTrainerSchedule.php';
+              </script>";
     }
-
-    header("Location: traineeTrainerSchedule.php");
-    exit;
 }
 
 if (isset($_GET['change1']) && isset($_GET['change2'])) {
     change(intval($_GET['change1']), intval($_GET['change2']), $conn);
 }
 ?>
+
 
 <!DOCTYPE html>
 <html lang="zxx">
@@ -185,7 +329,7 @@ if (isset($_GET['change1']) && isset($_GET['change2'])) {
                                     while ($row = $result->fetch_assoc()) {
                                         $day_id = $row['dayId'];
                                         $day = $row['days'];
-                                        echo "<tr><td style='padding: 0' class='class-time'>$day</td>";
+                                        echo "<tr><td style='font-size:20px; padding: 0' class='class-time'><b>$day</b></td>";
                                         $sql = "SELECT * FROM trainerHours WHERE dayId = ? ORDER BY hourId ASC";
                                         $stmt_hours = $conn->prepare($sql);
                                         $stmt_hours->bind_param("i", $day_id);
@@ -198,7 +342,7 @@ if (isset($_GET['change1']) && isset($_GET['change2'])) {
                                             switch ($row_hours['available']) {
                                                 case 0:
                                                     $button_text = " / ";
-                                                    $button_color = "#0a0a0a";
+                                                    $button_color = "#1B1212";
                                                     $text_color = "#e0f904";
                                                     break;
                                                 case 1:
@@ -214,17 +358,17 @@ if (isset($_GET['change1']) && isset($_GET['change2'])) {
                                             }
                                             if($row_hours['available']==0){
                                                 echo "<td style='padding: 0; ' class='ts-meta'>
-                                                <button style='padding: 0 ; width: 100%; background: $button_color; color: $text_color'>$button_text</button>
+                                                <button style='padding: 0 ; height:52px; width: 100%; border-radius:10px 20px; background: $button_color; color: $text_color'>$button_text</button>
                                                 </td>";
                                             }
                                             else if($row_hours['available']==2){
                                                 echo "<td style='padding: 0; ' class='ts-meta'>
-                                                <button style='padding: 0 ; width: 100%; background: $button_color; color: $text_color'>$button_text</button>
+                                                <button style='padding: 0 ; height:52px; width: 100%; border-radius:10px 20px; background: $button_color; color: $text_color'>$button_text</button>
                                                 </td>";
                                             }
                                             else{
                                                 echo "<td style='padding: 0; ' class='ts-meta'>
-                                                <button style='padding: 0 ; width: 100%; background: $button_color; color: $text_color' onclick='changeStatus($hour_id, $day_id);'>$button_text</button>
+                                                <button style='padding: 0 ; height:52px; width: 100%; border-radius:10px 20px; background: $button_color; color: $text_color' onclick='changeStatus($hour_id, $day_id);'>$button_text</button>
                                                 </td>";
                                             }
                                             
