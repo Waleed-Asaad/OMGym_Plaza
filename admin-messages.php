@@ -89,7 +89,7 @@ $messagesResult = mysqli_query($conn, $messagesQuery);
         <h1 style="text-align:center; margin:20px 10px;">Admin Messages</h1>
 
         <form method="post" action="" style="text-align: left; margin-left: 20%;">
-            <button type="submit" name="deleteReadMessages" style="background-color: red; color: white; padding: 10px; margin-bottom: 20px;">Delete Read Messages</button>
+            <button type="submit" name="deleteReadMessages" style="background-color: red; color: white; padding: 10px; margin-bottom: 20px;">Delete Messages</button>
         </form>
 
         <?php if (mysqli_num_rows($messagesResult) > 0) { ?>

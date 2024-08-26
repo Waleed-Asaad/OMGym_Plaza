@@ -57,12 +57,45 @@ if ($user_status == "trainer") {
 
 // Handle message deletion
 if (isset($_POST['deleteReadMessages'])) {
-    $sql = "DELETE FROM messages WHERE userId = ? AND readed = 1";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("i", $user_id);
-    $stmt->execute();
-    header('Location: ' . $_SERVER['PHP_SELF']); // Refresh the page to reflect the changes
-    exit();
+    if ($user_status == "trainer") {
+        $sql = "SELECT trainerId FROM trainer WHERE userId = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("i", $user_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $trainer = $result->fetch_assoc();
+        $trainerId = $trainer['trainerId'];
+        $sql = "DELETE FROM messages WHERE trainerId = ? AND readed = 1";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("i", $trainerId);
+        $stmt->execute();
+        header('Location: ' . $_SERVER['PHP_SELF']); // Refresh the page to reflect the changes
+        exit();
+    }
+    else if ($user_status == "trainee") {
+        $sql = "SELECT traineeId, trainerId FROM trainee WHERE userId = ?";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("i", $user_id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $trainee = $result->fetch_assoc();
+        $traineeId = $trainee['traineeId'];
+        $sql = "DELETE FROM messages WHERE traineeId = ? AND readed = 1";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("i", $traineeId);
+        $stmt->execute();
+        header('Location: ' . $_SERVER['PHP_SELF']); // Refresh the page to reflect the changes
+        exit();
+    }
+    else {
+        $sql = "DELETE FROM messages WHERE userId = ? AND readed = 1";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("i", $user_id);
+        $stmt->execute();
+        header('Location: ' . $_SERVER['PHP_SELF']); // Refresh the page to reflect the changes
+        exit();
+    }
+    
 }
 
 // Handle message sending
@@ -198,7 +231,7 @@ if (isset($_POST['sendMessage'])) {
     <div class="container">
         <!-- Delete Read Messages Button -->
         <form action="" method="post">
-            <button type="submit" name="deleteReadMessages" class="form-btn" style="background-color: #f36105;">Delete Read Messages</button>
+            <button type="submit" name="deleteReadMessages" class="form-btn" style="background-color: #f36105;">Delete Messages</button>
         </form>
         <table class="table table-bordered">
             <thead>
