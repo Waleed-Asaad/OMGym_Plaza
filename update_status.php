@@ -73,7 +73,7 @@ foreach ($days as $day) {
                  ];
 
          foreach ($hours as $hour) {
-           $sql = "INSERT INTO traineeHours (hours, dayId) VALUES ('$hour', $day_id)";
+           $sql = "INSERT INTO traineeHours (hours, dayId,traineeId) VALUES ('$hour', $day_id, $trainee_id)";
            if (!mysqli_query($conn, $sql)) {
               echo "Error: " . mysqli_error($conn);
           }

@@ -172,6 +172,31 @@ function cancelTraining($hour, $day, $conn) {
     $stmt_update2->bind_param("i", $hour);
     $stmt_update2->execute();
 }
+
+// Handle fetching the training plan
+if (isset($_GET['show_plan']) && isset($_GET['hour_id'])) {
+    error_log("GET parameters received: show_plan = {$_GET['show_plan']}, hour_id = {$_GET['hour_id']}");
+    $hour_id = intval($_GET['hour_id']);
+
+    // Fetch the training plan image based on hour_id
+    $sql_plan = "SELECT tp.planImage FROM training_plan tp 
+                 INNER JOIN trainerHours th ON th.training_planId = tp.training_planId
+                 WHERE th.hourId = ?";
+    $stmt_plan = $conn->prepare($sql_plan);
+    $stmt_plan->bind_param("i", $hour_id);
+    $stmt_plan->execute();
+    $result_plan = $stmt_plan->get_result();
+    $plan = $result_plan->fetch_assoc();
+
+    if ($plan) {
+        echo json_encode($plan);
+    } else {
+        echo json_encode(['error' => 'No plan found for this hour.']);
+    }
+    exit;
+} else {
+    error_log("GET parameters not set.");
+}
 ?>
 
 <!DOCTYPE html>
@@ -290,6 +315,7 @@ function cancelTraining($hour, $day, $conn) {
                                 $result_hours = $stmt_hours->get_result();
                                 while ($row_hours = $result_hours->fetch_assoc()) {
                                     $hour_id = $row_hours['hourId'];
+                                    
                                     $traineeId = $row_hours['traineeId'];
                                     $button_text = "";
                                     $button_color = "";
@@ -318,16 +344,34 @@ function cancelTraining($hour, $day, $conn) {
                                             break;
                                     }
 
+                                    if ($row_hours['available'] == 2) {
                                     // מציג את הכפתור בשעה המתאימה בטבלה
+                                    
                                     echo "<td style='padding: 0; ' class='ts-meta'>
-                                        <button style=' border-radius:10px 20px; padding: 0 ; height:52px; width: 100%; background: $button_color; color: $text_color' onclick='changeStatus($hour_id, $day_id);'>$button_text</button>
-                                        </td>";
+                                        <button style=' border-radius:10px 20px; padding: 0 ; height:26px; width: 100%; background: $button_color; color: $text_color' onclick='changeStatus($hour_id, $day_id);'>$button_text</button>";
+                                    
+                                    // הוספת כפתור להצגת תוכנית האימון
+                                    
+                                        echo "<button style=' border-radius:10px 20px; padding: 0 ; height:26px; width: 100%; background: $button_color; color: $text_color' onclick='showPlan($hour_id) '>View Plan</button>";
+                                        echo "</td>";
+                                    }
+                                    else{
+                                        echo "<td style='padding: 0; ' class='ts-meta'>
+                                        <button style=' border-radius:10px 20px; padding: 0 ; height:52px; width: 100%; background: $button_color; color: $text_color' onclick='changeStatus($hour_id, $day_id);'>$button_text</button>";
+                                    }
+
+                                    echo "</td>";
                                 }
                                 echo "</tr>";
                             }
                             ?>
                         </tbody>
                     </table>
+                    <!-- Training Plan Display Area -->
+                    <div id="training-plan" style="display:none; padding-top:20px;">
+                        <h3>Training Plan Image</h3>
+                        <img id="plan-image" src="" alt="Training Plan Image" style="max-width:100%;">
+                    </div>
                 </div>
             </div>
         </div>
@@ -354,6 +398,31 @@ function cancelTraining($hour, $day, $conn) {
     function changeStatus(hour, day) {
         window.location.href = "trainerSchedule.php?change1=" + hour + "&change2=" + day;
     }
+
+    function showPlan(hour_id) {
+    console.log("Fetching plan for hour_id: " + hour_id);
+    // Fetch the training plan image using AJAX
+    $.ajax({
+        url: "trainerSchedule.php",
+        method: "GET",
+        data: { show_plan: true, hour_id: hour_id },
+        dataType: "json",
+        success: function (response) {
+            console.log("Response received:", response);
+            if (response.error) {
+                $('#plan-image').attr('src', '').attr('alt', response.error);
+            } else {
+                // Display the training plan image
+                var imagePath = "img/training_plans/" + response.planImage;
+                $('#plan-image').attr('src', imagePath).attr('alt', 'Training Plan Image');
+            }
+            $('#training-plan').show();
+        },
+        error: function(xhr, status, error) {
+            console.error('Error fetching training plan:', error);
+        }
+    });
+}
 </script>
 </body>
 </html>

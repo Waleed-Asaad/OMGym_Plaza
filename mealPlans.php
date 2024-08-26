@@ -173,7 +173,7 @@ if (isset($_GET['change'])) {
                     $mealPlanImg = $mealPlan['mealPlan']['planImage'];
                     $percentage = $mealPlan['percentage'];
                     
-                    echo '<div class="gs-item grid-wide set-bg" data-setbg="img/meal_plans/'.$mealPlanImg.'" style="width:370px; height:300px; margin-bottom:400px;">
+                    echo '<div class="gs-item grid-wide set-bg" data-setbg="img/meal_plans/'.$mealPlanImg.'" style="width:360px; height:300px; margin-bottom:400px;">
                             <a href="img/meal_plans/'.$mealPlanImg.'" class="thumb-icon image-popup"><i class="fa fa-picture-o"></i></a>
                             <div class="progress-bar">
                                 <div class="progress-bar-fill" style="width:'.$percentage.'%;"></div>

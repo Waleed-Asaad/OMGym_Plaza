@@ -36,7 +36,8 @@ function change($hour, $day, $conn) {
     $numberOfTrainings = $traineeRow['numberOfTrainings'];
     $actualNumberOfTrainings = $traineeRow['actualNumberOfTrainings'];
 
-    // Check if trainee has remaining training slots
+    if($numberOfTrainings > 0){
+        // Check if trainee has remaining training slots
     if($numberOfTrainings > $actualNumberOfTrainings){
         // Retrieve trainer hour details
         $sql = "SELECT * FROM trainerHours WHERE hourId = ?";
@@ -102,115 +103,132 @@ function change($hour, $day, $conn) {
                     $hour_id = $row_hours['hourId'];
                     if ($hour_id % 12 == $hour % 12) {
 
-                        // Fetch the used training plan IDs
-                        $sql_used_plans = "SELECT DISTINCT training_planId FROM traineeHours WHERE hourId = ? AND training_planId IS NOT NULL";
-                        $stmt_used_plans = $conn->prepare($sql_used_plans);
-                        $stmt_used_plans->bind_param("i", $hour_id);
-                        $stmt_used_plans->execute();
-                        $result_used_plans = $stmt_used_plans->get_result();
+                        $sql_used_plans = "
+        SELECT DISTINCT training_planId 
+        FROM traineeHours 
+        WHERE traineeId = ? AND training_planId IS NOT NULL";
+    
+    $stmt_used_plans = $conn->prepare($sql_used_plans);
+    $stmt_used_plans->bind_param("i", $trainee_id);
+    $stmt_used_plans->execute();
+    $result_used_plans = $stmt_used_plans->get_result();
 
-                        $used_plan_ids = [];
-                        while ($used_plan_row = $result_used_plans->fetch_assoc()) {
-                            $used_plan_ids[] = $used_plan_row['training_planId'];
-                        }
+    $used_plan_ids = [];
+    while ($used_plan_row = $result_used_plans->fetch_assoc()) {
+        $used_plan_ids[] = $used_plan_row['training_planId'];
+    }
 
-                        // Construct placeholders for used plan IDs
-                        $used_plan_ids_placeholder = count($used_plan_ids) > 0 ? implode(',', array_fill(0, count($used_plan_ids), '?')) : 'NULL';
+    // If all plans are used, reset or handle accordingly
+    if (count($used_plan_ids) > 0) {
+        $used_plan_ids_placeholder = implode(',', array_fill(0, count($used_plan_ids), '?'));
+        $sql_plan = "
+            SELECT training_planId, 
+                   (bmi_match * 1 + muscle_building * 1 + endurance * 1 + strength * 1 + body_building * 1 + weight_loss * 1 + flexibility * 1 + abdominal_match * 1 + hand_match * 1 + chest_match * 1 + leg_match * 1) AS score 
+            FROM (
+                SELECT training_planId,
+                       (bmi = ?) AS bmi_match,
+                       (muscle_building = ?) AS muscle_building,
+                       (endurance = ?) AS endurance,
+                       (strength = ?) AS strength,
+                       (body_building = ?) AS body_building,
+                       (weight_loss = ?) AS weight_loss,
+                       (flexibility = ?) AS flexibility,
+                       (abdominal <= ?) AS abdominal_match,
+                       (hand <= ?) AS hand_match,
+                       (chest <= ?) AS chest_match,
+                       (leg <= ?) AS leg_match
+                FROM training_plan 
+                WHERE training_planId NOT IN ($used_plan_ids_placeholder)
+            ) AS matches
+            ORDER BY score DESC 
+            LIMIT 1";
+    } else {
+        $sql_plan = "
+            SELECT training_planId, 
+                   (bmi_match * 1 + muscle_building * 1 + endurance * 1 + strength * 1 + body_building * 1 + weight_loss * 1 + flexibility * 1 + abdominal_match * 1 + hand_match * 1 + chest_match * 1 + leg_match * 1) AS score 
+            FROM (
+                SELECT training_planId,
+                       (bmi = ?) AS bmi_match,
+                       (muscle_building = ?) AS muscle_building,
+                       (endurance = ?) AS endurance,
+                       (strength = ?) AS strength,
+                       (body_building = ?) AS body_building,
+                       (weight_loss = ?) AS weight_loss,
+                       (flexibility = ?) AS flexibility,
+                       (abdominal <= ?) AS abdominal_match,
+                       (hand <= ?) AS hand_match,
+                       (chest <= ?) AS chest_match,
+                       (leg <= ?) AS leg_match
+                FROM training_plan
+            ) AS matches
+            ORDER BY score DESC 
+            LIMIT 1";
+    }
 
-                        if (count($used_plan_ids) > 0) {
-                            $sql_plan = "
-                                SELECT training_planId, 
-                                       (bmi_match * 1 + muscle_building * 1 + endurance * 1 + strength * 1 + body_building * 1 + weight_loss * 1 + flexibility * 1 + abdominal_match * 1 + hand_match * 1 + chest_match * 1 + leg_match * 1) AS score 
-                                FROM (
-                                    SELECT training_planId,
-                                           (bmi = ?) AS bmi_match,
-                                           (muscle_building = ?) AS muscle_building,
-                                           (endurance = ?) AS endurance,
-                                           (strength = ?) AS strength,
-                                           (body_building = ?) AS body_building,
-                                           (weight_loss = ?) AS weight_loss,
-                                           (flexibility = ?) AS flexibility,
-                                           (abdominal <= ?) AS abdominal_match,
-                                           (hand <= ?) AS hand_match,
-                                           (chest <= ?) AS chest_match,
-                                           (leg <= ?) AS leg_match
-                                    FROM training_plan 
-                                    WHERE training_planId NOT IN ($used_plan_ids_placeholder)
-                                ) AS matches
-                                ORDER BY score DESC 
-                                LIMIT 1";
-                        } else {
-                            $sql_plan = "
-                                SELECT training_planId, 
-                                       (bmi_match * 1 + muscle_building * 1 + endurance * 1 + strength * 1 + body_building * 1 + weight_loss * 1 + flexibility * 1 + abdominal_match * 1 + hand_match * 1 + chest_match * 1 + leg_match * 1) AS score 
-                                FROM (
-                                    SELECT training_planId,
-                                           (bmi = ?) AS bmi_match,
-                                           (muscle_building = ?) AS muscle_building,
-                                           (endurance = ?) AS endurance,
-                                           (strength = ?) AS strength,
-                                           (body_building = ?) AS body_building,
-                                           (weight_loss = ?) AS weight_loss,
-                                           (flexibility = ?) AS flexibility,
-                                           (abdominal <= ?) AS abdominal_match,
-                                           (hand <= ?) AS hand_match,
-                                           (chest <= ?) AS chest_match,
-                                           (leg <= ?) AS leg_match
-                                    FROM training_plan
-                                ) AS matches
-                                ORDER BY score DESC 
-                                LIMIT 1";
-                        }
+    // Prepare the SQL statement
+    $stmt_plan = $conn->prepare($sql_plan);
 
-                        // Prepare the SQL statement
-                        $stmt_plan = $conn->prepare($sql_plan);
+    if (count($used_plan_ids) > 0) {
+        $types = str_repeat("i", 11) . str_repeat("i", count($used_plan_ids));
+        $params = array_merge(
+            [$bmi, $muscle_building, $endurance, $strength, $body_building, $weight_loss, $flexibility, $abdominal, $hand, $chest, $leg],
+            $used_plan_ids
+        );
+        $stmt_plan->bind_param($types, ...$params);
+    } else {
+        $stmt_plan->bind_param("iiiiiiiiiii", $bmi, $muscle_building, $endurance, $strength, $body_building, $weight_loss, $flexibility, $abdominal, $hand, $chest, $leg);
+    }
 
-                        // Check if the statement was prepared successfully
-                        if ($stmt_plan === false) {
-                            die("Prepare failed: (" . $conn->errno . ") " . $conn->error . "\nSQL: " . $sql_plan);
-                        }
+    // Execute the statement and get the result
+    $stmt_plan->execute();
+    $result_plan = $stmt_plan->get_result();
+    $training_plan = $result_plan->fetch_assoc();
 
-                        // Bind parameters dynamically
-                        if (count($used_plan_ids) > 0) {
-                            $types = "iiiiiiiiiii" . str_repeat("i", count($used_plan_ids));
-                            $params = array_merge([$types], [$bmi, $muscle_building, $endurance, $strength, $body_building, $weight_loss, $flexibility, $abdominal, $hand, $chest, $leg], $used_plan_ids);
-                            call_user_func_array([$stmt_plan, 'bind_param'], refValues($params));
-                        } else {
-                            $stmt_plan->bind_param("iiiiiiiiiii", $bmi, $muscle_building, $endurance, $strength, $body_building, $weight_loss, $flexibility, $abdominal, $hand, $chest, $leg);
-                        }
+    // If no training plan is found
+    if (!$training_plan) {
+        echo "<script type='text/javascript'>
+                alert('No suitable training plan available.');
+                window.location.href = 'traineeTrainerSchedule.php';
+              </script>";
+        exit;
+    }
 
-                        // Execute the statement
-                        $stmt_plan->execute();
+    // Use the training plan
+    $training_plan_id = $training_plan['training_planId'];
 
-                        // Get the result
-                        $result_plan = $stmt_plan->get_result();
-                        $training_plan = $result_plan->fetch_assoc();
+    // Schedule the hour
+    $sql_update = "UPDATE traineeHours SET scheduled = ?, training_planId = ? WHERE hourId = ?";
+    $stmt_update = $conn->prepare($sql_update);
+    $stmt_update->bind_param("iii", $available, $training_plan_id, $hour_id);
+    $stmt_update->execute();
 
-                        if (!$training_plan) {
-                            // Handle case when no suitable training plan is found
-                            echo "No new suitable training plan found.";
-                            exit;
-                        }
+    // Update the trainer hour with the training plan
+    $sql_update = "UPDATE trainerHours SET training_planId = ? WHERE hourId = ?";
+    $stmt_update = $conn->prepare($sql_update);
+    $stmt_update->bind_param("ii", $training_plan_id, $hour);
+    $stmt_update->execute();
 
-                        $training_plan_id = $training_plan['training_planId'];
-
-                        // Mark the hour as scheduled
-                        $sql_update = "UPDATE traineeHours SET scheduled = ?, training_planId = ? WHERE hourId = ?";
-                        $stmt_update = $conn->prepare($sql_update);
-                        $stmt_update->bind_param("iii", $available, $training_plan_id, $hour_id);
-                        $stmt_update->execute();
-                    }
+}
                 }
             }
         }
-        header("Location: traineeTrainerSchedule.php");
-        exit;
+    // Redirect or handle after scheduling
+    header("Location: traineeTrainerSchedule.php");
+    exit;
     } else {
         echo "<script type='text/javascript'>
                 alert('You have reached the maximum number of trainings.');
                 window.location.href = 'traineeTrainerSchedule.php';
               </script>";
     }
+    }
+    else{
+        echo "<script type='text/javascript'>
+                alert('You have to enter the number of trainings.');
+                window.location.href = 'traineeTrainerSchedule.php';
+              </script>";
+    }
+    
 }
 
 if (isset($_GET['change1']) && isset($_GET['change2'])) {
