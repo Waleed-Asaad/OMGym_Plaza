@@ -27,7 +27,9 @@ if ($user_status == "trainee") {
     $trainee = $result->fetch_assoc();
     $traineeId = $trainee['traineeId'];
     $trainerId = $trainee['trainerId'];
-
+    $sql = "SELECT * FROM messages WHERE traineeId = $traineeId ORDER BY messageId DESC";
+    $result2 = $conn->query($sql); 
+    $messages = $result2->fetch_all(MYSQLI_ASSOC);
 }
 if ($user_status == "trainer") {
     $sql = "SELECT trainerId FROM trainer WHERE userId = ?";
@@ -45,6 +47,9 @@ if ($user_status == "trainer") {
     $stmt->execute();
     $result = $stmt->get_result();
     $trainees = $result->fetch_all(MYSQLI_ASSOC);
+    $sql = "SELECT * FROM messages WHERE trainerId = $trainerId ORDER BY messageId DESC";
+    $result2 = $conn->query($sql); 
+    $messages = $result2->fetch_all(MYSQLI_ASSOC);
 
 }
 
