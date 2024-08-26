@@ -1,6 +1,7 @@
 <?php 
 include "connection.php";
 session_start();
+
 if (isset($_POST['submit'])) {
     $target = "img/trainees/" . basename($_FILES['image']['name']);
     $weight = $_POST['weight'];
@@ -22,7 +23,6 @@ if (isset($_POST['submit'])) {
     $user_id = $row['userId'];
     $image = $_FILES['image']['name'];
     $bmi = round($weight / (($height / 100) ** 2), 1);
-    
 
     $sql = "UPDATE trainee SET traineeImg = ?, weight = ?, height = ?, age = ?, gender = ?, activity = ?, numberOfTrainings = ?, muscle_building = ?, weight_loss = ?, strength = ?, flexibility = ?, endurance = ?, body_building = ?, bmi = ? WHERE userId = ?";
     $stmt = $conn->prepare($sql);
@@ -42,6 +42,45 @@ if (isset($_POST['submit'])) {
     header("Location: traineeHome.php");
     exit;
 }
+
+// Fetch the latest 10 measurements for the graph
+$user_email = $_SESSION['userEmail'];
+$select = "SELECT * FROM user WHERE userEmail = '$user_email'";
+$result = mysqli_query($conn, $select);
+$row = mysqli_fetch_array($result);
+$user_id = $row['userId'];
+
+$select = "SELECT * FROM trainee WHERE userId = '$user_id'";
+$result = mysqli_query($conn, $select);
+$row = mysqli_fetch_array($result);
+$trainee_id = $row['traineeId'];
+$sql = "SELECT DATE(date) AS date_only, weight, hand, leg, abdominal, chest FROM measurements WHERE traineeId='$trainee_id' ORDER BY weightId DESC LIMIT 10";
+$result = mysqli_query($conn, $sql);
+
+$dates = [];
+$weights = [];
+$hands = [];
+$legs = [];
+$abdominals = [];
+$chests = [];
+
+if ($result) {
+    while($row = mysqli_fetch_assoc($result)) {
+        $dates[] = $row["date_only"];
+        $weights[] = $row["weight"];
+        $hands[] = $row["hand"];
+        $legs[] = $row["leg"];
+        $abdominals[] = $row["abdominal"];
+        $chests[] = $row["chest"];
+    }
+}
+
+$dates = array_reverse($dates);
+$weights = array_reverse($weights);
+$hands = array_reverse($hands);
+$legs = array_reverse($legs);
+$abdominals = array_reverse($abdominals);
+$chests = array_reverse($chests);
 ?>
 <!DOCTYPE html>
 <html lang="zxx">
@@ -67,6 +106,9 @@ if (isset($_POST['submit'])) {
     <link rel="stylesheet" href="css/slicknav.min.css" type="text/css">
     <link rel="stylesheet" href="css/style.css" type="text/css">
 
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
     <style>
         .file-upload {
             display: none;
@@ -89,6 +131,10 @@ if (isset($_POST['submit'])) {
         .file-name {
             margin-left: 10px;
             font-style: italic;
+        }
+
+        canvas {
+            background-color: white;
         }
     </style>
 </head>
@@ -293,6 +339,20 @@ if (isset($_POST['submit'])) {
                     </div>
                 </div>
             </div>
+            </section>
+                                        <!-- Graph Section -->
+                                        <section class="choseus-section spad">
+                                        <div style="width:1500px;" class="container">
+                                        <div class="row">
+                                            <div class="col-lg-12">
+                                                <div class="section-title">
+                                                    <h2 style=" color: #f36105;">PROGRESS GRAPH</h2>
+                                                </div>
+                                                <canvas id="measurementsChart" width="400" height="200"></canvas>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </section>
         </div>
     </section>
 
@@ -356,7 +416,74 @@ if (isset($_POST['submit'])) {
     <script src="js/owl.carousel.min.js"></script>
     <script src="js/main.js"></script>
 
-    
-    
+    <!-- Chart.js Script to Render the Graph -->
+    <script>
+        const ctx = document.getElementById('measurementsChart').getContext('2d');
+        const measurementsChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: <?php echo json_encode($dates); ?>,
+                datasets: [
+                    {
+                        label: 'Weight',
+                        data: <?php echo json_encode($weights); ?>,
+                        borderColor: 'rgba(255, 99, 132, 1)',
+                        backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                        fill: false,
+                        tension: 0.1
+                    },
+                    {
+                        label: 'Hand',
+                        data: <?php echo json_encode($hands); ?>,
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        fill: false,
+                        tension: 0.1
+                    },
+                    {
+                        label: 'Leg',
+                        data: <?php echo json_encode($legs); ?>,
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                        fill: false,
+                        tension: 0.1
+                    },
+                    {
+                        label: 'Abdominal',
+                        data: <?php echo json_encode($abdominals); ?>,
+                        borderColor: 'rgba(153, 102, 255, 1)',
+                        backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                        fill: false,
+                        tension: 0.1
+                    },
+                    {
+                        label: 'Chest',
+                        data: <?php echo json_encode($chests); ?>,
+                        borderColor: 'rgba(255, 159, 64, 1)',
+                        backgroundColor: 'rgba(255, 159, 64, 0.2)',
+                        fill: false,
+                        tension: 0.1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    title: {
+                        display: true,
+                        text: 'Trainee Measurement Progress',
+                        color: '#f36105',
+                        font: {
+                                size: 30  // Set the font size here
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+
 </body>
 </html>
