@@ -81,22 +81,18 @@ if (isset($_GET['change'])) {
 ?>
 
     <?php
-                            $email = $_SESSION['userEmail'];
-                            $select = "SELECT * FROM user WHERE userEmail = '$email'";
-                            $result = mysqli_query($conn, $select);
-                            $row = mysqli_fetch_array($result);
-                            $user_id = $row['userId'];
+    $email = $_SESSION['userEmail'];
+    $select = "SELECT * FROM user WHERE userEmail = '$email'";
+    $result = mysqli_query($conn, $select);
+    $row = mysqli_fetch_array($result);
+    $user_id = $row['userId'];
 
-                            $sql = "SELECT t.planImage FROM trainee tr JOIN meal_plans t ON tr.meal_planId = t.meal_planId WHERE tr.userId = '$user_id'";
-                            $result = mysqli_query($conn, $sql);
-                            $row = mysqli_fetch_array($result);
-                            $mealPlanImg = $row['planImage'];
-                            if ($mealPlanImg) {
-                                $height=2000;
-                            }
-                            else{
-                                $height=500; 
-                            }
+    $sql = "SELECT t.planImage FROM trainee tr JOIN meal_plans t ON tr.meal_planId = t.meal_planId WHERE tr.userId = '$user_id'";
+    $result = mysqli_query($conn, $sql);
+    $row = mysqli_fetch_array($result);
+    $mealPlanImg = $row['planImage'];
+    $height = $mealPlanImg ? 800 : 500;
+
     echo '
     <section class="breadcrumb-section set-bg" data-setbg="img/hero/hero-2.jpg" style="height:'.$height.'px">
         <div class="container">
@@ -106,88 +102,91 @@ if (isset($_GET['change'])) {
                         <h2>MY MEAL PLAN</h2>
                         <div class="gallery">
                             <div class="grid-sizer"></div>';
-                          
 
-                            if ($mealPlanImg) {
-                                echo '<div class="gs-item grid-wide set-bg" data-setbg="img/meal_plans/'.$mealPlanImg.'" style="width:800px; height:1300px; margin-left:200px; margin-right:auto;">
-                                        <a href="img/meal_plans/'.$mealPlanImg.'" class="thumb-icon image-popup"><i class="fa fa-picture-o"></i></a>
-                                      </div>';
-                            } else {
-                                echo '<h2>YOU DID NOT PICK A MEAL PLAN YET</h2>';
-                            }
-                            ?>
+    if ($mealPlanImg) {
+        echo '<div class="gs-item grid-wide set-bg" data-setbg="img/meal_plans/'.$mealPlanImg.'" style="width:370px; height:300px; margin-left:390px; margin-right:auto;">
+                <a href="img/meal_plans/'.$mealPlanImg.'" class="thumb-icon image-popup"><i class="fa fa-picture-o"></i></a>
+              </div>';
+    } else {
+        echo '<h2>YOU DID NOT PICK A MEAL PLAN YET</h2>';
+    }
+    echo '
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </section>
+    </section>';
+    ?>
     <!-- Breadcrumb Section End -->
 
     <!-- Gallery Section Begin -->
-    <div class="gallery-section" style="height:3500px;">
+    <div class="gallery-section" style="height:700px;">
         <div class="gallery">
             <div class="grid-sizer"></div>
             <?php
-            $email = $_SESSION['userEmail'];
-            $select = "SELECT * FROM user WHERE userEmail = '$email'";
-            $result = mysqli_query($conn, $select);
-            $row = mysqli_fetch_array($result);
-            $user_id = $row['userId'];
-
             $sql = "SELECT * FROM trainee WHERE userId = '$user_id'";
             $result = mysqli_query($conn, $sql);
             $trainee_row = mysqli_fetch_array($result);
 
             // List of attributes to check for
-            $attributes = ["strength", "flexibility", "endurance", "weight_loss", "muscle_building", "body_building"];
+            $attributes = ["weight_loss", "strength", "flexibility", "endurance", "muscle_building", "body_building"];
             $mealPlans = [];
-            $total_attributes = count($attributes);
+            $trainee_bmi = $trainee_row['bmi'];
 
             $sql = "SELECT * FROM meal_plans";
             $result = mysqli_query($conn, $sql);
-            while ($row = mysqli_fetch_assoc($result)) {
+            while ($mealRow = mysqli_fetch_assoc($result)) {
                 $score = 0;
+                $total_attributes = 0;
                 foreach ($attributes as $attribute) {
-                    if ($row[$attribute] == 1 && $trainee_row[$attribute] == 1) {
-                        $score++;
+                    if ($mealRow[$attribute] == 1) {
+                        $total_attributes++;
+                        if ($trainee_row[$attribute] == 1) {
+                            $score++;
+                        }
                     }
                 }
+
+                // Calculate BMI difference and adjust score
+                $bmi_difference = abs($mealRow['bmi'] - $trainee_bmi);
+                $bmi_score = max(1 - ($bmi_difference / 100), 0);  // Ensure score doesn't go negative
+                $score += $bmi_score;
+                $percentage = number_format(($score / ($total_attributes + 1)) * 100, 2);
+
                 if ($score > 0) {
-                    $mealPlans[] = ['mealPlan' => $row, 'score' => $score];
+                    $mealPlans[] = ['mealPlan' => $mealRow, 'percentage' => $percentage];
                 }
             }
 
             if (!empty($mealPlans)) {
-                // Sort training plans by score in descending order
+                // Sort meal plans by percentage in descending order
                 usort($mealPlans, function($a, $b) {
-                    return $b['score'] - $a['score'];
+                    return $b['percentage'] - $a['percentage'];
                 });
 
-                // Get the top 4 mealPlans
+                // Get the top 4 meal plans
                 $top_mealPlans = array_slice($mealPlans, 0, 4);
 
-                // Display the top 4 mealPlans
+                // Display the top 4 meal plans
                 foreach ($top_mealPlans as $mealPlan) {
-                    if ($mealPlan['score'] > 0) {
-                        $mealPlanImg = $mealPlan['mealPlan']['planImage'];
-                        $score = $mealPlan['score'];
-                        $percentage = number_format(($score / $total_attributes) * 100, 2);
-                        echo '<div class="gs-item grid-wide set-bg" data-setbg="img/meal_plans/'.$mealPlanImg.'" style="width:750px; height:1200px; margin-bottom:400px;">
-                                <a href="img/meal_plans/'.$mealPlanImg.'" class="thumb-icon image-popup"><i class="fa fa-picture-o"></i></a>
-                                <div class="progress-bar">
-                                    <div class="progress-bar-fill" style="width:'.$percentage.'%;"></div>
-                                </div>
-                                <p style="font-size:20px; color:white;margin-left:30px">'.$percentage.'% Matches</p>';
-                               foreach ($attributes as $attribute) {
-                                if ($mealPlan['mealPlan'][$attribute]==1 && $trainee_row[$attribute] == 1) {
+                    $mealPlanImg = $mealPlan['mealPlan']['planImage'];
+                    $percentage = $mealPlan['percentage'];
+                    
+                    echo '<div class="gs-item grid-wide set-bg" data-setbg="img/meal_plans/'.$mealPlanImg.'" style="width:370px; height:300px; margin-bottom:400px;">
+                            <a href="img/meal_plans/'.$mealPlanImg.'" class="thumb-icon image-popup"><i class="fa fa-picture-o"></i></a>
+                            <div class="progress-bar">
+                                <div class="progress-bar-fill" style="width:'.$percentage.'%;"></div>
+                            </div>
+                            <p style="font-size:20px; color:white;margin-left:30px">'.$percentage.'% Matches</p>';
+                            foreach ($attributes as $attribute) {
+                                if ($mealPlan['mealPlan'][$attribute] == 1 && $trainee_row[$attribute] == 1) {
                                     echo '<li style="font-size:25px;margin-bottom: 5px;color:white">'.ucwords(str_replace('_', ' ', $attribute)).'</li>';
                                 }
                             }
-                            echo'
-                                <button style="padding: 0; width: 100%; background: #f36105; color: white" onclick="pickMealPlan('.$mealPlan['mealPlan']['meal_planId'].');">Pick This Meal Plan</button>
-                              </div>';
-                    }
+                            echo '
+                            <button style="padding: 0; width: 100%; background: #f36105; color: white" onclick="pickMealPlan('.$mealPlan['mealPlan']['meal_planId'].');">Pick This Meal Plan</button>
+                          </div>';
                 }
             } else {
                 echo '<h1 style="margin-left:700px; color:white" >NO MATCH</h1>';

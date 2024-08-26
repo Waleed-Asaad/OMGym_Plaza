@@ -170,7 +170,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                             };
                                         ?>
                                         <!-- Training plan file upload area -->
-                                        <p style="color: #f36105;">Add Profile Photo:</p>
+                                        <p style="color: #f36105;">Add Plan Photo:</p>
                                         <input type="file" style="background: #f36105; color: white;" id="image1" name="image1" accept="image/*" required>
                                         
                                         <div style="display: inline-flex;width:550px">
@@ -236,7 +236,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                             };
                                         ?>
                                         <!-- Meal plan file upload area -->
-                                        <p style="color: #f36105;">Add Profile Photo:</p>
+                                        <p style="color: #f36105;">Add Plan Photo:</p>
                                         <input type="file" style="background: #f36105; color: white;" id="image2" name="image2" accept="image/*" required>
                                         
                                         <div style="display: inline-flex;width:550px">

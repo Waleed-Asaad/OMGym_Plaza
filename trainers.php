@@ -272,6 +272,7 @@ if (isset($_GET['change'])) {
                 $sql = "SELECT * FROM trainee WHERE userId = '$user_id'";
                 $result = mysqli_query($conn, $sql);
                 $trainee_row = mysqli_fetch_array($result);
+                $trainee_bmi = $trainee_row['bmi'];
                 
                 // List of attributes to check for
                 $attributes = ["strength", "flexibility", "endurance", "weight_loss", "muscle_building", "body_building"];
@@ -303,15 +304,19 @@ if (isset($_GET['change'])) {
                     $demandResult = mysqli_query($conn, $sql);
                     $demandRow = mysqli_fetch_array($demandResult);
                     $status = $demandRow['status'];
+                    $bmi_difference = abs($row['bmi'] - $trainee_bmi);
+                    $bmi_score = max(1 - ($bmi_difference / 100), 0);  // Ensure score doesn't go negative
+                    $score += $bmi_score;
+                    $percentage = number_format(($score / ($total_attributes + 1)) * 100, 2);
                     if ($score > 0 && $row['numOfTrainees'] < 5 && $demandRow['status'] != 'accepted' && $demandRow['status'] != 'wait') {
-                        $trainers[] = ['trainer' => $row, 'score' => $score, 'total_attributes' => $total_attributes, 'numOfTrainees' => $row['numOfTrainees']];
+                        $trainers[] = ['trainer' => $row, 'percentage' => $percentage , 'numOfTrainees' => $row['numOfTrainees']];
                     }
                 }
 
                 if (!empty($trainers)){
-                    // Sort trainers by score in descending order
+                    // Sort trainers by percentage in descending order
                     usort($trainers, function($a, $b) {
-                        return $b['score'] - $a['score'];
+                        return $b['percentage'] - $a['percentage'];
                     });
 
                     // Get the top 4 trainers
@@ -324,15 +329,12 @@ if (isset($_GET['change'])) {
                     foreach ($top_trainers as $trainer) {
                         $trainerImg = $trainer['trainer']['trainerImg'];
                         $trainerName = $trainer['trainer']['trainerName'];
-                        $score = $trainer['score'];
-                        $total_attributes = $trainer['total_attributes'];
+                        $percentage = $trainer['percentage'];
                         
-                        $percentage = number_format(($score / $total_attributes) * 100, 2);
 
                         echo '<div style="width:300px;" class="gs-item grid-wide set-bg" data-setbg="img/team/'.$trainerImg.'">
                                 <a href="img/team/'.$trainerImg.'" class="thumb-icon image-popup"><i class="fa fa-picture-o"></i></a>
                                 
-                                <p style="font-size:20px; color:white;margin-left:100px">'.$status.'</p>
                                 <p style="font-size:20px; color:white;margin-left:100px">'.$trainerName.'</p>
                                 <div class="progress-bar">
                                     <div class="progress-bar-fill" style="width:'.$percentage.'%;"></div>
