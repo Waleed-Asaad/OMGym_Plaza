@@ -210,31 +210,35 @@ if (isset($_GET['productId'])) {
     
     <!-- All Products Section Begin -->
     <section class="pricing-section spad">
-        <div class="container">
-        <h3 style="color: #ec5606; padding: 20px;">* All Products *</h3>
-            <div class="row justify-content-center">
-                <?php
-                if ($product_result && mysqli_num_rows($product_result) > 0) {
-                    while ($row = mysqli_fetch_assoc($product_result)) { ?>
-                        <div class="col-lg-4 col-md-8">
-                            <div class="ps-item">
-                                <h2 style="color:beige"><?php echo $row["productName"]; ?></h2>
-                                <?php echo "<img class='product-image' src ='img/products/".$row['image']."'>";?>
-                                <div class="pi-price">
-                                    <h2><?php echo "$" . $row["price"]; ?></h2>
-                                    <span><?php echo $row["description"]; ?></span>
-                                </div>
-                                <button class="primary-btn pricing-btn"><a href="store.php?productId=<?php echo $row["productId"]; ?>">Add to Cart</a></button>
+    <div class="container">
+    <h3 style="color: #ec5606; padding: 20px;">* All Products *</h3>
+        <div class="row justify-content-center">
+            <?php
+            if ($product_result && mysqli_num_rows($product_result) > 0) {
+                while ($row = mysqli_fetch_assoc($product_result)) { ?>
+                    <div class="col-lg-4 col-md-8">
+                        <div class="ps-item">
+                            <h2 style="color:beige"><?php echo $row["productName"]; ?></h2>
+                            <?php echo "<img class='product-image' src ='img/products/".$row['image']."'>";?>
+                            <div class="pi-price">
+                                <h2><?php echo "$" . $row["price"]; ?></h2>
+                                <span><?php echo $row["description"]; ?></span>
                             </div>
+                            <?php if ($row['quantity'] > 0) { ?>
+                                <button class="primary-btn pricing-btn"><a href="store.php?productId=<?php echo $row["productId"]; ?>">Add to Cart</a></button>
+                            <?php } else { ?>
+                                <p style="color: red;">Out of Stock</p>
+                            <?php } ?>
                         </div>
-                    <?php }
-                    mysqli_free_result($product_result);
-                } else {
-                    echo "<p>No products found.</p>";
-                } ?>
-            </div>
+                    </div>
+                <?php }
+                mysqli_free_result($product_result);
+            } else {
+                echo "<p>No products found.</p>";
+            } ?>
         </div>
-    </section>
+    </div>
+</section>
     <!-- All Products Section End -->
 
     <!-- Get In Touch Section Begin -->

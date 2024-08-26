@@ -119,6 +119,11 @@ $history_result = $stmt->get_result();
         .order-item h4 {
             text-align: center; /* ממרכז את הכותרת */
         }
+
+        .complete-btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
     </style>
 </head>
 
@@ -185,18 +190,22 @@ $history_result = $stmt->get_result();
                                             <tbody>';
                                 }
                                 $status_icon = "";
+                                $disabled = "";
                                 switch ($row['status']) {
                                     case "pending approval":
                                         $status_icon = '<i class="fas fa-clock status-icon"></i>';
+                                        $disabled = "disabled";
                                         break;
                                     case "approved":
                                         $status_icon = '<i class="fas fa-check-circle status-icon"></i>';
+                                        $disabled = "disabled";
                                         break;
                                     case "shipped":
                                         $status_icon = '<i class="fas fa-shipping-fast status-icon"></i>';
                                         break;
                                     default:
                                         $status_icon = '<i class="fas fa-question-circle status-icon"></i>';
+                                        $disabled = "disabled";
                                         break;
                                 }
                                 echo '<tr>
@@ -208,7 +217,7 @@ $history_result = $stmt->get_result();
                                     <td>
                                         <form method="post" action="">
                                             <input type="hidden" name="order_id" value="' . $row['orderId'] . '">
-                                            <button type="submit" name="complete_order" class="complete-btn">Mark as Completed</button>
+                                            <button type="submit" name="complete_order" class="complete-btn" ' . $disabled . '>Mark as Completed</button>
                                         </form>
                                     </td>
                                     </tr>';
