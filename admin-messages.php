@@ -22,6 +22,13 @@ if (isset($_POST['messageId'])) {
     mysqli_query($conn, $updateMessageQuery);
 }
 
+// Handle deletion of read messages
+if (isset($_POST['deleteReadMessages'])) {
+    $deleteQuery = "DELETE FROM admin_messages WHERE adminId = '$adminId' AND readed = 1";
+    mysqli_query($conn, $deleteQuery);
+    header('location:admin-messages.php'); // Redirect to avoid resubmission
+}
+
 // Fetch admin messages
 $messagesQuery = "SELECT * FROM admin_messages WHERE adminId = '$adminId' ORDER BY messageId DESC";
 $messagesResult = mysqli_query($conn, $messagesQuery);
@@ -81,6 +88,10 @@ $messagesResult = mysqli_query($conn, $messagesQuery);
     <div class="messages-section">
         <h1 style="text-align:center; margin:20px 10px;">Admin Messages</h1>
 
+        <form method="post" action="" style="text-align: left; margin-left: 20%;">
+            <button type="submit" name="deleteReadMessages" style="background-color: red; color: white; padding: 10px; margin-bottom: 20px;">Delete Read Messages</button>
+        </form>
+
         <?php if (mysqli_num_rows($messagesResult) > 0) { ?>
             <table>
                 <thead>
@@ -106,7 +117,7 @@ $messagesResult = mysqli_query($conn, $messagesQuery);
                 </tbody>
             </table>
         <?php } else { ?>
-            <p>No messages found.</p>
+            <p style="text-align: left; margin-left: 45%;">No messages found.</p>
         <?php } ?>
     </div>
 </body>
