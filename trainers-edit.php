@@ -38,9 +38,31 @@ if(isset($_GET['delete_id'])){
             justify-content: center;
             gap: 20px;
         }
+        .card {
+            border: 1px solid #ccc;
+            padding: 20px;
+            border-radius: 5px;
+            width: 250px;
+            text-align: center;
+            background-color: #f9f9f9;
+        }
         .card img {
             width: 100%;
             height: auto;
+        }
+        .cancel-warning-orange {
+            background-color: orange;
+            color: white;
+            padding: 5px;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+        .cancel-warning-red {
+            background-color: red;
+            color: white;
+            padding: 5px;
+            border-radius: 5px;
+            margin-top: 10px;
         }
     </style>
     <meta charset="UTF-8">
@@ -68,20 +90,30 @@ if(isset($_GET['delete_id'])){
                         $endurance = $row['endurance'];
                         $body_building = $row['body_building'];
                         $flexibility = $row['flexibility'];
-                        $raiting_avg = $row['rating'];
+                        $cancel_count = $row['cancel'];
                         
                         echo "
                         <div class='card'>
                             <img src='img/team/$trainerImg' alt='$trainerName'>
                             <h3>$trainerName</h3>
-                            <p class='price'>Rating: $rating/5</p>
-                            <p>Roles:</p>";
+                            <p class='price'>Rating: $rating/5</p>";
+
+                        // הצגת מספר הביטולים עם רקע בהתאם
+                        if ($cancel_count >= 5 && $cancel_count < 10) {
+                            echo "<p class='cancel-warning-orange'>Cancellations: $cancel_count</p>";
+                        } elseif ($cancel_count >= 10) {
+                            echo "<p class='cancel-warning-red'>Cancellations: $cancel_count</p>";
+                        } else {
+                            echo "<p>Cancellations: $cancel_count</p>";
+                        }
+
+                        echo "<p>Roles:</p>";
                         
                         if ($muscle_building) {
                             echo "<p>Muscle Building</p>";
                         }
                         if ($weight_loss) {
-                            echo "<p>weight Loss</p>";
+                            echo "<p>Weight Loss</p>";
                         }
                         if ($strength) {
                             echo "<p>Strength</p>";

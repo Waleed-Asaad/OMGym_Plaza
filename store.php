@@ -42,6 +42,7 @@ foreach ($category_order as $category) {
         FROM products
         WHERE category = '$category'
         AND productId NOT IN (" . (count($last_order_products) > 0 ? implode(",", $last_order_products) : "0") . ")
+        AND quantity > 0  /* בדיקה שהכמות במלאי היא יותר מ-0 */
         ORDER BY RAND()
         LIMIT 1";
     $product_result = mysqli_query($conn, $product_query);
@@ -54,6 +55,7 @@ foreach ($category_order as $category) {
             SELECT *
             FROM products
             WHERE category = '$category'
+            AND quantity > 0  /* בדיקה שהכמות במלאי היא יותר מ-0 */
             ORDER BY RAND()
             LIMIT 1";
         $fallback_result = mysqli_query($conn, $fallback_query);

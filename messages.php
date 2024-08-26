@@ -13,9 +13,11 @@ $user = $result->fetch_assoc();
 $user_id = $user['userId'];
 $user_status = $user['status'];
 $user_name = $user['userName'];
-$sql = "SELECT * FROM messages WHERE userId = $user_id ORDER BY messageId DESC";
-$result2 = $conn->query($sql); 
-$messages = $result2->fetch_all(MYSQLI_ASSOC);
+
+// Pagination setup
+$messagesPerPage = 15;  // Number of messages per page
+$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;  // Current page number
+$offset = ($page - 1) * $messagesPerPage;  // Offset for SQL query
 
 // Fetch messages based on user status
 if ($user_status == "trainee") {
@@ -27,11 +29,22 @@ if ($user_status == "trainee") {
     $trainee = $result->fetch_assoc();
     $traineeId = $trainee['traineeId'];
     $trainerId = $trainee['trainerId'];
-    $sql = "SELECT * FROM messages WHERE traineeId = $traineeId ORDER BY messageId DESC";
-    $result2 = $conn->query($sql); 
+
+    $count_sql = "SELECT COUNT(*) as total FROM messages WHERE traineeId = ?";
+    $stmt = $conn->prepare($count_sql);
+    $stmt->bind_param("i", $traineeId);
+    $stmt->execute();
+    $count_result = $stmt->get_result();
+    $totalMessages = $count_result->fetch_assoc()['total'];
+
+    $sql = "SELECT * FROM messages WHERE traineeId = ? ORDER BY messageId DESC LIMIT ? OFFSET ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("iii", $traineeId, $messagesPerPage, $offset);
+    $stmt->execute();
+    $result2 = $stmt->get_result();
     $messages = $result2->fetch_all(MYSQLI_ASSOC);
-}
-if ($user_status == "trainer") {
+
+} elseif ($user_status == "trainer") {
     $sql = "SELECT trainerId FROM trainer WHERE userId = ?";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("i", $user_id);
@@ -47,47 +60,56 @@ if ($user_status == "trainer") {
     $stmt->execute();
     $result = $stmt->get_result();
     $trainees = $result->fetch_all(MYSQLI_ASSOC);
-    $sql = "SELECT * FROM messages WHERE trainerId = $trainerId ORDER BY messageId DESC";
-    $result2 = $conn->query($sql); 
+
+    $count_sql = "SELECT COUNT(*) as total FROM messages WHERE trainerId = ?";
+    $stmt = $conn->prepare($count_sql);
+    $stmt->bind_param("i", $trainerId);
+    $stmt->execute();
+    $count_result = $stmt->get_result();
+    $totalMessages = $count_result->fetch_assoc()['total'];
+
+    $sql = "SELECT * FROM messages WHERE trainerId = ? ORDER BY messageId DESC LIMIT ? OFFSET ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("iii", $trainerId, $messagesPerPage, $offset);
+    $stmt->execute();
+    $result2 = $stmt->get_result();
     $messages = $result2->fetch_all(MYSQLI_ASSOC);
 
+} else {
+    $count_sql = "SELECT COUNT(*) as total FROM messages WHERE userId = ?";
+    $stmt = $conn->prepare($count_sql);
+    $stmt->bind_param("i", $user_id);
+    $stmt->execute();
+    $count_result = $stmt->get_result();
+    $totalMessages = $count_result->fetch_assoc()['total'];
+
+    $sql = "SELECT * FROM messages WHERE userId = ? ORDER BY messageId DESC LIMIT ? OFFSET ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("iii", $user_id, $messagesPerPage, $offset);
+    $stmt->execute();
+    $result2 = $stmt->get_result();
+    $messages = $result2->fetch_all(MYSQLI_ASSOC);
 }
 
-
+$totalPages = ceil($totalMessages / $messagesPerPage); // Calculate total pages
 
 // Handle message deletion
 if (isset($_POST['deleteReadMessages'])) {
     if ($user_status == "trainer") {
-        $sql = "SELECT trainerId FROM trainer WHERE userId = ?";
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param("i", $user_id);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        $trainer = $result->fetch_assoc();
-        $trainerId = $trainer['trainerId'];
         $sql = "DELETE FROM messages WHERE trainerId = ? AND readed = 1";
         $stmt = $conn->prepare($sql);
         $stmt->bind_param("i", $trainerId);
         $stmt->execute();
         header('Location: ' . $_SERVER['PHP_SELF']); // Refresh the page to reflect the changes
         exit();
-    }
-    else if ($user_status == "trainee") {
-        $sql = "SELECT traineeId, trainerId FROM trainee WHERE userId = ?";
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param("i", $user_id);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        $trainee = $result->fetch_assoc();
-        $traineeId = $trainee['traineeId'];
+    } elseif ($user_status == "trainee") {
         $sql = "DELETE FROM messages WHERE traineeId = ? AND readed = 1";
         $stmt = $conn->prepare($sql);
         $stmt->bind_param("i", $traineeId);
         $stmt->execute();
         header('Location: ' . $_SERVER['PHP_SELF']); // Refresh the page to reflect the changes
         exit();
-    }
-    else {
+    } else {
         $sql = "DELETE FROM messages WHERE userId = ? AND readed = 1";
         $stmt = $conn->prepare($sql);
         $stmt->bind_param("i", $user_id);
@@ -95,7 +117,6 @@ if (isset($_POST['deleteReadMessages'])) {
         header('Location: ' . $_SERVER['PHP_SELF']); // Refresh the page to reflect the changes
         exit();
     }
-    
 }
 
 // Handle message sending
@@ -106,14 +127,13 @@ if (isset($_POST['sendMessage'])) {
 
     if ($recipientType == 'trainer' && $user_status == 'trainee') {
         // Send message from trainee to trainer
-        // שליפת ה-userId של המאמן מטבלת trainer לפי trainerId
         $sql = "SELECT userId FROM trainer WHERE trainerId = ?";
         $stmt = $conn->prepare($sql);
         $stmt->bind_param("i", $trainerId);
         $stmt->execute();
         $result = $stmt->get_result();
         $trainerData = $result->fetch_assoc();
-        $trainerUserId = $trainerData['userId']; // זהו ה-userId של המאמן
+        $trainerUserId = $trainerData['userId'];
         $sql = "INSERT INTO messages (content, readed, userId, traineeId, trainerId) VALUES (?, 0, ?, 0, ?)";
         $stmt = $conn->prepare($sql);
         $stmt->bind_param("sii", $messageContent, $trainerUserId, $trainerId);
@@ -134,7 +154,6 @@ if (isset($_POST['sendMessage'])) {
         $stmt->bind_param("sii", $messageContent, $traineeUserId, $recipientId);
         $stmt->execute();
 
-
     } elseif ($recipientType == 'admin') {
         // Send message from user/trainee/trainer to admin
         $sql = "SELECT adminId FROM admin LIMIT 1";  // Assuming there's at least one admin
@@ -142,7 +161,6 @@ if (isset($_POST['sendMessage'])) {
         $admin = $result->fetch_assoc();
         $adminId = $admin['adminId'];
 
-        
         $sql = "INSERT INTO admin_messages (content, readed, adminId) VALUES (?, 0, ?)";
         $stmt = $conn->prepare($sql);
         $stmt->bind_param("si", $messageContent, $adminId);
@@ -191,6 +209,30 @@ if (isset($_POST['sendMessage'])) {
 
         .table tbody tr:hover {
             background-color: #e9ecef;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+        }
+
+        .pagination a {
+            margin: 0 5px;
+            padding: 8px 16px;
+            text-decoration: none;
+            border: 1px solid #ddd;
+            color: black;
+        }
+
+        .pagination a.active {
+            background-color: #f36100;
+            color: white;
+            border: 1px solid #f36100;
+        }
+
+        .pagination a:hover:not(.active) {
+            background-color: #ddd;
         }
     </style>
 </head>
@@ -259,7 +301,12 @@ if (isset($_POST['sendMessage'])) {
             </tbody>
         </table>
 
-        
+        <!-- Pagination Links -->
+        <div class="pagination">
+            <?php for ($i = 1; $i <= $totalPages; $i++) { ?>
+                <a href="?page=<?php echo $i; ?>" class="<?php if ($i == $page) echo 'active'; ?>"><?php echo $i; ?></a>
+            <?php } ?>
+        </div>
     </div>
 </section>
 
