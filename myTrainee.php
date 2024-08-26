@@ -220,7 +220,8 @@ $chests = array_reverse($chests);
                                     }
 
                                     if (isset($mealPlanImg)) {
-                                        echo "<li style='font-size:45px;margin-bottom: 5px;color:#f36105'>Meal plan: <br> <img style='margin-top: 20px' src='img/meal_plans/$mealPlanImg' alt='Meal Plan Image'></li>";
+                                        echo "<li style='font-size:45px;margin-bottom: 5px;color:#f36105'>Meal plan: <br> <div class='gs-item grid-wide set-bg' data-setbg='img/meal_plans/".$mealPlanImg."' style='width:380px; height:300px; margin-left:340px;margin-top:20px'>
+                                        <a href='img/meal_plans/".$mealPlanImg."' style=' margin-left:450px;margin-top:20px' class='thumb-icon image-popup'><i class='fa fa-picture-o'></i></a></li>";
                                     } else {
                                         echo "<li style='font-size:25px;margin-bottom: 5px;color: #f36105'>Meal plan: <br> There's no meal plan yet</li>";
                                     }

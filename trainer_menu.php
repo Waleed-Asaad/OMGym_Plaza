@@ -79,6 +79,8 @@ $unreadCount = getUnreadMessagesCount($trainerId, $conn);
                 <li><a href="./demands.php">My Demands</a></li>
                 <li><a href="./myTrainees.php">My Trainees</a></li>
                 <li><a href="./addPlans.php">Add Plans</a></li>
+                <li><a href="./trainerTrainingPlans.php">Training Plans</a></li>
+                <li><a href="./trainerMealPlans.php">Meal Plans</a></li>
                 <li><a href="./messages.php">Messages <i class="fas fa-envelope"></i>
                     <?php if ($unreadCount > 0) { ?>
                         <span class="badge"><?php echo $unreadCount; ?></span>
@@ -116,6 +118,8 @@ $unreadCount = getUnreadMessagesCount($trainerId, $conn);
                             <li><a href="./demands.php">My Demands</a></li>
                             <li><a href="./myTrainees.php">My Trainees</a></li>
                             <li><a href="./addPlans.php">Add Plans</a></li>
+                            <li><a href="./trainerTrainingPlans.php">Training Plans</a></li>
+                            <li><a href="./trainerMealPlans.php">Meal Plans</a></li>
                             <li><a href="./messages.php">Messages <i class="fas fa-envelope"></i>
                                 <?php if ($unreadCount > 0) { ?>
                                     <span class="badge"><?php echo $unreadCount; ?></span>
