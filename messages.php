@@ -13,6 +13,9 @@ $user = $result->fetch_assoc();
 $user_id = $user['userId'];
 $user_status = $user['status'];
 $user_name = $user['userName'];
+$sql = "SELECT * FROM messages WHERE userId = $user_id ORDER BY messageId DESC";
+$result2 = $conn->query($sql); 
+$messages = $result2->fetch_all(MYSQLI_ASSOC);
 
 // Fetch messages based on user status
 if ($user_status == "trainee") {
@@ -25,14 +28,8 @@ if ($user_status == "trainee") {
     $traineeId = $trainee['traineeId'];
     $trainerId = $trainee['trainerId'];
 
-    $sql = "SELECT * FROM messages WHERE traineeId = ? ORDER BY messageId DESC";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("i", $traineeId);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $messages = $result->fetch_all(MYSQLI_ASSOC);
-
-} elseif ($user_status == "trainer") {
+}
+if ($user_status == "trainer") {
     $sql = "SELECT trainerId FROM trainer WHERE userId = ?";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("i", $user_id);
@@ -40,13 +37,6 @@ if ($user_status == "trainee") {
     $result = $stmt->get_result();
     $trainer = $result->fetch_assoc();
     $trainerId = $trainer['trainerId'];
-
-    $sql = "SELECT * FROM messages WHERE trainerId = ? ORDER BY messageId DESC";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("i", $trainerId);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $messages = $result->fetch_all(MYSQLI_ASSOC);
 
     // Fetch the list of trainees associated with the trainer
     $sql = "SELECT traineeId, traineeName FROM trainee WHERE trainerId = ?";
@@ -56,13 +46,18 @@ if ($user_status == "trainee") {
     $result = $stmt->get_result();
     $trainees = $result->fetch_all(MYSQLI_ASSOC);
 
-} else {
-    $sql = "SELECT * FROM messages WHERE userId = ? ORDER BY messageId DESC";
+}
+
+
+
+// Handle message deletion
+if (isset($_POST['deleteReadMessages'])) {
+    $sql = "DELETE FROM messages WHERE userId = ? AND readed = 1";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("i", $user_id);
     $stmt->execute();
-    $result = $stmt->get_result();
-    $messages = $result->fetch_all(MYSQLI_ASSOC);
+    header('Location: ' . $_SERVER['PHP_SELF']); // Refresh the page to reflect the changes
+    exit();
 }
 
 // Handle message sending
@@ -73,19 +68,34 @@ if (isset($_POST['sendMessage'])) {
 
     if ($recipientType == 'trainer' && $user_status == 'trainee') {
         // Send message from trainee to trainer
-        $sql = "INSERT INTO messages (content, readed, userId, traineeId, trainerId) VALUES (?, 0, 0, 0, ?)";
+        // שליפת ה-userId של המאמן מטבלת trainer לפי trainerId
+        $sql = "SELECT userId FROM trainer WHERE trainerId = ?";
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param("si", $messageContent, $trainerId);
+        $stmt->bind_param("i", $trainerId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $trainerData = $result->fetch_assoc();
+        $trainerUserId = $trainerData['userId']; // זהו ה-userId של המאמן
+        $sql = "INSERT INTO messages (content, readed, userId, traineeId, trainerId) VALUES (?, 0, ?, 0, ?)";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("sii", $messageContent, $trainerUserId, $trainerId);
         $stmt->execute();
 
     } elseif ($recipientType == 'trainee' && $user_status == 'trainer') {
         // Send message from trainer to a specific trainee
-        
         $recipientId = $_POST['recipientId'];
-        $sql = "INSERT INTO messages (content, readed, userId, traineeId, trainerId) VALUES (?, 0, 0, ?, 0)";
+        $sql = "SELECT userId FROM trainee WHERE traineeId = ?";
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param("si", $messageContent, $recipientId);
+        $stmt->bind_param("i", $recipientId);
         $stmt->execute();
+        $result = $stmt->get_result();
+        $traineeData = $result->fetch_assoc();
+        $traineeUserId = $traineeData['userId'];
+        $sql = "INSERT INTO messages (content, readed, userId, traineeId, trainerId) VALUES (?, 0, ?, ?, 0)";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("sii", $messageContent, $traineeUserId, $recipientId);
+        $stmt->execute();
+
 
     } elseif ($recipientType == 'admin') {
         // Send message from user/trainee/trainer to admin
@@ -101,7 +111,6 @@ if (isset($_POST['sendMessage'])) {
         $stmt->execute();
     }
 }
-
 ?>
 
 <!DOCTYPE html>
@@ -182,6 +191,10 @@ if (isset($_POST['sendMessage'])) {
 <!-- Messages Section Begin -->
 <section class="pricing-section spad">
     <div class="container">
+        <!-- Delete Read Messages Button -->
+        <form action="" method="post">
+            <button type="submit" name="deleteReadMessages" class="form-btn" style="background-color: #f36105;">Delete Read Messages</button>
+        </form>
         <table class="table table-bordered">
             <thead>
                 <tr>
@@ -207,6 +220,8 @@ if (isset($_POST['sendMessage'])) {
                 <?php } ?>
             </tbody>
         </table>
+
+        
     </div>
 </section>
 
