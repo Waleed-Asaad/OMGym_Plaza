@@ -19,15 +19,19 @@ if ($check_stmt) {
 
         if ($interval->days >= 7) {
             // Send a message to the trainer
-            $select = "SELECT * FROM trainee WHERE traineeId = '$trainee_id'";
-            $result = mysqli_query($conn, $select);
-            $row = mysqli_fetch_array($result);
+            $select = "SELECT * FROM trainee WHERE traineeId = ?";
+            $stmt = $conn->prepare($select);
+            $stmt->bind_param("i", $trainee_id);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $row = $result->fetch_assoc();
             $traineeName = $row['traineeName'];
+            $trainer_id = $row['trainerId'];
 
             $message = "It has been a week since the last measurements were taken for ".$traineeName." . Please schedule a new measurement.";
-            $insert_message_sql = "INSERT INTO messages (content, readed, userId, traineeId, trainerId) VALUES (?, 0, 0, 0, ?)";
+            $insert_message_sql = "INSERT INTO messages (content, readed, userId, traineeId, trainerId) VALUES (?, 0, 0, ?, ?)";
             $insert_message_stmt = $conn->prepare($insert_message_sql);
-            $insert_message_stmt->bind_param("si", $message, $trainer_id);
+            $insert_message_stmt->bind_param("sii", $message, $trainee_id, $trainer_id);
             $insert_message_stmt->execute();
             $insert_message_stmt->close();
         }
@@ -59,15 +63,13 @@ if(isset($_POST['submit'])){
                 $row = $result->fetch_assoc();
                 $height = $row['height'];
                 $trainer_id = $row['trainerId'];
-                $criteria = [
-                    'weight_loss' => $row['weight_loss'],
-                    'strength' => $row['strength'],
-                    'endurance' => $row['endurance'],
-                    'muscle_building' => $row['muscle_building'],
-                    'flexibility' => $row['flexibility'],
-                    'body_building' => $row['body_building'],
-                    'bmi' => $row['bmi']
-                ];
+                
+                $weight_loss = $row['weight_loss'];
+                $strength = $row['strength'];
+                $endurance = $row['endurance'];
+                $muscle_building = $row['muscle_building'];
+                $flexibility = $row['flexibility'];
+                $body_building = $row['body_building'];
                 
                 // Calculate BMI
                 $bmi = round($weight / (($height / 100) ** 2), 1);
@@ -90,64 +92,115 @@ if(isset($_POST['submit'])){
                     $insert_stmt->close();
                 }
 
-                
                 // Update the training_planId in the traineeHours table based on the new measurements and criteria
-                // Find the most suitable and unused training plan
-                $sql = "SELECT * FROM traineeHours WHERE traineeId = '$trainee_id' AND training_planId IS NOT NULL";
-                $hourResult = mysqli_query($conn, $sql);
-                while ($hourRow = mysqli_fetch_assoc($hourResult)) {
-
+                $sql = "SELECT * FROM traineeHours WHERE traineeId = ? AND training_planId IS NOT NULL";
+                $stmt_hours = $conn->prepare($sql);
+                $stmt_hours->bind_param("i", $trainee_id);
+                $stmt_hours->execute();
+                $hourResult = $stmt_hours->get_result();
+                
+                while ($hourRow = $hourResult->fetch_assoc()) {
                     $training_planId = $hourRow['training_planId'];
                     $hourName = $hourRow['hours'];
                     $dayId = $hourRow['dayId'];
 
-                    $select = "SELECT * FROM traineeDay WHERE dayId = '$dayId'";
-                    $day_result = mysqli_query($conn, $select);
-                    $dayRow = mysqli_fetch_array($day_result);
+                    $select = "SELECT * FROM traineeDay WHERE dayId = ?";
+                    $day_stmt = $conn->prepare($select);
+                    $day_stmt->bind_param("i", $dayId);
+                    $day_stmt->execute();
+                    $day_result = $day_stmt->get_result();
+                    $dayRow = $day_result->fetch_assoc();
                     $dayName = $dayRow['days'];
 
-                    $plan_sql = "
-                    SELECT training_planId, 
-                           (weight_loss = ?) + 
-                           (strength = ?) + 
-                           (endurance = ?) + 
-                           (muscle_building = ?) + 
-                           (flexibility = ?) + 
-                           (body_building = ?) + 
-                           (bmi <= ?) +
-                           (hand <= ?) + 
-                           (leg <= ?) + 
-                           (abdominal <= ?) + 
-                           (chest <= ?) AS score
-                    FROM training_plan
-                    WHERE training_planId NOT IN (
-                        SELECT DISTINCT training_planId FROM traineeHours WHERE traineeId = ?
-                    )
-                    ORDER BY score DESC
-                    LIMIT 1";
-                $plan_stmt = $conn->prepare($plan_sql);
-                $plan_stmt->bind_param("iiiiiidiiiii", 
-                    $criteria['weight_loss'], 
-                    $criteria['strength'], 
-                    $criteria['endurance'], 
-                    $criteria['muscle_building'], 
-                    $criteria['flexibility'], 
-                    $criteria['body_building'], 
-                    $criteria['bmi'],
-                    $hand,
-                    $leg,
-                    $abdominal,
-                    $chest,
-                    $trainee_id
-                );
-                $plan_stmt->execute();
-                $result_plan = $plan_stmt->get_result();
-                if ($result_plan->num_rows > 0) {
-                    $best_plan = $result_plan->fetch_assoc();
-                    $new_plan_id = $best_plan['training_planId'];
+                    $sql_used_plans = "
+                        SELECT DISTINCT training_planId 
+                        FROM traineeHours 
+                        WHERE traineeId = ? AND training_planId IS NOT NULL";
+                    
+                    $stmt_used_plans = $conn->prepare($sql_used_plans);
+                    $stmt_used_plans->bind_param("i", $trainee_id);
+                    $stmt_used_plans->execute();
+                    $result_used_plans = $stmt_used_plans->get_result();
+
+                    $used_plan_ids = [];
+                    while ($used_plan_row = $result_used_plans->fetch_assoc()) {
+                        $used_plan_ids[] = $used_plan_row['training_planId'];
+                    }
+
+                    if (count($used_plan_ids) > 0) {
+                        $used_plan_ids_placeholder = implode(',', array_fill(0, count($used_plan_ids), '?'));
+                        $sql_plan = "
+                            SELECT training_planId, 
+                                (bmi_match * 1 + muscle_building * 1 + endurance * 1 + strength * 1 + body_building * 1 + weight_loss * 1 + flexibility * 1 + abdominal_match * 1 + hand_match * 1 + chest_match * 1 + leg_match * 1) AS score 
+                            FROM (
+                                SELECT training_planId,
+                                    (bmi = ?) AS bmi_match,
+                                    (muscle_building = ?) AS muscle_building,
+                                    (endurance = ?) AS endurance,
+                                    (strength = ?) AS strength,
+                                    (body_building = ?) AS body_building,
+                                    (weight_loss = ?) AS weight_loss,
+                                    (flexibility = ?) AS flexibility,
+                                    (abdominal <= ?) AS abdominal_match,
+                                    (hand <= ?) AS hand_match,
+                                    (chest <= ?) AS chest_match,
+                                    (leg <= ?) AS leg_match
+                                FROM training_plan 
+                                WHERE training_planId NOT IN ($used_plan_ids_placeholder)
+                            ) AS matches
+                            ORDER BY score DESC 
+                            LIMIT 1";
+                        
+                        $stmt_plan = $conn->prepare($sql_plan);
+                        $types = str_repeat("i", 11) . str_repeat("i", count($used_plan_ids));
+                        $params = array_merge(
+                            [$bmi, $muscle_building, $endurance, $strength, $body_building, $weight_loss, $flexibility, $abdominal, $hand, $chest, $leg],
+                            $used_plan_ids
+                        );
+                        $stmt_plan->bind_param($types, ...$params);
+                    } else {
+                        $sql_plan = "
+                            SELECT training_planId, 
+                                (bmi_match * 1 + muscle_building * 1 + endurance * 1 + strength * 1 + body_building * 1 + weight_loss * 1 + flexibility * 1 + abdominal_match * 1 + hand_match * 1 + chest_match * 1 + leg_match * 1) AS score 
+                            FROM (
+                                SELECT training_planId,
+                                    (bmi = ?) AS bmi_match,
+                                    (muscle_building = ?) AS muscle_building,
+                                    (endurance = ?) AS endurance,
+                                    (strength = ?) AS strength,
+                                    (body_building = ?) AS body_building,
+                                    (weight_loss = ?) AS weight_loss,
+                                    (flexibility = ?) AS flexibility,
+                                    (abdominal <= ?) AS abdominal_match,
+                                    (hand <= ?) AS hand_match,
+                                    (chest <= ?) AS chest_match,
+                                    (leg <= ?) AS leg_match
+                                FROM training_plan
+                            ) AS matches
+                            ORDER BY score DESC 
+                            LIMIT 1";
+                        
+                        $stmt_plan = $conn->prepare($sql_plan);
+                        $stmt_plan->bind_param("iiiiiiiiiii", $bmi, $muscle_building, $endurance, $strength, $body_building, $weight_loss, $flexibility, $abdominal, $hand, $chest, $leg);
+                    }
+
+                    $stmt_plan->execute();
+                    $result_plan = $stmt_plan->get_result();
+                    $training_plan = $result_plan->fetch_assoc();
+
+                    // If no training plan is found
+                    if (!$training_plan) {
+                        echo "<script type='text/javascript'>
+                                alert('No suitable training plan available.');
+                                window.location.href = 'traineeTrainerSchedule.php';
+                            </script>";
+                        exit;
+                    }
+
+                    $new_plan_id = $training_plan['training_planId'];
 
                     // Update the traineeHours table with the new training_planId
-                    $update_plan_sql = "UPDATE traineeHours SET training_planId = ? WHERE traineeId = ? And training_planId = ? ";
+                    $update_plan_sql = "UPDATE traineeHours SET training_planId = ? WHERE traineeId = ? AND training_planId = ?";
                     $update_plan_stmt = $conn->prepare($update_plan_sql);
                     $update_plan_stmt->bind_param("iii", $new_plan_id, $trainee_id, $training_planId);
                     $update_plan_stmt->execute();
@@ -155,14 +208,15 @@ if(isset($_POST['submit'])){
 
                     // Send a message to the trainee
                     $trainee_message = "Your training plan on ".$dayName." at ".$hourName.":00 has been updated to a new plan.";
-                    $insert_trainee_message_sql = "INSERT INTO messages (content, readed, userId, traineeId, trainerId) VALUES (?, 0, 0, ?, 0)";
+                    $insert_trainee_message_sql = "INSERT INTO messages (content, readed, userId, traineeId, trainerId) VALUES (?, 0, 0, ?, ?)";
                     $insert_trainee_message_stmt = $conn->prepare($insert_trainee_message_sql);
-                    $insert_trainee_message_stmt->bind_param("si", $trainee_message, $trainee_id);
+                    $insert_trainee_message_stmt->bind_param("sii", $trainee_message, $trainee_id, $trainer_id);
                     $insert_trainee_message_stmt->execute();
                     $insert_trainee_message_stmt->close();
+
+                    $stmt_plan->close();
                 }
-                $plan_stmt->close();
-                }
+                
                 
             } else {
                 echo "No trainee found with the given ID.";
@@ -262,11 +316,14 @@ $chests = array_reverse($chests);
 
                             if ($trainee_id > 0) {
                                 // Query to get the specific trainee's details
-                                $sql = "SELECT * FROM trainee WHERE traineeId = '$trainee_id'";
-                                $result = mysqli_query($conn, $sql);
+                                $sql = "SELECT * FROM trainee WHERE traineeId = ?";
+                                $stmt = $conn->prepare($sql);
+                                $stmt->bind_param("i", $trainee_id);
+                                $stmt->execute();
+                                $result = $stmt->get_result();
                                 
                                 if ($result) {
-                                    $row = mysqli_fetch_assoc($result);
+                                    $row = $result->fetch_assoc();
                                     $meal_id = $row['meal_planId'];
                                     $training_id = $row['training_planId'];
                                     $muscle_building = $row['muscle_building'];
@@ -318,10 +375,14 @@ $chests = array_reverse($chests);
                                 </div>
                                 <?php
                                 if ($meal_id > 0) {
-                                    $sql1 = "SELECT * FROM meal_plans WHERE meal_planId = '$meal_id'";
-                                    $result1 = mysqli_query($conn, $sql1);
+                                    $sql1 = "SELECT * FROM meal_plans WHERE meal_planId = ?";
+                                    $stmt1 = $conn->prepare($sql1);
+                                    $stmt1->bind_param("i", $meal_id);
+                                    $stmt1->execute();
+                                    $result1 = $stmt1->get_result();
+                                    
                                     if ($result1) {
-                                        $row1 = mysqli_fetch_assoc($result1);
+                                        $row1 = $result1->fetch_assoc();
                                         $mealPlanImg = $row1['planImage'];
                                     }
 
@@ -578,7 +639,7 @@ $chests = array_reverse($chests);
                         text: 'Trainee Measurement Progress',
                         color: '#f36105',
                         font: {
-                                size: 30  // Set the font size here
+                            size: 30  // Set the font size here
                         }
                     }
                 }
