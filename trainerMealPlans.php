@@ -67,7 +67,7 @@ if (isset($_POST['delete'])) {
                 while ($row = mysqli_fetch_assoc($result)) {
                     $planImage = $row['planImage'];
                     
-                    echo "<div class='gs-item grid-wide set-bg' data-setbg='img/meal_plans/$planImage' style='width:350px; height:300px;margin-bottom:50px; margin-right:15px'>";
+                    echo "<div class='gs-item grid-wide set-bg' data-setbg='img/meal_plans/$planImage' style='width:350px; height:250px;margin-bottom:50px; margin-right:15px'>";
                     echo "<a href='img/meal_plans/$planImage' class='thumb-icon image-popup'><i class='fa fa-picture-o'></i></a>";
                     echo "<div class='product-actions'>";
                     echo "<form method='post' action=''>";

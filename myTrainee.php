@@ -2,6 +2,40 @@
 include "connection.php";
 session_start();
 
+$trainee_id = isset($_GET['trainee_id']) ? intval($_GET['trainee_id']) : 0;
+
+// Check if a week has passed since the last measurement
+$check_sql = "SELECT DATE(date) AS last_date FROM measurements WHERE traineeId = ? ORDER BY weightId DESC LIMIT 1";
+$check_stmt = $conn->prepare($check_sql);
+if ($check_stmt) {
+    $check_stmt->bind_param("i", $trainee_id);
+    $check_stmt->execute();
+    $result = $check_stmt->get_result();
+    if ($result->num_rows > 0) {
+        $row = $result->fetch_assoc();
+        $last_date = new DateTime($row['last_date']);
+        $current_date = new DateTime();
+        $interval = $last_date->diff($current_date);
+
+        if ($interval->days >= 7) {
+            // Send a message to the trainer
+            $select = "SELECT * FROM trainee WHERE traineeId = '$trainee_id'";
+            $result = mysqli_query($conn, $select);
+            $row = mysqli_fetch_array($result);
+            $traineeName = $row['traineeName'];
+
+            $message = "It has been a week since the last measurements were taken for ".$traineeName." . Please schedule a new measurement.";
+            $insert_message_sql = "INSERT INTO messages (content, readed, userId, traineeId, trainerId) VALUES (?, 0, 0, 0, ?)";
+            $insert_message_stmt = $conn->prepare($insert_message_sql);
+            $insert_message_stmt->bind_param("si", $message, $trainer_id);
+            $insert_message_stmt->execute();
+            $insert_message_stmt->close();
+        }
+    }
+    $check_stmt->close();
+}
+
+
 if(isset($_POST['submit'])){
     // Retrieve form data
     $weight = $_POST['weight'];
@@ -14,8 +48,8 @@ if(isset($_POST['submit'])){
     $trainee_id = isset($_GET['trainee_id']) ? intval($_GET['trainee_id']) : 0;
 
     if ($trainee_id > 0) {
-        // Fetch trainee details to calculate BMI
-        $select = "SELECT height FROM trainee WHERE traineeId = ?";
+        // Fetch trainee details to calculate BMI and retrieve relevant fields
+        $select = "SELECT height, trainerId, weight_loss, strength, endurance, muscle_building, flexibility, body_building, bmi FROM trainee WHERE traineeId = ?";
         $stmt = $conn->prepare($select);
         if ($stmt) {
             $stmt->bind_param("i", $trainee_id);
@@ -24,6 +58,16 @@ if(isset($_POST['submit'])){
             if ($result->num_rows > 0) {
                 $row = $result->fetch_assoc();
                 $height = $row['height'];
+                $trainer_id = $row['trainerId'];
+                $criteria = [
+                    'weight_loss' => $row['weight_loss'],
+                    'strength' => $row['strength'],
+                    'endurance' => $row['endurance'],
+                    'muscle_building' => $row['muscle_building'],
+                    'flexibility' => $row['flexibility'],
+                    'body_building' => $row['body_building'],
+                    'bmi' => $row['bmi']
+                ];
                 
                 // Calculate BMI
                 $bmi = round($weight / (($height / 100) ** 2), 1);
@@ -33,14 +77,8 @@ if(isset($_POST['submit'])){
                 $update_stmt = $conn->prepare($update_sql);
                 if ($update_stmt) {
                     $update_stmt->bind_param("idi", $weight, $bmi, $trainee_id);
-                    if ($update_stmt->execute()) {
-                        echo "Trainee record updated successfully";
-                    } else {
-                        echo "Error updating trainee record: " . $update_stmt->error;
-                    }
+                    $update_stmt->execute();
                     $update_stmt->close();
-                } else {
-                    echo "Error preparing update statement: " . $conn->error;
                 }
 
                 // Insert measurements
@@ -48,16 +86,84 @@ if(isset($_POST['submit'])){
                 $insert_stmt = $conn->prepare($insert_sql);
                 if ($insert_stmt) {
                     $insert_stmt->bind_param("iiiiii", $weight, $hand, $leg, $abdominal, $chest, $trainee_id);
-                    if($insert_stmt->execute()){
-                        echo "Measurements record inserted successfully";
-                    } else {
-                        echo "Error inserting measurements record: " . $insert_stmt->error;
-                    }
+                    $insert_stmt->execute();
                     $insert_stmt->close();
-                } else {
-                    echo "Error preparing insert statement: " . $conn->error;
                 }
 
+                
+                // Update the training_planId in the traineeHours table based on the new measurements and criteria
+                // Find the most suitable and unused training plan
+                $sql = "SELECT * FROM traineeHours WHERE traineeId = '$trainee_id' AND training_planId IS NOT NULL";
+                $hourResult = mysqli_query($conn, $sql);
+                while ($hourRow = mysqli_fetch_assoc($hourResult)) {
+
+                    $training_planId = $hourRow['training_planId'];
+                    $hourName = $hourRow['hours'];
+                    $dayId = $hourRow['dayId'];
+
+                    $select = "SELECT * FROM traineeDay WHERE dayId = '$dayId'";
+                    $day_result = mysqli_query($conn, $select);
+                    $dayRow = mysqli_fetch_array($day_result);
+                    $dayName = $dayRow['days'];
+
+                    $plan_sql = "
+                    SELECT training_planId, 
+                           (weight_loss = ?) + 
+                           (strength = ?) + 
+                           (endurance = ?) + 
+                           (muscle_building = ?) + 
+                           (flexibility = ?) + 
+                           (body_building = ?) + 
+                           (bmi <= ?) +
+                           (hand <= ?) + 
+                           (leg <= ?) + 
+                           (abdominal <= ?) + 
+                           (chest <= ?) AS score
+                    FROM training_plan
+                    WHERE training_planId NOT IN (
+                        SELECT DISTINCT training_planId FROM traineeHours WHERE traineeId = ?
+                    )
+                    ORDER BY score DESC
+                    LIMIT 1";
+                $plan_stmt = $conn->prepare($plan_sql);
+                $plan_stmt->bind_param("iiiiiidiiiii", 
+                    $criteria['weight_loss'], 
+                    $criteria['strength'], 
+                    $criteria['endurance'], 
+                    $criteria['muscle_building'], 
+                    $criteria['flexibility'], 
+                    $criteria['body_building'], 
+                    $criteria['bmi'],
+                    $hand,
+                    $leg,
+                    $abdominal,
+                    $chest,
+                    $trainee_id
+                );
+                $plan_stmt->execute();
+                $result_plan = $plan_stmt->get_result();
+                if ($result_plan->num_rows > 0) {
+                    $best_plan = $result_plan->fetch_assoc();
+                    $new_plan_id = $best_plan['training_planId'];
+
+                    // Update the traineeHours table with the new training_planId
+                    $update_plan_sql = "UPDATE traineeHours SET training_planId = ? WHERE traineeId = ? And training_planId = ? ";
+                    $update_plan_stmt = $conn->prepare($update_plan_sql);
+                    $update_plan_stmt->bind_param("iii", $new_plan_id, $trainee_id, $training_planId);
+                    $update_plan_stmt->execute();
+                    $update_plan_stmt->close();
+
+                    // Send a message to the trainee
+                    $trainee_message = "Your training plan on ".$dayName." at ".$hourName.":00 has been updated to a new plan.";
+                    $insert_trainee_message_sql = "INSERT INTO messages (content, readed, userId, traineeId, trainerId) VALUES (?, 0, 0, ?, 0)";
+                    $insert_trainee_message_stmt = $conn->prepare($insert_trainee_message_sql);
+                    $insert_trainee_message_stmt->bind_param("si", $trainee_message, $trainee_id);
+                    $insert_trainee_message_stmt->execute();
+                    $insert_trainee_message_stmt->close();
+                }
+                $plan_stmt->close();
+                }
+                
             } else {
                 echo "No trainee found with the given ID.";
             }
@@ -277,6 +383,8 @@ $chests = array_reverse($chests);
                                                         <?php
                                                             // Displaying the dates
                                                             if ($result) {
+                                                                $dates = array_reverse($dates);
+                                                                $dates = array_slice($dates, 0, 5);
                                                                 foreach($dates as $date) {
                                                         ?>
                                                         <p style="font-size:20px; margin-bottom:38px"><b><?php echo $date; ?></b></p>
@@ -291,6 +399,8 @@ $chests = array_reverse($chests);
                                                         <h4 style="color: #f36105;">WEIGHT</h4>
                                                         <?php
                                                             if ($result) {
+                                                                $weights = array_reverse($weights);
+                                                                $weights = array_slice($weights, 0, 5);
                                                                 foreach($weights as $weight) {
                                                         ?>
                                                         <p style="font-size:20px; margin-bottom:38px"><b><?php echo $weight; ?></b></p>
@@ -305,6 +415,8 @@ $chests = array_reverse($chests);
                                                         <h4 style="color: #f36105;">HAND</h4>
                                                         <?php
                                                             if ($result) {
+                                                                $hands = array_reverse($hands);
+                                                                $hands = array_slice($hands, 0, 5);
                                                                 foreach($hands as $hand) {
                                                         ?>
                                                         <p style="font-size:20px; margin-bottom:38px"><b><?php echo $hand; ?></b></p>
@@ -319,6 +431,8 @@ $chests = array_reverse($chests);
                                                         <h4 style="color: #f36105;">LEG</h4>
                                                         <?php
                                                             if ($result) {
+                                                                $legs = array_reverse($legs);
+                                                                $legs = array_slice($legs, 0, 5);
                                                                 foreach($legs as $leg) {
                                                         ?>
                                                         <p style="font-size:20px; margin-bottom:38px"><b><?php echo $leg; ?></b></p>
@@ -333,6 +447,8 @@ $chests = array_reverse($chests);
                                                         <h4 style="color: #f36105;">ABDOMINAL</h4>
                                                         <?php
                                                             if ($result) {
+                                                                $abdominals = array_reverse($abdominals);
+                                                                $abdominals = array_slice($abdominals, 0, 5);
                                                                 foreach($abdominals as $abdominal) {
                                                         ?>
                                                         <p style="font-size:20px; margin-bottom:38px"><b><?php echo $abdominal; ?></b></p>
@@ -347,6 +463,8 @@ $chests = array_reverse($chests);
                                                         <h4 style="color: #f36105;">CHEST</h4>
                                                         <?php
                                                             if ($result) {
+                                                                $chests = array_reverse($chests);
+                                                                $chests = array_slice($chests, 0, 5);
                                                                 foreach($chests as $chest) {
                                                         ?>
                                                         <p style="font-size:20px; margin-bottom:38px"><b><?php echo $chest; ?></b></p>
