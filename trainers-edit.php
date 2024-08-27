@@ -1,5 +1,4 @@
 <?php
-
 include 'connection.php';
 session_start();
 
@@ -9,10 +8,34 @@ if(!isset($_SESSION['adminName'])){
 
 if(isset($_GET['delete_id'])){
     $delete_id = $_GET['delete_id'];
+
+    // Step 1: Fetch all trainees associated with the trainer
+    $select_trainees_sql = "SELECT traineeId, userId FROM trainee WHERE trainerId = '$delete_id'";
+    $result_trainees = mysqli_query($conn, $select_trainees_sql);
+
+    // Step 2: Update each trainee's trainerId to NULL
+    if($result_trainees && mysqli_num_rows($result_trainees) > 0) {
+        while($row_trainee = mysqli_fetch_assoc($result_trainees)) {
+            $traineeId = $row_trainee['traineeId'];
+            $userId = $row_trainee['userId'];
+            
+            // Set trainerId to NULL
+            $update_trainee_sql = "UPDATE trainee SET trainerId = NULL WHERE traineeId = '$traineeId'";
+            mysqli_query($conn, $update_trainee_sql);
+            
+            // Step 3: Send a message to each trainee
+            $message_content = "Your trainer has been fired. Please choose a new trainer.";
+            $insert_message_sql = "INSERT INTO messages (content, userId, trainerId, traineeId) VALUES ('$message_content', '$userId', '$delete_id', '$traineeId')";
+            mysqli_query($conn, $insert_message_sql);
+        }
+    }
+
+    // Step 4: Delete the trainer from the trainer and user tables
     $select_user_id_sql = "SELECT userId FROM trainer WHERE trainerId = '$delete_id'";
     $result = mysqli_query($conn, $select_user_id_sql);
     $row = mysqli_fetch_assoc($result);
     $user_id = $row['userId'];
+    
     $delete_trainer_sql = "DELETE FROM trainer WHERE trainerId = '$delete_id'";
     if(mysqli_query($conn, $delete_trainer_sql)){
         $delete_user_sql = "DELETE FROM user WHERE userId = '$user_id'";
@@ -24,6 +47,7 @@ if(isset($_GET['delete_id'])){
     }
 }
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
