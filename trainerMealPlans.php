@@ -20,6 +20,33 @@ if (isset($_POST['delete'])) {
     $meal_planId = $_POST['delete'];
     $deleteSql = "DELETE FROM meal_plans WHERE meal_planId = $meal_planId";
     mysqli_query($conn, $deleteSql);
+
+    $sql = "SELECT * FROM trainee WHERE meal_planId = ? ";
+    $stmt_hours = $conn->prepare($sql);
+    $stmt_hours->bind_param("i", $meal_planId);
+    $stmt_hours->execute();
+    $traineeResult = $stmt_hours->get_result();
+                
+    while ($traineeRow = $traineeResult->fetch_assoc()) {
+        $traineeId = $traineeRow['traineeId'];
+        $trainee_message = "Your meal plan has been deleted by the trainer, you have to choose a new one.";
+        $insert_trainee_message_sql = "INSERT INTO messages (content, readed, userId, traineeId, trainerId) VALUES (?, 0, 0, ?, 0)";
+        $insert_trainee_message_stmt = $conn->prepare($insert_trainee_message_sql);
+        $insert_trainee_message_stmt->bind_param("si", $trainee_message, $traineeId);
+        $insert_trainee_message_stmt->execute();
+        $insert_trainee_message_stmt->close();
+
+        // Update the trainee table with NULL where meal_planId
+        $update_plan_sql = "UPDATE trainee SET meal_planId = NULL WHERE traineeId = ?";
+        $update_plan_stmt = $conn->prepare($update_plan_sql);
+        $update_plan_stmt->bind_param("i", $traineeId);
+        $update_plan_stmt->execute();
+        $update_plan_stmt->close();
+    }
+    
+
+    
+
     header("Location: trainerMealPlans.php");
     exit; // Prevent further code execution
 }

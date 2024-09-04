@@ -104,7 +104,7 @@ if (isset($_GET['change'])) {
                             <div class="grid-sizer"></div>';
 
     if ($mealPlanImg) {
-        echo '<div class="gs-item grid-wide set-bg" data-setbg="img/meal_plans/'.$mealPlanImg.'" style="width:370px; height:300px; margin-left:390px; margin-right:auto;">
+        echo '<div class="gs-item grid-wide set-bg" data-setbg="img/meal_plans/'.$mealPlanImg.'" style="width:370px; height:270px; margin-left:390px; margin-right:auto;">
                 <a href="img/meal_plans/'.$mealPlanImg.'" class="thumb-icon image-popup"><i class="fa fa-picture-o"></i></a>
               </div>';
     } else {
