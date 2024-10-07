@@ -13,8 +13,6 @@ $result = mysqli_query($conn, $select);
 $row = mysqli_fetch_array($result);
 $trainerId = $row['trainerId'];
 
-
-
 // Deleting a meal plan
 if (isset($_POST['delete'])) {
     $meal_planId = $_POST['delete'];
