@@ -6,44 +6,102 @@ if (isset($_POST['submit'])) {
     $rating_star = $_POST['star-rating'];
     $trainer_id = $_POST['trainer-id'];
     $email = $_SESSION['userEmail'];
+
+    // Get user data
     $select = "SELECT * FROM user WHERE userEmail = '$email'";
     $result = mysqli_query($conn, $select);
     if ($result) {
         $row = mysqli_fetch_array($result);
         $user_id = $row['userId'];
 
-        $sql = "SELECT raiting_sum, raiting_counter FROM trainer WHERE trainerId = '$trainer_id'";
-        $result = mysqli_query($conn, $sql);
-        if ($result) {
-            $row = mysqli_fetch_array($result);
-            echo '<h1>$row["raiting_sum"]</h1>';
-            echo '<h1>$rating_star</h1>';
-            $raitingSum = $row['raiting_sum'] + $rating_star;
-            echo '<h1>$raitingSum</h1>';
-            $raitingCounter = $row['raiting_counter'] + 1;
-            $rating = $raitingSum / $raitingCounter;
+        // Get trainee data
+        $select = "SELECT * FROM trainee WHERE userId = '$user_id'";
+        $result = mysqli_query($conn, $select);
+        $row = mysqli_fetch_array($result);
+        $traineeId = $row['traineeId'];
 
-            $sql = "UPDATE trainer SET rating = ?, raiting_sum = ?, raiting_counter = ? WHERE trainerId = ?";
-            $stmt = $conn->prepare($sql);
-            if ($stmt) {
-                $stmt->bind_param("diii", $rating, $raitingSum, $raitingCounter, $trainer_id);
-                if ($stmt->execute()) {
-                    echo "Record updated successfully";
+        // Check if the trainee has already rated this trainer
+        $check_rating = "SELECT * FROM rating WHERE traineeId = '$traineeId' AND trainerId = '$trainer_id' ORDER BY date DESC LIMIT 1";
+        $rating_result = mysqli_query($conn, $check_rating);
+        $can_rate = true;
+
+        if ($rating_row = mysqli_fetch_array($rating_result)) {
+            $last_rating_date = $rating_row['date'];
+            $current_date = date('Y-m-d');
+
+            // Calculate the difference between current date and last rating date
+            $date_diff = strtotime($current_date) - strtotime($last_rating_date);
+            $days_passed = round($date_diff / (60 * 60 * 24));
+
+            // Only allow rating if more than 30 days (1 month) have passed
+            if ($days_passed < 30) {
+                $can_rate = false;
+            }
+        }
+
+        if ($can_rate) {
+            // Update rating and rating_sum, rating_counter in the trainer table
+            $sql = "SELECT raiting_sum, raiting_counter FROM trainer WHERE trainerId = '$trainer_id'";
+            $result = mysqli_query($conn, $sql);
+            if ($result) {
+                $row = mysqli_fetch_array($result);
+                $raitingSum = $row['raiting_sum'] + $rating_star;
+                $raitingCounter = $row['raiting_counter'] + 1;
+                $rating = $raitingSum / $raitingCounter;
+
+                $sql = "UPDATE trainer SET rating = ?, raiting_sum = ?, raiting_counter = ? WHERE trainerId = ?";
+                $stmt = $conn->prepare($sql);
+                if ($stmt) {
+                    $stmt->bind_param("diii", $rating, $raitingSum, $raitingCounter, $trainer_id);
+                    if ($stmt->execute()) {
+                        // Insert or update the rating into the rating table
+                        if ($rating_row) {
+                            // Update existing rating record
+                            $update_rating = "UPDATE rating SET rating = ?, date = ? WHERE ratingId = ?";
+                            $stmt_update = $conn->prepare($update_rating);
+                            $current_date = date('Y-m-d');
+                            $stmt_update->bind_param("isi", $rating_star, $current_date, $rating_row['ratingId']);
+                            $stmt_update->execute();
+                        } else {
+                            // Insert new rating record
+                            
+                            $insert_rating = "INSERT INTO rating (traineeId, trainerId, rating, date) VALUES (?, ?, ?, ?)";
+                            $stmt_insert = $conn->prepare($insert_rating);
+                            if ($stmt_insert === false) {
+                                die("Error preparing the query: " . $conn->error);
+                            }
+
+                            $current_date = date('Y-m-d');  // Get the current date in 'Y-m-d' format
+                            $stmt_insert->bind_param("iiis", $traineeId, $trainer_id, $rating_star, $current_date);
+
+                            if ($stmt_insert->execute()) {
+                                echo "New rating inserted successfully!";
+                            } else {
+                                die("Error executing query: " . $stmt_insert->error);
+                            }
+                        }
+                        echo "Rating updated successfully";
+                    } else {
+                        echo "Error updating trainer's record: " . $stmt->error;
+                    }
+                    $stmt->close();
                 } else {
-                    echo "Error updating record: " . $stmt->error;
+                    echo "Error preparing statement: " . $conn->error;
                 }
-                $stmt->close();
             } else {
-                echo "Error preparing statement: " . $conn->error;
+                echo "Error selecting trainer: " . mysqli_error($conn);
             }
         } else {
-            echo "Error selecting trainer: " . mysqli_error($conn);
+            echo "<script type='text/javascript'>
+                alert('You have already rated this trainer in the last 30 days.');
+                window.location.href = 'trainers.php';
+            </script>";
         }
     } else {
         echo "Error selecting user: " . mysqli_error($conn);
     }
 
-    header("Location: trainers.php");
+    
     exit;
 }
 
@@ -272,7 +330,8 @@ if (isset($_GET['change'])) {
                 $sql = "SELECT * FROM trainee WHERE userId = '$user_id'";
                 $result = mysqli_query($conn, $sql);
                 $trainee_row = mysqli_fetch_array($result);
-                $trainee_bmi = $trainee_row['bmi'];
+                if($trainee_row['bmi']){
+                    $trainee_bmi = $trainee_row['bmi'];
                 
                 // List of attributes to check for
                 $attributes = ["strength", "flexibility", "endurance", "weight_loss", "muscle_building", "body_building"];
@@ -357,6 +416,8 @@ if (isset($_GET['change'])) {
                               <button style="padding: 0; width: 100%; background: #f36105; color: white" onclick="pickTrainer('.$trainer['trainer']['trainerId'].');">Send a Request</button>
                               </div>';
                     }
+                }
+                
                 } else {
                     echo '<h1 style="margin-left:700px; color:white">NO MATCH</h1>';
                 }

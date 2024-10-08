@@ -128,8 +128,8 @@ if (isset($_GET['change'])) {
             $sql = "SELECT * FROM trainee WHERE userId = '$user_id'";
             $result = mysqli_query($conn, $sql);
             $trainee_row = mysqli_fetch_array($result);
-
-            // List of attributes to check for
+            if($trainee_row['bmi']){
+                // List of attributes to check for
             $attributes = ["weight_loss", "strength", "flexibility", "endurance", "muscle_building", "body_building"];
             $mealPlans = [];
             $trainee_bmi = $trainee_row['bmi'];
@@ -188,6 +188,9 @@ if (isset($_GET['change'])) {
                             <button style="padding: 0; width: 100%; background: #f36105; color: white" onclick="pickMealPlan('.$mealPlan['mealPlan']['meal_planId'].');">Pick This Meal Plan</button>
                           </div>';
                 }
+            }
+
+            
             } else {
                 echo '<h1 style="margin-left:700px; color:white" >NO MATCH</h1>';
             }
